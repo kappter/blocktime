@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Weekly Time Blocks</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #controls { margin-bottom: 10px; }
+    #grid { display: grid; grid-template-columns: repeat(7, 1fr); border: 2px solid #333; }
+    .day { border-left: 1px solid #ccc; border-right: 1px solid #ccc; }
+    .cell {
+      border: 1px solid #ddd;
+      height: 20px;
+      width: 100%;
+      background: white;
+    }
+    .filled { border: 1px solid #333; }
+    #report { margin-top: 20px; }
+    label { margin-right: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Weekly Time Block Planner</h1>
+
+  <div id="controls">
+    <label>
+      Resolution:
+      <select id="resolution">
+        <option value="15">15 min</option>
+        <option value="30">30 min</option>
+        <option value="60" selected>60 min</option>
+      </select>
+    </label>
+
+    <label>
+      Category:
+      <input type="text" id="categoryName" value="Study">
+    </label>
+    <label>
+      Color:
+      <input type="color" id="categoryColor" value="#ff0000">
+    </label>
+    <button id="setCategory">Set Category</button>
+    <button id="reportBtn">Generate Report</button>
+  </div>
+
+  <div id="grid"></div>
+
+  <div id="report"></div>
+
+  <script>
+    const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    let resolution = 60;
+    let rows = 24 * 60 / resolution;
+    let categories = {};
+    let currentCategory = {name: "Study", color: "#ff0000"};
+    let gridState = []; // week[day][row] = categoryName
+
+    const gridDiv = document.getElementById("grid");
+
+    function buildGrid() {
+      gridDiv.innerHTML = "";
+      gridDiv.style.gridTemplateColumns = `repeat(${days.length}, 1fr)`;
+      gridState = days.map(() => Array(rows).fill(null));
+
+      for (let d = 0; d < days.length; d++) {
+        const col = document.createElement("div");
+        col.classList.add("day");
+        col.style.display = "flex";
+        col.style.flexDirection = "column-reverse"; // bottom-up stacking
+        for (let r = 0; r < rows; r++) {
+          const cell = document.createElement("div");
+          cell.classList.add("cell");
+          cell.dataset.day = d;
+          cell.dataset.row = r;
+          cell.onclick = () => dropBlock(d);
+          col.appendChild(cell);
+        }
+        gridDiv.appendChild(col);
+      }
+    }
+
+    function dropBlock(day) {
+      const colCells = gridDiv.children[day].children;
+      for (let r = 0; r < rows; r++) {
+        if (!gridState[day][r]) {
+          gridState[day][r] = currentCategory.name;
+          const cell = colCells[r];
+          cell.style.backgroundColor = currentCategory.color;
+          cell.classList.add("filled");
+          break;
+        }
+      }
+    }
+
+    function generateReport() {
+      const counts = {};
+      const blockMinutes = resolution;
+      days.forEach((_, d) => {
+        gridState[d].forEach(c => {
+          if (c) counts[c] = (counts[c] || 0) + blockMinutes/60;
+        });
+      });
+
+      let html = "<h2>Weekly Report</h2><table border='1' cellpadding='5'><tr><th>Category</th><th>Hours</th></tr>";
+      Object.entries(counts).forEach(([cat, hrs]) => {
+        html += `<tr><td>${cat}</td><td>${hrs}</td></tr>`;
+      });
+      html += "</table>";
+      document.getElementById("report").innerHTML = html;
+    }
+
+    document.getElementById("resolution").onchange = (e) => {
+      resolution = parseInt(e.target.value);
+      rows = 24 * 60 / resolution;
+      buildGrid();
+    };
+
+    document.getElementById("setCategory").onclick = () => {
+      const name = document.getElementById("categoryName").value;
+      const color = document.getElementById("categoryColor").value;
+      currentCategory = {name, color};
+      categories[name] = color;
+    };
+
+    document.getElementById("reportBtn").onclick = generateReport;
+
+    buildGrid();
+  </script>
+</body>
+</html>
