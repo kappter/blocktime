@@ -13,7 +13,7 @@ BlockTime is a web app that helps users visualize and manage their weekly time a
 - **Enhanced Report**: Includes student name, dynamic summary with motivational text, table, and pie chart.
 - **PDF Export**: Download the report as a PDF with name, summary, table, and chart.
 - **Reset Option**: Clear the grid to start over.
-- **Mobile-Friendly**: Single-day view, touch controls, responsive design.
+- **Mobile-Friendly**: Single-day view, touch and click support, responsive design.
 
 ## Setup
 1. **Download the App**:
@@ -22,8 +22,10 @@ BlockTime is a web app that helps users visualize and manage their weekly time a
      - `styles.css` (styling)
      - `script.js` (logic and PDF export)
 2. **Run the App**:
+   - Place all files in the same directory.
    - Open `index.html` in a modern web browser (e.g., Chrome, Firefox, Safari) on desktop or mobile.
-   - No server or local installation is required; the app uses pure HTML, CSS, and JavaScript.
+   - For best results, use a local server (e.g., `python -m http.server` and access `http://localhost:8000`) to avoid file protocol issues.
+   - No additional installation is required; the app uses pure HTML, CSS, and JavaScript.
 3. **Dependencies**:
    - Internet connection for CDNs:
      - Chart.js (`https://cdn.jsdelivr.net/npm/chart.js`) for the pie chart.
@@ -45,9 +47,9 @@ BlockTime is a web app that helps users visualize and manage their weekly time a
 5. **Generate Report**:
    - Enter your name in the report section.
    - Tap/click "Generate Report" to see a summary, table, and pie chart.
-   - The summary includes total hours, top category, and motivational text.
+   - The summary includes total hours, top category, and motivational text (e.g., "Great job, [Name]! 🎉").
 6. **Download PDF**:
-   - Tap/click "Download PDF" to save the report as a PDF (includes name, summary, table, and chart).
+   - Tap/click "Download PDF" to save the report as `BlockTime_Report_[Name].pdf` (includes name, summary, table, and chart).
 7. **Reset**:
    - Tap/click "Reset" to clear the grid.
 8. **Toggle Theme**:
@@ -56,15 +58,16 @@ BlockTime is a web app that helps users visualize and manage their weekly time a
 ## Example
 - Choose "30 minutes" resolution (48 slots per day).
 - Add categories: "Sleep" (blue), "Study" (yellow), "Leisure" (green).
-- Select "Monday", tap "Sleep", then tap the column 16 times for 8 hours of sleep.
+- Select "Monday", tap/click "Sleep", then tap/click the column 16 times for 8 hours of sleep.
 - Repeat for other days using the dropdown.
-- Enter your name, tap "Generate Report" to see a breakdown (e.g., "Sleep: 56 hours, 33.3%"), and download as PDF.
+- Enter your name (e.g., "Alex"), tap/click "Generate Report" to see a breakdown (e.g., "Sleep: 56 hours, 33.3%"), and download as PDF.
 
 ## Notes
 - The app runs in the browser and does not save data between sessions.
 - The PDF export includes your name, a motivational summary, table, and pie chart, suitable for assignment submission.
-- The single-day view and touch controls ensure a smooth mobile experience.
-- Time markers are simplified (12AM, 6AM, 12PM, 6PM) for clarity.
+- The single-day view, touch/click support, and responsive design (85vw grid, 80vh height) ensure a smooth mobile experience.
+- Time markers are simplified (12AM, 6AM, 12PM, 6PM) for clarity, with precise alignment.
+- If you encounter errors (e.g., script loading issues), ensure files are in the same directory and use a local server. Test in Incognito mode to rule out extension interference (e.g., MindStudio content scripts).
 - Future enhancements could include swipe gestures, saving plans, or additional report customization.
 
 ## License

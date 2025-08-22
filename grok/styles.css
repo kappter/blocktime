@@ -72,12 +72,12 @@ h1 {
     max-width: 100%;
 }
 #time-markers {
-    width: 40px;
+    width: 35px;
     height: 80vh;
     display: flex;
     flex-direction: column-reverse;
     justify-content: space-between;
-    font-size: 10px;
+    font-size: 9px;
     text-align: right;
     padding-right: 2px;
 }
@@ -87,7 +87,7 @@ h1 {
     width: 100%;
 }
 .day {
-    width: 90vw;
+    width: 85vw;
     height: 80vh;
     border: 1px solid var(--grid-border);
     display: flex;

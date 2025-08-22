@@ -17,13 +17,13 @@ function initGrid() {
 function renderTimeMarkers() {
     const markersDiv = document.getElementById('time-markers');
     markersDiv.innerHTML = '';
-    const hoursToShow = [0, 6, 12, 18]; // Simplified: 12AM, 6AM, 12PM, 6PM
+    const hoursToShow = [0, 6, 12, 18];
     const slotsPerHour = 60 / resolution;
     hoursToShow.forEach(hour => {
         const marker = document.createElement('div');
         marker.textContent = hour % 12 === 0 ? '12' + (hour < 12 ? 'AM' : 'PM') : (hour % 12) + (hour < 12 ? 'AM' : 'PM');
         marker.style.position = 'absolute';
-        marker.style.bottom = `calc(${(hour * slotsPerHour) * (80vh / var(--slots-per-day))} - 6px)`;
+        marker.style.bottom = `calc(${(hour * slotsPerHour * (80 / slotsPerDay))}vh - 6px)`;
         markersDiv.appendChild(marker);
     });
 }
@@ -34,6 +34,10 @@ function resetGrid() {
     const dayDiv = document.createElement('div');
     dayDiv.className = 'day';
     dayDiv.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        dropBlock(currentDay);
+    });
+    dayDiv.addEventListener('click', (e) => {
         e.preventDefault();
         dropBlock(currentDay);
     });
@@ -70,6 +74,12 @@ function renderCategories() {
         catDiv.style.backgroundColor = cat.color;
         catDiv.textContent = cat.name;
         catDiv.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            selectedCat = i;
+            document.querySelectorAll('.category').forEach(c => c.classList.remove('selected'));
+            catDiv.classList.add('selected');
+        });
+        catDiv.addEventListener('click', (e) => {
             e.preventDefault();
             selectedCat = i;
             document.querySelectorAll('.category').forEach(c => c.classList.remove('selected'));
@@ -115,7 +125,6 @@ function generateReport() {
     const hoursPerBlock = resolution / 60;
     const totalHours = totalBlocks * hoursPerBlock;
 
-    // Summary Text
     const studentName = document.getElementById('studentName').value.trim() || 'Student';
     const maxCategory = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b, categories[0]?.name || 'None');
     const summaryText = document.getElementById('summaryText');
@@ -163,16 +172,12 @@ function downloadPDF() {
     const tableBody = document.querySelector('#summaryTable tbody');
     const rows = Array.from(tableBody.children).map(row => Array.from(row.children).map(cell => cell.textContent));
 
-    // Add title and name
     doc.setFontSize(16);
     doc.text('BlockTime Weekly Report', 20, 20);
     doc.setFontSize(12);
     doc.text(`Prepared by: ${studentName}`, 20, 30);
-
-    // Add summary text
     doc.text(summaryText.split('\n').map(line => line.trim()), 20, 40, { maxWidth: 160 });
 
-    // Add table
     doc.autoTable({
         startY: 60,
         head: [['Category', 'Hours', 'Percentage']],
@@ -181,7 +186,6 @@ function downloadPDF() {
         styles: { fontSize: 10 },
     });
 
-    // Add pie chart
     const canvas = document.getElementById('pieChart');
     const imgData = canvas.toDataURL('image/png');
     doc.addImage(imgData, 'PNG', 20, doc.autoTable.previous.finalY + 10, 80, 80);
@@ -202,8 +206,11 @@ document.getElementById('menu-toggle').addEventListener('touchstart', (e) => {
     e.preventDefault();
     document.getElementById('menu').classList.toggle('show');
 });
+document.getElementById('menu-toggle').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('menu').classList.toggle('show');
+});
 
-// Load Chart.js and jsPDF
 const chartScript = document.createElement('script');
 chartScript.src = 'https://cdn.jsdelivr.net/npm/chart.js';
 chartScript.async = true;
@@ -214,5 +221,4 @@ pdfScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.mi
 pdfScript.async = true;
 document.head.appendChild(pdfScript);
 
-// Initialize
 initGrid();
