@@ -1,142 +1,81 @@
-<!DOCTYPE html>
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BlockTime - Time Management App</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        :root {
-            --bg-color: #ffffff;
-            --text-color: #000000;
-            --grid-border: #ddd;
-            --grid-line: #eee;
-            --control-bg: #f9f9f9;
-            --report-border: #ccc;
-        }
-        .dark-mode {
-            --bg-color: #1a1a1a;
-            --text-color: #ffffff;
-            --grid-border: #444;
-            --grid-line: #333;
-            --control-bg: #2a2a2a;
-            --report-border: #555;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            transition: all 0.3s;
-        }
-        #controls {
-            margin-bottom: 20px;
-            background-color: var(--control-bg);
-            padding: 10px;
-            border-radius: 5px;
-        }
-        #categories, #legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .category {
-            padding: 5px 10px;
-            border: 1px solid var(--grid-border);
-            cursor: pointer;
-            border-radius: 3px;
-        }
-        .category.selected {
-            border: 2px solid var(--text-color);
-        }
-        #grid-container {
-            display: flex;
-            gap: 10px;
-        }
-        #time-markers {
-            width: 60px;
-            height: 600px;
-            display: flex;
-            flex-direction: column-reverse;
-            justify-content: space-between;
-            font-size: 12px;
-            text-align: right;
-            padding-right: 5px;
-        }
-        #grid {
-            display: flex;
-            gap: 10px;
-        }
-        .day {
-            width: 100px;
-            height: 600px;
-            border: 1px solid var(--grid-border);
-            display: flex;
-            flex-direction: column-reverse;
-            position: relative;
-            cursor: pointer;
-        }
-        .day::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 100%;
-            background: repeating-linear-gradient(
-                to top,
-                var(--grid-line) 0,
-                var(--grid-line) 1px,
-                transparent 1px,
-                transparent calc(600px / var(--slots-per-day))
-            );
-        }
-        .day-label {
-            text-align: center;
-            font-weight: bold;
-        }
-        .block {
-            width: 100%;
-            height: calc(600px / var(--slots-per-day));
-        }
-        #report {
-            margin-top: 20px;
-            border: 1px solid var(--report-border);
-            padding: 10px;
-            border-radius: 5px;
-            display: none;
-        }
-        #pieChart {
-            max-width: 400px;
-            margin: 20px auto;
-        }
-        #toggle-theme {
-            margin-left: 10px;
-            padding: 5px 10px;
-            cursor: pointer;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <h1>BlockTime</h1>
-    <div id="controls">
-        <label>Time Resolution:</label>
-        <select id="resolution">
-            <option value="15">15 minutes</option>
-            <option value="30">30 minutes</option>
-            <option value="60">60 minutes</option>
-        </select>
-        <button onclick="initGrid()">Set Resolution</button>
-        <button id="toggle-theme" onclick="toggleTheme()">Toggle Dark Mode</button>
-        <br><br>
-        <label>Add Category:</label>
-        <input type="text" id="catName" placeholder="e.g., Sleep">
-        <input type="color" id="catColor" value="#0000ff">
-        <button onclick="addCategory()">Add</button>
-        <div id="categories"></div>
-        <div id="legend"><strong>Legend:</strong></div>
+    <div id="menu-toggle">☰</div>
+    <div id="menu" class="hidden">
+        <div id="controls">
+            <label>Time Resolution:</label>
+            <select id="resolution">
+                <option value="15">15 minutes</option>
+                <option value="30">30 minutes</option>
+                <option value="60">60 minutes</option>
+            </select>
+            <button onclick="initGrid()">Set Resolution</button>
+            <button id="toggle-theme" onclick="toggleTheme()">Toggle Dark Mode</button>
+            <br><br>
+            <label>Add Category:</label>
+            <input type="text" id="catName" placeholder="e.g., Sleep">
+            <input type="color" id="catColor" value="#0000ff">
+            <button onclick="addCategory()">Add</button>
+            <div id="categories"></div>
+            <div id="legend"><strong>Legend:</strong></div>
+        </div>
     </div>
+    <select id="day-select">
+        <option value="0">Monday</option>
+        <option value="1">Tuesday</option>
+        <option value="2">Wednesday</option>
+        <option value="3">Thursday</option>
+        <option value="4">Friday</option>
+        <option value="5">Saturday</option>
+        <option value="6">Sunday</option>
+    </select>
     <div id="grid-container">
         <div id="time-markers"></div>
         <div id="grid"></div>
@@ -144,152 +83,17 @@
     <button onclick="generateReport()">Generate Report</button>
     <button onclick="resetGrid()">Reset</button>
     <div id="report">
-        <h2>Weekly Summary</h2>
+        <h2>Weekly Time Summary</h2>
+        <label>Your Name:</label>
+        <input type="text" id="studentName" placeholder="Enter your name">
+        <div id="summaryText"></div>
         <table id="summaryTable" border="1">
             <thead><tr><th>Category</th><th>Hours</th><th>Percentage</th></tr></thead>
             <tbody></tbody>
         </table>
         <canvas id="pieChart"></canvas>
+        <button onclick="downloadPDF()">Download PDF</button>
     </div>
-
-    <script>
-        let resolution = 15;
-        let slotsPerDay = 24 * 60 / resolution;
-        let categories = [];
-        let selectedCat = null;
-        let gridData = Array(7).fill().map(() => []);
-        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-        function initGrid() {
-            resolution = parseInt(document.getElementById('resolution').value);
-            slotsPerDay = 24 * 60 / resolution;
-            document.documentElement.style.setProperty('--slots-per-day', slotsPerDay);
-            resetGrid();
-            renderTimeMarkers();
-        }
-
-        function renderTimeMarkers() {
-            const markersDiv = document.getElementById('time-markers');
-            markersDiv.innerHTML = '';
-            const hoursToShow = [0, 3, 6, 9, 12, 15, 18, 21]; // Every 3 hours
-            const slotsPerHour = 60 / resolution;
-            hoursToShow.forEach(hour => {
-                const marker = document.createElement('div');
-                marker.textContent = hour % 12 === 0 ? '12' + (hour < 12 ? 'AM' : 'PM') : (hour % 12) + (hour < 12 ? 'AM' : 'PM');
-                marker.style.position = 'absolute';
-                marker.style.bottom = `calc(${(hour * slotsPerHour) * (600 / slotsPerDay)}px - 10px)`;
-                markersDiv.appendChild(marker);
-            });
-        }
-
-        function resetGrid() {
-            gridData = Array(7).fill().map(() => []);
-            const grid = document.getElementById('grid');
-            grid.innerHTML = '';
-            days.forEach((day, i) => {
-                const dayDiv = document.createElement('div');
-                dayDiv.className = 'day';
-                dayDiv.onclick = () => dropBlock(i);
-                const label = document.createElement('div');
-                label.className = 'day-label';
-                label.textContent = day;
-                grid.appendChild(dayDiv);
-                grid.appendChild(label);
-            });
-        }
-
-        function addCategory() {
-            const name = document.getElementById('catName').value.trim();
-            const color = document.getElementById('catColor').value;
-            if (name && !categories.find(c => c.name === name)) {
-                categories.push({name, color});
-                renderCategories();
-                renderLegend();
-            }
-            document.getElementById('catName').value = '';
-        }
-
-        function renderCategories() {
-            const catsDiv = document.getElementById('categories');
-            catsDiv.innerHTML = '';
-            categories.forEach((cat, i) => {
-                const catDiv = document.createElement('div');
-                catDiv.className = 'category';
-                catDiv.style.backgroundColor = cat.color;
-                catDiv.textContent = cat.name;
-                catDiv.onclick = () => {
-                    selectedCat = i;
-                    document.querySelectorAll('.category').forEach(c => c.classList.remove('selected'));
-                    catDiv.classList.add('selected');
-                };
-                catsDiv.appendChild(catDiv);
-            });
-        }
-
-        function renderLegend() {
-            const legendDiv = document.getElementById('legend');
-            legendDiv.innerHTML = '<strong>Legend:</strong> ';
-            categories.forEach(cat => {
-                const span = document.createElement('span');
-                span.style.backgroundColor = cat.color;
-                span.style.padding = '2px 8px';
-                span.style.margin = '0 5px';
-                span.style.borderRadius = '3px';
-                span.textContent = cat.name;
-                legendDiv.appendChild(span);
-            });
-        }
-
-        function dropBlock(dayIndex) {
-            if (selectedCat === null) return alert('Select a category first!');
-            if (gridData[dayIndex].length >= slotsPerDay) return alert('Day is full!');
-            const cat = categories[selectedCat];
-            gridData[dayIndex].push(cat);
-            const dayDiv = document.querySelectorAll('.day')[dayIndex];
-            const block = document.createElement('div');
-            block.className = 'block';
-            block.style.backgroundColor = cat.color;
-            dayDiv.appendChild(block);
-        }
-
-        function generateReport() {
-            const counts = {};
-            categories.forEach(cat => counts[cat.name] = 0);
-            gridData.flat().forEach(cat => counts[cat.name]++);
-            const totalBlocks = gridData.reduce((sum, day) => sum + day.length, 0);
-            const hoursPerBlock = resolution / 60;
-            const totalHours = totalBlocks * hoursPerBlock;
-
-            const tableBody = document.querySelector('#summaryTable tbody');
-            tableBody.innerHTML = '';
-            const pieData = { labels: [], datasets: [{ data: [], backgroundColor: [] }] };
-            Object.keys(counts).forEach(name => {
-                const hours = counts[name] * hoursPerBlock;
-                const pct = totalHours ? (hours / 168 * 100).toFixed(1) : 0;
-                const row = `<tr><td>${name}</td><td>${hours}</td><td>${pct}%</td></tr>`;
-                tableBody.innerHTML += row;
-                pieData.labels.push(name);
-                pieData.datasets[0].data.push(hours);
-                pieData.datasets[0].backgroundColor.push(categories.find(c => c.name === name).color);
-            });
-
-            document.getElementById('report').style.display = 'block';
-
-            const ctx = document.getElementById('pieChart').getContext('2d');
-            if (window.myPieChart) window.myPieChart.destroy();
-            window.myPieChart = new Chart(ctx, {
-                type: 'pie',
-                data: pieData,
-                options: { responsive: true, plugins: { legend: { position: 'top' }, title: { display: true, text: 'Weekly Time Allocation (Hours)' } } }
-            });
-        }
-
-        function toggleTheme() {
-            document.body.classList.toggle('dark-mode');
-        }
-
-        // Initialize
-        initGrid();
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
