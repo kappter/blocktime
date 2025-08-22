@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlockTime - Time Management App</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #controls { margin-bottom: 20px; }
+        #categories { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+        .category { padding: 5px 10px; border: 1px solid #ccc; cursor: pointer; }
+        .category.selected { border: 2px solid black; }
+        #grid { display: flex; gap: 10px; }
+        .day { width: 100px; height: 600px; border: 1px solid #ddd; display: flex; flex-direction: column-reverse; overflow: hidden; cursor: pointer; }
+        .day-label { text-align: center; font-weight: bold; }
+        .block { width: 100%; height: 6px; } /* Height adjusts dynamically in JS */
+        #report { margin-top: 20px; border: 1px solid #ccc; padding: 10px; display: none; }
+        #pieChart { max-width: 400px; margin: 20px auto; }
+    </style>
+</head>
+<body>
+    <h1>BlockTime</h1>
+    <div id="controls">
+        <label>Time Resolution:</label>
+        <select id="resolution">
+            <option value="15">15 minutes</option>
+            <option value="30">30 minutes</option>
+            <option value="60">60 minutes</option>
+        </select>
+        <button onclick="initGrid()">Set Resolution</button>
+        <br><br>
+        <label>Add Category:</label>
+        <input type="text" id="catName" placeholder="e.g., Sleep">
+        <input type="color" id="catColor" value="#0000ff">
+        <button onclick="addCategory()">Add</button>
+        <div id="categories"></div>
+    </div>
+    <div id="grid"></div>
+    <button onclick="generateReport()">Generate Report</button>
+    <button onclick="resetGrid()">Reset</button>
+    <div id="report">
+        <h2>Weekly Summary</h2>
+        <table id="summaryTable" border="1">
+            <thead><tr><th>Category</th><th>Hours</th><th>Percentage</th></tr></thead>
+            <tbody></tbody>
+        </table>
+        <canvas id="pieChart"></canvas>
+    </div>
+
+    <script>
+        let resolution = 15; // Default
+        let slotsPerDay = 24 * 60 / resolution; // e.g., 96 for 15 min
+        let categories = []; // [{name: 'Sleep', color: '#0000ff'}]
+        let selectedCat = null;
+        let gridData = Array(7).fill().map(() => []); // Array of arrays: blocks per day
+
+        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+        function initGrid() {
+            resolution = parseInt(document.getElementById('resolution').value);
+            slotsPerDay = 24 * 60 / resolution;
+            const blockHeight = 600 / slotsPerDay; // Adjust container height dynamically if needed
+            document.querySelectorAll('.block').forEach(b => b.style.height = `${blockHeight}px`);
+            resetGrid();
+        }
+
+        function resetGrid() {
+            gridData = Array(7).fill().map(() => []);
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            days.forEach((day, i) => {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'day';
+                dayDiv.onclick = () => dropBlock(i);
+                const label = document.createElement('div');
+                label.className = 'day-label';
+                label.textContent = day;
+                grid.appendChild(dayDiv);
+                grid.appendChild(label);
+            });
+        }
+
+        function addCategory() {
+            const name = document.getElementById('catName').value.trim();
+            const color = document.getElementById('catColor').value;
+            if (name && !categories.find(c => c.name === name)) {
+                categories.push({name, color});
+                renderCategories();
+            }
+            document.getElementById('catName').value = '';
+        }
+
+        function renderCategories() {
+            const catsDiv = document.getElementById('categories');
+            catsDiv.innerHTML = '';
+            categories.forEach((cat, i) => {
+                const catDiv = document.createElement('div');
+                catDiv.className = 'category';
+                catDiv.style.backgroundColor = cat.color;
+                catDiv.textContent = cat.name;
+                catDiv.onclick = () => {
+                    selectedCat = i;
+                    document.querySelectorAll('.category').forEach(c => c.classList.remove('selected'));
+                    catDiv.classList.add('selected');
+                };
+                catsDiv.appendChild(catDiv);
+            });
+        }
+
+        function dropBlock(dayIndex) {
+            if (selectedCat === null) return alert('Select a category first!');
+            if (gridData[dayIndex].length >= slotsPerDay) return alert('Day is full!');
+            const cat = categories[selectedCat];
+            gridData[dayIndex].push(cat);
+            const dayDiv = document.querySelectorAll('.day')[dayIndex];
+            const block = document.createElement('div');
+            block.className = 'block';
+            block.style.backgroundColor = cat.color;
+            block.style.height = `${600 / slotsPerDay}px`;
+            dayDiv.appendChild(block);
+        }
+
+        function generateReport() {
+            const counts = {};
+            categories.forEach(cat => counts[cat.name] = 0);
+            gridData.flat().forEach(cat => counts[cat.name]++);
+            const totalBlocks = gridData.reduce((sum, day) => sum + day.length, 0);
+            const hoursPerBlock = resolution / 60;
+            const totalHours = totalBlocks * hoursPerBlock;
+
+            const tableBody = document.querySelector('#summaryTable tbody');
+            tableBody.innerHTML = '';
+            const pieData = { labels: [], datasets: [{ data: [], backgroundColor: [] }] };
+            Object.keys(counts).forEach(name => {
+                const hours = counts[name] * hoursPerBlock;
+                const pct = totalHours ? (hours / 168 * 100).toFixed(1) : 0;
+                const row = `<tr><td>${name}</td><td>${hours}</td><td>${pct}%</td></tr>`;
+                tableBody.innerHTML += row;
+                pieData.labels.push(name);
+                pieData.datasets[0].data.push(hours);
+                pieData.datasets[0].backgroundColor.push(categories.find(c => c.name === name).color);
+            });
+
+            document.getElementById('report').style.display = 'block';
+
+            const ctx = document.getElementById('pieChart').getContext('2d');
+            if (window.myPieChart) window.myPieChart.destroy();
+            window.myPieChart = new Chart(ctx, {
+                type: 'pie',
+                data: pieData,
+                options: { responsive: true, plugins: { legend: { position: 'top' }, title: { display: true, text: 'Weekly Time Allocation (Hours)' } } }
+            });
+        }
+
+        // Initialize
+        initGrid();
+    </script>
+</body>
+</html>
+
