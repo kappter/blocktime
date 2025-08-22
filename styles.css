@@ -1,0 +1,226 @@
+:root {
+    --bg-color: #ffffff;
+    --text-color: #000000;
+    --grid-border: #ddd;
+    --grid-line: #eee;
+    --control-bg: #f9f9f9;
+    --report-border: #ccc;
+    --accent-color: #6200ea;
+    --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.dark-mode {
+    --bg-color: #121212;
+    --text-color: #ffffff;
+    --grid-border: #444;
+    --grid-line: #333;
+    --control-bg: #1e1e1e;
+    --report-border: #555;
+    --accent-color: #bb86fc;
+    --shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    margin: 10px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: all 0.3s ease;
+}
+h1 {
+    text-align: center;
+    font-size: 24px;
+}
+#menu-toggle {
+    font-size: 20px;
+    cursor: pointer;
+    padding: 10px;
+    background-color: var(--accent-color);
+    color: #fff;
+    border-radius: 6px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+#menu {
+    padding: 10px;
+    background-color: var(--control-bg);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+@media (min-width: 600px) {
+    #menu-toggle {
+        display: none;
+    }
+    #menu {
+        display: block !important;
+    }
+}
+@media (max-width: 600px) {
+    #menu {
+        display: none;
+    }
+    #menu.show {
+        display: block;
+    }
+}
+#controls {
+    margin-bottom: 10px;
+}
+#categories, #legend {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 8px;
+    margin-top: 8px;
+}
+.category {
+    padding: 8px 12px;
+    border: 1px solid var(--grid-border);
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s;
+}
+.category.selected {
+    border: 2px solid var(--accent-color);
+    transform: scale(1.05);
+}
+#grid-container {
+    display: flex;
+    gap: 5px;
+    max-width: 100%;
+}
+#time-markers {
+    width: 35px;
+    height: 80vh;
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: space-between;
+    font-size: 9px;
+    text-align: right;
+    padding-right: 2px;
+}
+#grid {
+    display: flex;
+    gap: 5px;
+    width: 100%;
+}
+.day {
+    width: 85vw;
+    height: 80vh;
+    border: 1px solid var(--grid-border);
+    display: flex;
+    flex-direction: column-reverse;
+    position: relative;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+.day::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: repeating-linear-gradient(
+        to top,
+        var(--grid-line) 0,
+        var(--grid-line) 1px,
+        transparent 1px,
+        transparent calc(80vh / var(--slots-per-day))
+    );
+}
+.day-label {
+    text-align: center;
+    font-weight: 600;
+    font-size: 14px;
+    margin-top: 5px;
+}
+.block {
+    width: 100%;
+    height: calc(80vh / var(--slots-per-day));
+    transition: opacity 0.2s;
+}
+#day-select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    background-color: var(--control-bg);
+    color: var(--text-color);
+    font-size: 16px;
+}
+#report {
+    margin-top: 15px;
+    border: 1px solid var(--report-border);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    text-align: center;
+}
+#report h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: var(--accent-color);
+}
+#studentName {
+    width: 100%;
+    padding: 8px;
+    margin: 10px 0;
+    border-radius: 6px;
+    border: 1px solid var(--grid-border);
+}
+#summaryText {
+    margin: 15px 0;
+    font-size: 16px;
+    line-height: 1.5;
+}
+#summaryTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+}
+#summaryTable th, #summaryTable td {
+    border: 1px solid var(--report-border);
+    padding: 8px;
+    font-size: 14px;
+}
+#pieChart {
+    max-width: 100%;
+    margin: 15px auto;
+}
+button, #toggle-theme {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 6px;
+    background-color: var(--accent-color);
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s;
+}
+button:hover, #toggle-theme:hover {
+    transform: scale(1.05);
+}
+@media (max-width: 600px) {
+    body {
+        margin: 5px;
+    }
+    h1 {
+        font-size: 20px;
+    }
+    #time-markers {
+        font-size: 9px;
+        width: 35px;
+    }
+    .day {
+        width: 85vw;
+    }
+    button, #toggle-theme {
+        width: 100%;
+        padding: 12px;
+    }
+    #menu-toggle {
+        font-size: 18px;
+    }
+}
