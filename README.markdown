@@ -1,7 +1,7 @@
 # BlockTime
 
 ## Overview
-BlockTime is a web app that helps users visualize and manage their weekly time allocation. Inspired by a Lego-based time management concept, it allows users to create custom categories, assign colors, and "drop" blocks into a 7-day grid (Monday to Sunday) to represent time spent on activities. Each block shows its category and time range (e.g., "Sleep: 8:00-8:30 PM"), with running totals for categories and the overall week displayed below the grid. Users can copy a day's schedule to another day or save it as a reusable "day type" (e.g., Work, Weekend, Holiday, Travel). The app supports time resolutions (15, 30, or 60 minutes per block) and generates a report with a summary, table, and pie chart, downloadable as a PDF. It’s optimized for desktop and mobile with a touch-friendly interface, ideal for students planning their week for assignments.
+BlockTime is a web app that helps users visualize and manage their weekly time allocation. Inspired by a Lego-based time management concept, it allows users to create custom categories, assign colors, and "drop" blocks into a 7-day grid (Monday to Sunday) to represent time spent on activities. Each block shows its category and time range (e.g., "Sleep: 8:00-8:30 PM"), with running totals for categories and the overall week displayed below the grid. Users can copy a day's schedule, save it as a reusable "day type" (e.g., Work, Weekend, Holiday, Travel), and save/load the entire schedule as a JSON file for editing later. The app supports time resolutions (15, 30, or 60 minutes per block) and generates a report with a summary, table, and pie chart, downloadable as a PDF. It’s optimized for desktop and mobile with a touch-friendly interface, ideal for students planning their week for assignments.
 
 ## Features
 - **Custom Categories**: Define activity categories with names and colors.
@@ -11,6 +11,7 @@ BlockTime is a web app that helps users visualize and manage their weekly time a
 - **Running Totals**: Displays hours per category and total hours below the grid, updated dynamically.
 - **Copy Day**: Copy the current day’s schedule to another day (e.g., Monday to Wednesday).
 - **Day Types**: Save a day’s schedule as a named type (e.g., "Work", "Weekend") and apply it to any day.
+- **Save/Load Schedule**: Save the entire schedule (categories, grid, day types) as a JSON file and load it back to edit.
 - **Time Markers**: Simplified labels at 12AM, 6AM, 12PM, 6PM for clarity.
 - **Legend**: Scrollable strip showing all categories and colors.
 - **Dark Mode**: Toggle between light and dark themes.
@@ -54,15 +55,20 @@ BlockTime is a web app that helps users visualize and manage their weekly time a
 6. **Save and Apply Day Types**:
    - Enter a name (e.g., "Work") in the "Save Day Type" input and tap/click "Save Day Type" to store the current day’s schedule.
    - Select a saved day type from the "Apply Day Type" dropdown and tap/click "Apply Day Type" to populate the current day.
-7. **Generate Report**:
+7. **Save Schedule**:
+   - Tap/click "Save Schedule" to download a `BlockTime_Schedule.json` file containing categories, grid data, and day types.
+8. **Load Schedule**:
+   - Tap/click the file input under "Save/Load Schedule" to upload a previously saved `BlockTime_Schedule.json` file.
+   - The app will restore categories, grid, and day types, updating the UI.
+9. **Generate Report**:
    - Enter your name in the report section.
    - Tap/click "Generate Report" to see a summary, table, and pie chart.
    - The summary includes total hours, top category, and motivational text (e.g., "Great job, [Name]! 🎉").
-8. **Download PDF**:
-   - Tap/click "Download PDF" to save the report as `BlockTime_Report_[Name].pdf` (includes name, summary, table, and chart).
-9. **Reset**:
-   - Tap/click "Reset" to clear the grid and totals.
-10. **Toggle Theme**:
+10. **Download PDF**:
+    - Tap/click "Download PDF" to save the report as `BlockTime_Report_[Name].pdf` (includes name, summary, table, and chart).
+11. **Reset**:
+    - Tap/click "Reset" to clear the grid and totals.
+12. **Toggle Theme**:
     - Tap/click "Toggle Dark Mode" to switch themes.
 
 ## Example
@@ -72,21 +78,24 @@ BlockTime is a web app that helps users visualize and manage their weekly time a
 - Check totals (e.g., "Sleep: 8.0 hours, Total: 8.0 hours").
 - Save Monday as "Work" day type, then apply it to Tuesday.
 - Copy Monday’s schedule to Wednesday.
-- Repeat for other days using the dropdown.
+- Tap/click "Save Schedule" to download `BlockTime_Schedule.json`.
+- Start a new session, upload the JSON file via the file input, and verify the schedule (categories, Monday/Wednesday blocks, "Work" day type) is restored.
 - Enter your name (e.g., "Alex"), tap/click "Generate Report" to see a breakdown (e.g., "Sleep: 56 hours, 33.3%"), and download as PDF.
 
 ## Notes
-- The app runs in the browser and does not save data between sessions (day types reset on reload).
+- The app runs in the browser and does not save data between sessions (day types and schedules reset on reload unless saved/loaded).
 - Block labels show the category and time range, making it clear what time each block represents.
-- The "Time Allocation Totals" section shows running hours per category and overall, updated as you add or copy blocks.
+- The "Time Allocation Totals" section shows running hours per category and overall, updated as you add, copy, or load blocks.
 - The "Copy Day" feature duplicates a day’s schedule, and "Day Types" let you save and reuse schedules (e.g., for Work or Weekend days).
+- The "Save Schedule" feature downloads a JSON file with all data, and "Load Schedule" restores it from a valid JSON file.
 - The PDF export includes your name, a motivational summary, table, and pie chart, suitable for assignment submission.
 - The single-day view, touch/click support, and responsive design (85vw grid, 80vh height) ensure a smooth mobile experience.
 - Time markers are simplified (12AM, 6AM, 12PM, 6PM) for clarity, with precise alignment.
 - Controls are always visible on desktop (≥600px) and toggled via a prominent "☰ Menu" button on mobile.
 - If controls don’t appear, tap/click the "☰ Menu" button or check DevTools (F12) Console for errors.
+- If loading fails, ensure the uploaded file is a valid `BlockTime_Schedule.json` (check Console for error details).
 - If you encounter issues (e.g., script loading), ensure files are in the same directory and use a local server. Test in Incognito mode to rule out extension interference (e.g., MindStudio content scripts).
-- Future enhancements could include swipe gestures, persistent storage, or additional report customization.
+- Future enhancements could include persistent storage, swipe gestures, or default day types with pre-set categories.
 
 ## License
 This is a free, open-source tool for educational use. No warranty is provided.

@@ -199,6 +199,82 @@ function dropBlock(dayIndex) {
     updateTotals();
 }
 
+function saveSchedule() {
+    const schedule = {
+        categories: categories,
+        gridData: gridData,
+        dayTypes: dayTypes
+    };
+    const blob = new Blob([JSON.stringify(schedule, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'BlockTime_Schedule.json';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function loadSchedule(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (!file.name.endsWith('.json')) return alert('Please upload a .json file!');
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            
+            // Validate schedule data
+            if (!data.categories || !Array.isArray(data.categories) ||
+                !data.gridData || !Array.isArray(data.gridData) ||
+                !data.dayTypes || typeof data.dayTypes !== 'object') {
+                throw new Error('Invalid schedule format');
+            }
+
+            // Validate categories
+            if (!data.categories.every(cat => cat.name && cat.color)) {
+                throw new Error('Invalid category data');
+            }
+
+            // Validate gridData
+            if (data.gridData.length !== 7 || !data.gridData.every(day => Array.isArray(day))) {
+                throw new Error('Invalid grid data');
+            }
+
+            // Validate dayTypes
+            if (!Object.values(data.dayTypes).every(day => Array.isArray(day))) {
+                throw new Error('Invalid day types data');
+            }
+
+            // Verify all gridData and dayTypes entries reference valid categories
+            const categoryNames = data.categories.map(cat => cat.name);
+            const allValid = [
+                ...data.gridData.flat(),
+                ...Object.values(data.dayTypes).flat()
+            ].every(block => categoryNames.includes(block.name));
+            if (!allValid) {
+                throw new Error('Grid data or day types reference unknown categories');
+            }
+
+            // Apply loaded data
+            categories = data.categories;
+            gridData = data.gridData;
+            dayTypes = data.dayTypes;
+            
+            renderCategories();
+            renderLegend();
+            renderDayTypes();
+            resetGrid();
+            updateTotals();
+            alert('Schedule loaded successfully!');
+        } catch (error) {
+            console.error('Error loading schedule:', error);
+            alert('Failed to load schedule. Please ensure the file is a valid BlockTime schedule JSON.');
+        }
+    };
+    reader.readAsText(file);
+}
+
 function generateReport() {
     const counts = {};
     categories.forEach(cat => counts[cat.name] = 0);
@@ -294,6 +370,8 @@ document.getElementById('menu-toggle').addEventListener('click', (e) => {
     document.getElementById('menu').classList.toggle('show');
     console.log('Menu toggled (click)');
 });
+
+document.getElementById('loadSchedule').addEventListener('change', loadSchedule);
 
 const chartScript = document.createElement('script');
 chartScript.src = 'https://cdn.jsdelivr.net/npm/chart.js';
