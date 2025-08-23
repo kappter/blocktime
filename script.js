@@ -28,6 +28,30 @@ function renderTimeMarkers() {
     });
 }
 
+function formatTime(minutes) {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    const period = hours < 12 ? 'AM' : 'PM';
+    const displayHours = hours % 12 === 0 ? 12 : hours % 12;
+    return `${displayHours}:${mins.toString().padStart(2, '0')} ${period}`;
+}
+
+function updateTotals() {
+    const counts = {};
+    categories.forEach(cat => counts[cat.name] = 0);
+    gridData.flat().forEach(cat => counts[cat.name]++);
+    const hoursPerBlock = resolution / 60;
+    const totalHours = gridData.reduce((sum, day) => sum + day.length, 0) * hoursPerBlock;
+
+    const categoryTotals = document.getElementById('category-totals');
+    categoryTotals.innerHTML = categories.map(cat => 
+        `${cat.name}: ${(counts[cat.name] * hoursPerBlock).toFixed(1)} hours`
+    ).join('<br>');
+
+    const overallTotal = document.getElementById('overall-total');
+    overallTotal.innerHTML = `<strong>Total: ${totalHours.toFixed(1)} hours</strong>`;
+}
+
 function resetGrid() {
     const grid = document.getElementById('grid');
     grid.innerHTML = '';
@@ -46,12 +70,19 @@ function resetGrid() {
     label.className = 'day-label';
     label.textContent = days[currentDay];
     grid.appendChild(label);
-    gridData[currentDay].forEach(cat => {
+    gridData[currentDay].forEach((cat, index) => {
         const block = document.createElement('div');
         block.className = 'block';
         block.style.backgroundColor = cat.color;
+        const startMinutes = index * resolution;
+        const endMinutes = (index + 1) * resolution;
+        const labelDiv = document.createElement('div');
+        labelDiv.className = 'block-label';
+        labelDiv.textContent = `${cat.name}: ${formatTime(startMinutes)}-${formatTime(endMinutes)}`;
+        block.appendChild(labelDiv);
         dayDiv.appendChild(block);
     });
+    updateTotals();
 }
 
 function addCategory() {
@@ -61,6 +92,7 @@ function addCategory() {
         categories.push({name, color});
         renderCategories();
         renderLegend();
+        updateTotals();
     }
     document.getElementById('catName').value = '';
 }
@@ -115,8 +147,16 @@ function dropBlock(dayIndex) {
     block.className = 'block';
     block.style.backgroundColor = cat.color;
     block.style.opacity = '0';
+    const index = gridData[dayIndex].length - 1;
+    const startMinutes = index * resolution;
+    const endMinutes = (index + 1) * resolution;
+    const labelDiv = document.createElement('div');
+    labelDiv.className = 'block-label';
+    labelDiv.textContent = `${cat.name}: ${formatTime(startMinutes)}-${formatTime(endMinutes)}`;
+    block.appendChild(labelDiv);
     dayDiv.appendChild(block);
     setTimeout(() => block.style.opacity = '1', 10);
+    updateTotals();
 }
 
 function generateReport() {

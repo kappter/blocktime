@@ -138,6 +138,33 @@ h1 {
     width: 100%;
     height: calc(80vh / var(--slots-per-day));
     transition: opacity 0.2s;
+    position: relative;
+}
+.block-label {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    font-size: 8px;
+    color: #fff;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 2px 4px;
+    border-radius: 3px;
+    pointer-events: none;
+}
+#totals {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: var(--control-bg);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+#totals h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+#category-totals, #overall-total {
+    font-size: 14px;
+    line-height: 1.5;
 }
 #day-select {
     width: 100%;
@@ -222,5 +249,9 @@ button:hover, #toggle-theme:hover {
     }
     #menu-toggle {
         font-size: 18px;
+    }
+    .block-label {
+        font-size: 7px;
+        padding: 1px 3px;
     }
 }
