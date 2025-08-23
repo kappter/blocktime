@@ -66,6 +66,28 @@
             <button onclick="addCategory()">Add</button>
             <div id="categories"></div>
             <div id="legend"><strong>Legend:</strong></div>
+            <br>
+            <label>Copy Day:</label>
+            <select id="copy-day-select">
+                <option value="0">Monday</option>
+                <option value="1">Tuesday</option>
+                <option value="2">Wednesday</option>
+                <option value="3">Thursday</option>
+                <option value="4">Friday</option>
+                <option value="5">Saturday</option>
+                <option value="6">Sunday</option>
+            </select>
+            <button onclick="copyDay()">Copy Current Day</button>
+            <br><br>
+            <label>Save Day Type:</label>
+            <input type="text" id="dayTypeName" placeholder="e.g., Work, Weekend">
+            <button onclick="saveDayType()">Save Day Type</button>
+            <br>
+            <label>Apply Day Type:</label>
+            <select id="day-type-select">
+                <option value="">Select Day Type</option>
+            </select>
+            <button onclick="applyDayType()">Apply Day Type</button>
         </div>
     </div>
     <select id="day-select">

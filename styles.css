@@ -64,6 +64,9 @@ h1 {
 #controls {
     margin-bottom: 10px;
 }
+#controls label, #controls input, #controls select {
+    margin: 5px 0;
+}
 #categories, #legend {
     display: flex;
     flex-wrap: nowrap;
@@ -166,7 +169,7 @@ h1 {
     font-size: 14px;
     line-height: 1.5;
 }
-#day-select {
+#day-select, #copy-day-select, #day-type-select {
     width: 100%;
     padding: 8px;
     margin-bottom: 10px;
@@ -188,10 +191,10 @@ h1 {
     margin-bottom: 10px;
     color: var(--accent-color);
 }
-#studentName {
+#studentName, #dayTypeName {
     width: 100%;
     padding: 8px;
-    margin: 10px 0;
+    margin: 5px 0;
     border-radius: 6px;
     border: 1px solid var(--grid-border);
 }
