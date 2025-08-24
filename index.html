@@ -63,6 +63,7 @@
         <input type="text" id="catName" placeholder="e.g., Sleep">
         <input type="color" id="catColor" value="#0000ff">
         <button onclick="addCategory()">Add</button>
+        <button onclick="undoAction()">Undo Last Action</button>
         <div id="categories"></div>
         <div id="legend"><strong>Legend:</strong></div>
     </div>
@@ -110,9 +111,6 @@
         <label>Save/Load Schedule:</label>
         <button onclick="saveSchedule()">Save Schedule</button>
         <input type="file" id="loadSchedule" accept=".json">
-        <br>
-        <label>Undo:</label>
-        <button onclick="undoAction()">Undo Last Action</button>
     </div>
     <button onclick="generateReport()">Generate Report</button>
     <button onclick="resetGrid()">Reset</button>

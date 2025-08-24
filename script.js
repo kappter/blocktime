@@ -395,15 +395,16 @@ function renderWeekView() {
     ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#fff' : '#000';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
-    const hoursToShow = timeDirection === 'bottom' ? [0, 6, 12, 18] : [18, 12, 6, 0];
-    hoursToShow.forEach(hour => {
-        const y = timeDirection === 'bottom' 
+    const hoursToShow = [0, 6, 12, 18];
+    const orderedHours = timeDirection === 'bottom' ? hoursToShow : hoursToShow.slice().reverse();
+    orderedHours.forEach((hour, i) => {
+        const y = timeDirection === 'bottom'
             ? canvas.height - (hour * slotsPerHour * blockHeight)
-            : (hour * slotsPerHour * blockHeight);
+            : (hour === 0 ? 0 : (18 - hour) * slotsPerHour * blockHeight + blockHeight);
         ctx.fillText(
             hour % 12 === 0 ? '12' + (hour < 12 ? 'AM' : 'PM') : (hour % 12) + (hour < 12 ? 'AM' : 'PM'),
             55,
-            y - blockHeight / 2
+            y + (timeDirection === 'bottom' ? -blockHeight / 2 : blockHeight / 2)
         );
     });
 
