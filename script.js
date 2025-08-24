@@ -5,12 +5,14 @@ let selectedCat = null;
 let gridData = Array(7).fill().map(() => []);
 let currentDay = 0;
 let dayTypes = {};
+let undoStack = [];
 const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 function initGrid() {
     resolution = parseInt(document.getElementById('resolution').value);
     slotsPerDay = 24 * 60 / resolution;
     document.documentElement.style.setProperty('--slots-per-day', slotsPerDay);
+    undoStack = [];
     resetGrid();
     renderTimeMarkers();
 }
@@ -141,6 +143,7 @@ function renderLegend() {
 function copyDay() {
     const targetDay = parseInt(document.getElementById('copy-day-select').value);
     if (targetDay === currentDay) return alert('Cannot copy to the same day!');
+    pushUndoState();
     gridData[targetDay] = [...gridData[currentDay]];
     if (currentDay === targetDay) resetGrid();
     updateTotals();
@@ -171,15 +174,30 @@ function renderDayTypes() {
 function applyDayType() {
     const typeName = document.getElementById('day-type-select').value;
     if (!typeName) return alert('Select a day type!');
+    pushUndoState();
     gridData[currentDay] = [...dayTypes[typeName]];
     resetGrid();
     updateTotals();
     alert(`Applied day type "${typeName}" to ${days[currentDay]}`);
 }
 
+function pushUndoState() {
+    if (undoStack.length >= 10) undoStack.shift();
+    undoStack.push(JSON.parse(JSON.stringify(gridData)));
+}
+
+function undoAction() {
+    if (undoStack.length === 0) return alert('Nothing to undo!');
+    gridData = JSON.parse(JSON.stringify(undoStack.pop()));
+    resetGrid();
+    updateTotals();
+    alert('Last action undone');
+}
+
 function dropBlock(dayIndex) {
     if (selectedCat === null) return alert('Select a category first!');
     if (gridData[dayIndex].length >= slotsPerDay) return alert('Day is full!');
+    pushUndoState();
     const cat = categories[selectedCat];
     gridData[dayIndex].push(cat);
     const dayDiv = document.querySelector('.day');
@@ -224,29 +242,24 @@ function loadSchedule(event) {
         try {
             const data = JSON.parse(e.target.result);
             
-            // Validate schedule data
             if (!data.categories || !Array.isArray(data.categories) ||
                 !data.gridData || !Array.isArray(data.gridData) ||
                 !data.dayTypes || typeof data.dayTypes !== 'object') {
                 throw new Error('Invalid schedule format');
             }
 
-            // Validate categories
             if (!data.categories.every(cat => cat.name && cat.color)) {
                 throw new Error('Invalid category data');
             }
 
-            // Validate gridData
             if (data.gridData.length !== 7 || !data.gridData.every(day => Array.isArray(day))) {
                 throw new Error('Invalid grid data');
             }
 
-            // Validate dayTypes
             if (!Object.values(data.dayTypes).every(day => Array.isArray(day))) {
                 throw new Error('Invalid day types data');
             }
 
-            // Verify all gridData and dayTypes entries reference valid categories
             const categoryNames = data.categories.map(cat => cat.name);
             const allValid = [
                 ...data.gridData.flat(),
@@ -256,10 +269,10 @@ function loadSchedule(event) {
                 throw new Error('Grid data or day types reference unknown categories');
             }
 
-            // Apply loaded data
             categories = data.categories;
             gridData = data.gridData;
             dayTypes = data.dayTypes;
+            undoStack = [];
             
             renderCategories();
             renderLegend();
