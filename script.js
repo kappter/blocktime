@@ -219,6 +219,7 @@ function dropBlock(dayIndex) {
 
 function saveSchedule() {
     const schedule = {
+        resolution: resolution,
         categories: categories,
         gridData: gridData,
         dayTypes: dayTypes
@@ -269,11 +270,18 @@ function loadSchedule(event) {
                 throw new Error('Grid data or day types reference unknown categories');
             }
 
+            if (data.resolution && ![15, 30, 60].includes(data.resolution)) {
+                throw new Error('Invalid resolution value');
+            }
+
+            resolution = data.resolution || 15;
+            document.getElementById('resolution').value = resolution;
             categories = data.categories;
             gridData = data.gridData;
             dayTypes = data.dayTypes;
             undoStack = [];
             
+            initGrid();
             renderCategories();
             renderLegend();
             renderDayTypes();
