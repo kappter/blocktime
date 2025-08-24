@@ -46,10 +46,29 @@ function formatTime(minutes) {
     return `${displayHours}:${mins.toString().padStart(2, '0')} ${period}`;
 }
 
+function getAttributeForCategory(catName) {
+    const attributes = {
+        'Sleep': 'Joyful-Eager',
+        'Study': 'Neutral-Reluctant',
+        'Work': 'Neutral-Eager',
+        'Exercise': 'Joyful-Willing',
+        'Relax': 'Joyful-Reluctant'
+    };
+    return attributes[catName] || 'Neutral-Willing';
+}
+
 function updateTotals() {
     const counts = {};
-    categories.forEach(cat => counts[cat.name] = 0);
-    gridData.flat().forEach(cat => counts[cat.name]++);
+    const attributeCounts = {};
+    categories.forEach(cat => {
+        counts[cat.name] = 0;
+        attributeCounts[cat.name] = { 'Joyful-Eager': 0, 'Joyful-Willing': 0, 'Joyful-Reluctant': 0, 'Neutral-Eager': 0, 'Neutral-Reluctant': 0 };
+    });
+    gridData.flat().forEach(cat => {
+        counts[cat.name]++;
+        const attr = getAttributeForCategory(cat.name);
+        attributeCounts[cat.name][attr]++;
+    });
     const hoursPerBlock = resolution / 60;
     const totalHours = gridData.reduce((sum, day) => sum + day.length, 0) * hoursPerBlock;
 
@@ -57,6 +76,13 @@ function updateTotals() {
     categoryTotals.innerHTML = categories.map(cat => 
         `${cat.name}: ${(counts[cat.name] * hoursPerBlock).toFixed(1)} hours`
     ).join('<br>');
+
+    const attributeSummary = document.getElementById('attribute-summary');
+    attributeSummary.innerHTML = '<strong>Activity Attributes:</strong><br>';
+    categories.forEach(cat => {
+        const attr = getAttributeForCategory(cat.name);
+        attributeSummary.innerHTML += `${cat.name}: ${attr} (${(attributeCounts[cat.name][attr] * hoursPerBlock).toFixed(1)} hours)<br>`;
+    });
 
     const overallTotal = document.getElementById('overall-total');
     overallTotal.innerHTML = `<strong>Total: ${totalHours.toFixed(1)} hours</strong>`;
@@ -92,7 +118,7 @@ function resetGrid() {
         const endMinutes = (actualIndex + 1) * resolution;
         const labelDiv = document.createElement('div');
         labelDiv.className = 'block-label';
-        labelDiv.textContent = `${cat.name}: ${formatTime(startMinutes)}-${formatTime(endMinutes)}`;
+        labelDiv.textContent = `${cat.name}: ${formatTime(startMinutes)}-${formatTime(endMinutes)} (${getAttributeForCategory(cat.name)})`;
         block.appendChild(labelDiv);
         dayDiv.appendChild(block);
     });
@@ -317,8 +343,16 @@ function generateReport() {
     }
 
     const counts = {};
-    categories.forEach(cat => counts[cat.name] = 0);
-    gridData.flat().forEach(cat => counts[cat.name]++);
+    const attributeCounts = {};
+    categories.forEach(cat => {
+        counts[cat.name] = 0;
+        attributeCounts[cat.name] = { 'Joyful-Eager': 0, 'Joyful-Willing': 0, 'Joyful-Reluctant': 0, 'Neutral-Eager': 0, 'Neutral-Reluctant': 0 };
+    });
+    gridData.flat().forEach(cat => {
+        counts[cat.name]++;
+        const attr = getAttributeForCategory(cat.name);
+        attributeCounts[cat.name][attr]++;
+    });
     const totalBlocks = gridData.reduce((sum, day) => sum + day.length, 0);
     const hoursPerBlock = resolution / 60;
     const totalHours = totalBlocks * hoursPerBlock;
@@ -329,7 +363,7 @@ function generateReport() {
     summaryText.innerHTML = `
         <p><strong>Great job, ${studentName}! 🎉</strong> You've planned <strong>${totalHours.toFixed(1)}</strong> hours of your week! 
         Your top activity is <strong>${maxCategory}</strong> with <strong>${(counts[maxCategory] * hoursPerBlock).toFixed(1)}</strong> hours. 
-        Keep balancing your time to crush it! 🚀</p>
+        Check your activity attributes below for insights!</p>
     `;
 
     const tableBody = document.querySelector('#summaryTable tbody');
@@ -338,7 +372,8 @@ function generateReport() {
     Object.keys(counts).forEach(name => {
         const hours = counts[name] * hoursPerBlock;
         const pct = totalHours ? (hours / 168 * 100).toFixed(1) : 0;
-        const row = `<tr><td>${name}</td><td>${hours}</td><td>${pct}%</td></tr>`;
+        const attr = getAttributeForCategory(name);
+        const row = `<tr><td>${name}</td><td>${hours}</td><td>${pct}%</td><td>${attr}</td></tr>`;
         tableBody.innerHTML += row;
         pieData.labels.push(name);
         pieData.datasets[0].data.push(hours);
@@ -419,7 +454,7 @@ function renderWeekView() {
             ctx.font = '8px Arial';
             ctx.textAlign = 'left';
             ctx.fillText(
-                `${cat.name}: ${formatTime(actualIndex * resolution)}-${formatTime((actualIndex + 1) * resolution)}`,
+                `${cat.name}: ${formatTime(actualIndex * resolution)}-${formatTime((actualIndex + 1) * resolution)} (${getAttributeForCategory(cat.name)})`,
                 x + 3,
                 y + blockHeight / 2
             );
@@ -449,7 +484,7 @@ function downloadPDF() {
 
     doc.autoTable({
         startY: 60,
-        head: [['Category', 'Hours', 'Percentage']],
+        head: [['Category', 'Hours', 'Percentage', 'Attribute']],
         body: rows,
         theme: 'striped',
         styles: { fontSize: 10 },
