@@ -14,7 +14,10 @@ function initGrid() {
     slotsPerDay = 24 * 60 / resolution;
     document.documentElement.style.setProperty('--slots-per-day', slotsPerDay);
     document.documentElement.style.setProperty('--day-flex-direction', timeDirection === 'bottom' ? 'column-reverse' : 'column');
+    console.log(`Resolution changed to ${resolution} min, slotsPerDay: ${slotsPerDay}`);
     undoStack = [];
+    // Truncate gridData if it exceeds new slotsPerDay
+    gridData = gridData.map(day => day.slice(0, slotsPerDay));
     resetGrid();
     renderTimeMarkers();
 }
@@ -24,7 +27,7 @@ function renderTimeMarkers() {
     if (markersDiv) markersDiv.innerHTML = '';
     const hoursToShow = [0, 6, 12, 18];
     const slotsPerHour = 60 / resolution;
-    const blockHeight = 80 / slotsPerDay; // Height per slot in vh
+    const blockHeight = 70 / slotsPerDay; // Adjusted for 70vh grid height
     const orderedHours = timeDirection === 'bottom' ? hoursToShow : hoursToShow.slice().reverse();
     if (markersDiv) {
         orderedHours.forEach((hour, i) => {
@@ -456,10 +459,10 @@ function renderWeekView() {
         blocks.forEach((cat, index) => {
             const totalBlocks = gridData[dayIndex].length;
             const timeIndex = timeDirection === 'bottom' ? totalBlocks - 1 - index : index;
-            const y = timeDirection === 'bottom' ? (totalBlocks - 1 - index) * (80 / slotsPerDay) : index * (80 / slotsPerDay);
+            const y = timeDirection === 'bottom' ? (totalBlocks - 1 - index) * (70 / slotsPerDay) : index * (70 / slotsPerDay);
             if (ctx) {
                 ctx.fillStyle = cat.color;
-                ctx.fillRect(x + 1, y, dayWidth - 2, 80 / slotsPerDay);
+                ctx.fillRect(x + 1, y, dayWidth - 2, 70 / slotsPerDay);
 
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
                 ctx.font = '8px Arial';
@@ -467,7 +470,7 @@ function renderWeekView() {
                 ctx.fillText(
                     `${cat.name}: ${formatTime(timeIndex * resolution)}-${formatTime((timeIndex + 1) * resolution)} (${getAttributeForCategory(cat.name)})`,
                     x + 3,
-                    y + (80 / slotsPerDay) / 2
+                    y + (70 / slotsPerDay) / 2
                 );
             }
         });
@@ -527,15 +530,18 @@ function toggleTheme() {
     renderWeekView();
 }
 
-document.getElementById('day-select').addEventListener('change', () => {
-    currentDay = parseInt(document.getElementById('day-select').value);
-    resetGrid();
-});
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('day-select').addEventListener('change', () => {
+        currentDay = parseInt(document.getElementById('day-select').value);
+        resetGrid();
+    });
 
-document.getElementById('loadSchedule').addEventListener('change', loadSchedule);
+    document.getElementById('loadSchedule').addEventListener('change', loadSchedule);
 
-document.getElementById('resolution').addEventListener('change', () => {
-    initGrid();
+    document.getElementById('resolution').addEventListener('change', () => {
+        console.log('Resolution dropdown changed');
+        initGrid();
+    });
 });
 
 window.addEventListener('load', () => {
