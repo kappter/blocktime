@@ -42,26 +42,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlockTime</title>
+    <title>BlockTime Scheduler</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="script.js" defer></script>
 </head>
 <body>
     <div class="container">
-        <h1 class="app-title">BlockTime</h1>
-        <div class="top-controls">
-            <select id="resolution">
-                <option value="15">15 min</option>
-                <option value="30">30 min</option>
-                <option value="60">60 min</option>
-            </select>
-            <button id="toggle-time-direction">Time Render: 12AM at Bottom</button>
-            <input type="text" id="catName" placeholder="Category Name">
-            <input type="color" id="catColor" value="#000000">
-            <button onclick="addCategory()">Add</button>
-            <button onclick="undoAction()">Undo Last Action</button>
+        <h1>BlockTime Scheduler</h1>
+        <div class="controls">
             <select id="day-select">
                 <option value="0">Mon</option>
                 <option value="1">Tue</option>
@@ -71,19 +62,22 @@
                 <option value="5">Sat</option>
                 <option value="6">Sun</option>
             </select>
+            <select id="resolution">
+                <option value="15">15 min</option>
+                <option value="30">30 min</option>
+                <option value="60">60 min</option>
+            </select>
+            <button id="toggle-time-direction">Time Render: 12AM at Bottom</button>
+            <input type="text" id="catName" placeholder="Category Name">
+            <input type="color" id="catColor" value="#ff0000">
+            <button onclick="addCategory()">Add Category</button>
             <div id="categories"></div>
-        </div>
-        <div class="grid-container">
-            <div id="time-markers"></div>
-            <div id="grid"></div>
-        </div>
-        <div id="legend"></div>
-        <div id="time-allocation-totals">
-            <div id="category-totals"></div>
-            <div id="attribute-summary"></div>
-            <div id="overall-total"></div>
-        </div>
-        <div class="bottom-features">
+            <select id="mindset-select">
+                <option value="Contentment">Contentment</option>
+                <option value="Obligation">Obligation</option>
+                <option value="Energy">Energy</option>
+                <option value="Neutral">Neutral</option>
+            </select>
             <select id="copy-day-select">
                 <option value="0">Mon</option>
                 <option value="1">Tue</option>
@@ -93,31 +87,37 @@
                 <option value="5">Sat</option>
                 <option value="6">Sun</option>
             </select>
-            <button onclick="copyDay()">Copy Current Day</button>
+            <button onclick="copyDay()">Copy Day</button>
             <input type="text" id="dayTypeName" placeholder="Day Type Name">
             <button onclick="saveDayType()">Save Day Type</button>
-            <select id="day-type-select">
-                <option value="">Select Day Type</option>
-            </select>
+            <select id="day-type-select"></select>
             <button onclick="applyDayType()">Apply Day Type</button>
-            <button onclick="saveSchedule()">Save Schedule</button>
+            <button onclick="undoAction()">Undo</button>
             <input type="file" id="loadSchedule" accept=".json">
+            <button onclick="saveSchedule()">Save Schedule</button>
             <button onclick="generateReport()">Generate Report</button>
-            <input type="text" id="studentName" placeholder="Your Name">
             <button onclick="downloadPDF()">Download PDF</button>
-            <button onclick="toggleTheme()">Toggle Dark Mode</button>
-            <button onclick="window.location.reload()">Reset</button>
+            <button onclick="toggleTheme()">Toggle Theme</button>
+            <input type="text" id="studentName" placeholder="Your Name">
         </div>
+        <div class="grid-container">
+            <div id="time-markers"></div>
+            <div id="grid"></div>
+        </div>
+        <div id="legend"></div>
+        <div id="category-totals"></div>
+        <div id="attribute-summary"></div>
+        <div id="overall-total"></div>
         <div id="report" style="display: none;">
-            <h3>Weekly Report</h3>
+            <h2>Weekly Summary</h2>
             <div id="summaryText"></div>
             <table id="summaryTable">
-                <thead><tr><th>Category</th><th>Hours</th><th>Percentage</th><th>Attribute</th></tr></thead>
+                <thead><tr><th>Category</th><th>Hours</th><th>Percentage</th><th>Mindset Distribution</th></tr></thead>
                 <tbody></tbody>
             </table>
             <canvas id="pieChart" width="400" height="400"></canvas>
             <canvas id="weekChart" width="1200" height="300"></canvas>
         </div>
     </div>
-    <script src="script.js"></script>
+</body>
 </html>

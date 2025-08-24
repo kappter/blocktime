@@ -246,13 +246,13 @@ function dropBlock(dayIndex) {
     if (gridData[dayIndex].length >= slotsPerDay) return alert('Day is full!');
     pushUndoState();
     const cat = categories[selectedCat];
-    // Prompt user to select a mindset
-    const mindset = prompt(`Select mindset for ${cat.name}:\n${mindsets.join(', ')}`) || 'Neutral';
+    const mindsetSelect = document.getElementById('mindset-select');
+    const mindset = mindsetSelect.value;
     if (mindsets.includes(mindset)) {
         gridData[dayIndex].push({ ...cat, mindset });
         resetGrid();
     } else {
-        alert('Invalid mindset! Defaulting to Neutral.');
+        alert('Invalid mindset selected! Defaulting to Neutral.');
         gridData[dayIndex].push({ ...cat, mindset: 'Neutral' });
         resetGrid();
     }
