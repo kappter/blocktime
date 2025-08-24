@@ -297,6 +297,12 @@ function loadSchedule(event) {
 }
 
 function generateReport() {
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js failed to load. Please check your internet connection or CDN availability.');
+        alert('Cannot generate report: Chart.js library failed to load. Please check your internet connection and try again.');
+        return;
+    }
+
     const counts = {};
     categories.forEach(cat => counts[cat.name] = 0);
     gridData.flat().forEach(cat => counts[cat.name]++);
@@ -348,10 +354,10 @@ function generateReport() {
 function renderWeekView() {
     const canvas = document.getElementById('weekChart');
     const ctx = canvas.getContext('2d');
-    canvas.width = 600;
-    canvas.height = 100;
+    canvas.width = 1200;
+    canvas.height = 300;
 
-    const dayWidth = (canvas.width - 35) / 7;
+    const dayWidth = (canvas.width - 60) / 7;
     const blockHeight = canvas.height / slotsPerDay;
     const slotsPerHour = 60 / resolution;
 
@@ -359,10 +365,10 @@ function renderWeekView() {
 
     ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#333' : '#eee';
     for (let i = 0; i < slotsPerDay; i++) {
-        ctx.fillRect(35, i * blockHeight, canvas.width - 35, 1);
+        ctx.fillRect(60, i * blockHeight, canvas.width - 60, 1);
     }
 
-    ctx.font = '8px Arial';
+    ctx.font = '10px Arial';
     ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#fff' : '#000';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
@@ -370,31 +376,31 @@ function renderWeekView() {
         const y = canvas.height - (hour * slotsPerHour * blockHeight);
         ctx.fillText(
             hour % 12 === 0 ? '12' + (hour < 12 ? 'AM' : 'PM') : (hour % 12) + (hour < 12 ? 'AM' : 'PM'),
-            30,
+            55,
             y - blockHeight / 2
         );
     });
 
     days.forEach((day, dayIndex) => {
-        const x = 35 + dayIndex * dayWidth;
+        const x = 60 + dayIndex * dayWidth;
         ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#444' : '#ddd';
         ctx.fillRect(x, 0, 1, canvas.height);
         ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#fff' : '#000';
-        ctx.font = '10px Arial';
+        ctx.font = '12px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText(day, x + dayWidth / 2, canvas.height - 5);
+        ctx.fillText(day, x + dayWidth / 2, canvas.height - 10);
 
         gridData[dayIndex].forEach((cat, index) => {
             const y = canvas.height - (index + 1) * blockHeight;
             ctx.fillStyle = cat.color;
             ctx.fillRect(x + 1, y, dayWidth - 2, blockHeight);
 
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-            ctx.font = '6px Arial';
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.font = '8px Arial';
             ctx.textAlign = 'left';
             ctx.fillText(
                 `${cat.name}: ${formatTime(index * resolution)}-${formatTime((index + 1) * resolution)}`,
-                x + 2,
+                x + 3,
                 y + blockHeight / 2
             );
         });
@@ -402,8 +408,14 @@ function renderWeekView() {
 }
 
 function downloadPDF() {
+    if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
+        console.error('jsPDF or jspdf-autotable failed to load. Please check your internet connection or CDN availability.');
+        alert('Cannot download PDF: jsPDF library failed to load. Please check your internet connection and try again.');
+        return;
+    }
+
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+    const doc = new jsPDF({ orientation: 'landscape' });
     const studentName = document.getElementById('studentName').value.trim() || 'Student';
     const summaryText = document.getElementById('summaryText').textContent;
     const tableBody = document.querySelector('#summaryTable tbody');
@@ -413,7 +425,7 @@ function downloadPDF() {
     doc.text('BlockTime Weekly Report', 20, 20);
     doc.setFontSize(12);
     doc.text(`Prepared by: ${studentName}`, 20, 30);
-    doc.text(summaryText.split('\n').map(line => line.trim()), 20, 40, { maxWidth: 160 });
+    doc.text(summaryText.split('\n').map(line => line.trim()), 20, 40, { maxWidth: 260 });
 
     doc.autoTable({
         startY: 60,
@@ -421,16 +433,18 @@ function downloadPDF() {
         body: rows,
         theme: 'striped',
         styles: { fontSize: 10 },
+        margin: { left: 20, right: 20 }
     });
 
     const weekCanvas = document.getElementById('weekChart');
     const weekImgData = weekCanvas.toDataURL('image/png');
     doc.text('Weekly Schedule', 20, doc.autoTable.previous.finalY + 10);
-    doc.addImage(weekImgData, 'PNG', 20, doc.autoTable.previous.finalY + 20, 160, 20);
+    doc.addImage(weekImgData, 'PNG', 20, doc.autoTable.previous.finalY + 20, 260, 60);
 
     const pieCanvas = document.getElementById('pieChart');
     const pieImgData = pieCanvas.toDataURL('image/png');
-    doc.addImage(pieImgData, 'PNG', 20, doc.autoTable.previous.finalY + 50, 80, 80);
+    doc.text('Weekly Time Allocation', 20, doc.autoTable.previous.finalY + 90);
+    doc.addImage(pieImgData, 'PNG', 20, doc.autoTable.previous.finalY + 100, 100, 100);
 
     doc.save(`BlockTime_Report_${studentName || 'Student'}.pdf`);
 }
@@ -447,4 +461,12 @@ document.getElementById('day-select').addEventListener('change', () => {
 
 document.getElementById('loadSchedule').addEventListener('change', loadSchedule);
 
-initGrid();
+window.addEventListener('load', () => {
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js not loaded. Check CDN: https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js');
+    }
+    if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
+        console.error('jsPDF not loaded. Check CDNs: https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js and https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');
+    }
+    initGrid();
+});
