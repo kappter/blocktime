@@ -11,14 +11,41 @@ const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const mindsets = ['Contentment', 'Obligation', 'Energy', 'Neutral']; // Mindset options
 
 function initGrid() {
+    const oldResolution = resolution;
     resolution = parseInt(document.getElementById('resolution').value);
+    const oldSlotsPerDay = slotsPerDay;
     slotsPerDay = 24 * 60 / resolution;
     document.documentElement.style.setProperty('--slots-per-day', slotsPerDay);
     document.documentElement.style.setProperty('--day-flex-direction', timeDirection === 'bottom' ? 'column-reverse' : 'column');
-    console.log(`Resolution changed to ${resolution} min, slotsPerDay: ${slotsPerDay}`);
+    console.log(`Resolution changed from ${oldResolution} min to ${resolution} min, slotsPerDay: ${slotsPerDay}`);
+
+    // Handle block splitting if resolution decreases
+    if (resolution < oldResolution && oldResolution > 0) {
+        const resolutionRatio = oldResolution / resolution;
+        gridData = gridData.map(day => {
+            const newDay = [];
+            day.forEach((block, index) => {
+                for (let i = 0; i < resolutionRatio; i++) {
+                    newDay.push({ ...block });
+                }
+            });
+            return newDay.slice(0, slotsPerDay); // Truncate to new slotsPerDay
+        });
+    } else if (resolution > oldResolution) {
+        // Handle merging if resolution increases (simplify by keeping first block per old slot)
+        gridData = gridData.map(day => {
+            const newDay = [];
+            for (let i = 0; i < day.length; i += oldResolution / resolution) {
+                if (day[i]) newDay.push({ ...day[i] });
+            }
+            return newDay.slice(0, slotsPerDay); // Truncate to new slotsPerDay
+        });
+    } else {
+        // Same resolution, just truncate
+        gridData = gridData.map(day => day.slice(0, slotsPerDay));
+    }
+
     undoStack = [];
-    // Truncate gridData to new slotsPerDay and force re-render
-    gridData = gridData.map(day => day.slice(0, slotsPerDay));
     resetGrid();
     renderTimeMarkers();
     renderWeekView(); // Ensure week view updates with new scale
@@ -475,7 +502,7 @@ function renderWeekView() {
         }
         blocks.forEach((block, index) => {
             const timeIndex = timeDirection === 'bottom' ? (slotsPerDay - 1 - index) : index;
-            const y = timeIndex * (blockHeight); // Use blockHeight for consistent scaling
+            const y = timeIndex * blockHeight; // Use blockHeight for consistent scaling
             if (ctx) {
                 ctx.fillStyle = block.color;
                 ctx.fillRect(x + 1, y, dayWidth - 2, blockHeight);
