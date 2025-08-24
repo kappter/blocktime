@@ -108,15 +108,15 @@ function resetGrid() {
     label.textContent = days[currentDay];
     if (grid) grid.appendChild(label);
 
-    const len = gridData[currentDay].length;
-    const blocks = timeDirection === 'top' ? gridData[currentDay] : gridData[currentDay].slice().reverse();
+    const blocks = timeDirection === 'bottom' ? gridData[currentDay].slice().reverse() : gridData[currentDay];
     blocks.forEach((cat, index) => {
         const block = document.createElement('div');
         block.className = 'block';
         block.style.backgroundColor = cat.color;
-        const actualIndex = timeDirection === 'top' ? index : len - 1 - index;
-        const startMinutes = actualIndex * resolution;
-        const endMinutes = (actualIndex + 1) * resolution;
+        const totalBlocks = gridData[currentDay].length;
+        const timeIndex = timeDirection === 'bottom' ? totalBlocks - 1 - index : index;
+        const startMinutes = timeIndex * resolution;
+        const endMinutes = (timeIndex + 1) * resolution;
         const labelDiv = document.createElement('div');
         labelDiv.className = 'block-label';
         labelDiv.textContent = `${cat.name}: ${formatTime(startMinutes)}-${formatTime(endMinutes)} (${getAttributeForCategory(cat.name)})`;
@@ -452,22 +452,22 @@ function renderWeekView() {
             ctx.fillText(day, x + dayWidth / 2, timeDirection === 'bottom' ? canvas.height - 10 : 15);
         }
 
-        const len = gridData[dayIndex].length;
         const blocks = timeDirection === 'bottom' ? gridData[dayIndex].slice().reverse() : gridData[dayIndex];
         blocks.forEach((cat, index) => {
-            const actualIndex = timeDirection === 'top' ? index : len - 1 - index;
-            const y = index * blockHeight;
+            const totalBlocks = gridData[dayIndex].length;
+            const timeIndex = timeDirection === 'bottom' ? totalBlocks - 1 - index : index;
+            const y = timeDirection === 'bottom' ? (totalBlocks - 1 - index) * (80 / slotsPerDay) : index * (80 / slotsPerDay);
             if (ctx) {
                 ctx.fillStyle = cat.color;
-                ctx.fillRect(x + 1, y, dayWidth - 2, blockHeight);
+                ctx.fillRect(x + 1, y, dayWidth - 2, 80 / slotsPerDay);
 
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
                 ctx.font = '8px Arial';
                 ctx.textAlign = 'left';
                 ctx.fillText(
-                    `${cat.name}: ${formatTime(actualIndex * resolution)}-${formatTime((actualIndex + 1) * resolution)} (${getAttributeForCategory(cat.name)})`,
+                    `${cat.name}: ${formatTime(timeIndex * resolution)}-${formatTime((timeIndex + 1) * resolution)} (${getAttributeForCategory(cat.name)})`,
                     x + 3,
-                    y + blockHeight / 2
+                    y + (80 / slotsPerDay) / 2
                 );
             }
         });
