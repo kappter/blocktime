@@ -371,8 +371,8 @@ function generateReport() {
         counts[block.name]++;
         mindsetCounts[block.name][block.mindset]++;
     });
-    const totalBlocks = gridData.reduce((sum, day) => sum + day.length, 0);
     const hoursPerBlock = resolution / 60;
+    const totalBlocks = gridData.reduce((sum, day) => sum + day.length, 0);
     const totalHours = totalBlocks * hoursPerBlock;
 
     const studentName = document.getElementById('studentName')?.value.trim() || 'Student';
@@ -390,7 +390,7 @@ function generateReport() {
     Object.keys(counts).forEach(name => {
         const hours = counts[name] * hoursPerBlock;
         const pct = totalHours ? (hours / 168 * 100).toFixed(1) : 0;
-        const row = `<tr><td>${name}</td><td>${hours}</td><td>${pct}%</td><td>${Object.entries(mindsetCounts[name]).map(([m, h]) => `${m}: ${(h * hoursPerBlock).toFixed(1)}h`).join(', ')}</td></tr>`;
+        const row = `<tr><td>${name}</td><td>${hours.toFixed(2)}</td><td>${pct}%</td><td>${Object.entries(mindsetCounts[name]).map(([m, h]) => `${m}: ${(h * hoursPerBlock).toFixed(2)}h`).join(', ')}</td></tr>`;
         if (tableBody) tableBody.innerHTML += row;
         pieData.labels.push(name);
         pieData.datasets[0].data.push(hours);
@@ -411,7 +411,7 @@ function generateReport() {
             responsive: true, 
             plugins: { 
                 legend: { position: 'top' }, 
-                title: { display: true, text: 'Weekly Time Allocation (Hours)' } 
+                title: { display: true, text: `Weekly Time Allocation (Hours, ${resolution}-min slots)` } 
             } 
         }
     });
@@ -426,14 +426,14 @@ function renderWeekView() {
     }
 
     const dayWidth = (canvas?.width - 60) / 7 || 0;
-    const blockHeight = canvas?.height / slotsPerDay || 0;
+    const blockHeight = canvas?.height / slotsPerDay || 0; // Scale height based on slotsPerDay
     const slotsPerHour = 60 / resolution;
 
     if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (ctx) {
         ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#333' : '#eee';
-        for (let i = 0; i < slotsPerDay; i++) {
+        for (let i = 0; i <= slotsPerDay; i++) {
             ctx.fillRect(60, i * blockHeight, canvas.width - 60, 1);
         }
     }
@@ -446,7 +446,7 @@ function renderWeekView() {
         const hoursToShow = [0, 6, 12, 18];
         const orderedHours = timeDirection === 'bottom' ? hoursToShow : hoursToShow.slice().reverse();
         orderedHours.forEach((hour, i) => {
-            const slotIndex = hour * slotsPerHour;
+            const slotIndex = Math.floor(hour * slotsPerHour);
             const y = timeDirection === 'bottom'
                 ? canvas.height - (slotIndex * blockHeight)
                 : slotIndex * blockHeight;
@@ -475,10 +475,10 @@ function renderWeekView() {
         }
         blocks.forEach((block, index) => {
             const timeIndex = timeDirection === 'bottom' ? (slotsPerDay - 1 - index) : index;
-            const y = timeIndex * (70 / slotsPerDay);
+            const y = timeIndex * (blockHeight); // Use blockHeight for consistent scaling
             if (ctx) {
                 ctx.fillStyle = block.color;
-                ctx.fillRect(x + 1, y, dayWidth - 2, 70 / slotsPerDay);
+                ctx.fillRect(x + 1, y, dayWidth - 2, blockHeight);
 
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
                 ctx.font = '8px Arial';
@@ -486,7 +486,7 @@ function renderWeekView() {
                 ctx.fillText(
                     `${block.name}: ${formatTime(timeIndex * resolution)}-${formatTime((timeIndex + 1) * resolution)} (${block.mindset})`,
                     x + 3,
-                    y + (70 / slotsPerDay) / 2
+                    y + blockHeight / 2
                 );
             }
         });
