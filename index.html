@@ -48,73 +48,70 @@
 </head>
 <body>
     <h1>BlockTime</h1>
-    <div id="menu-toggle">☰ Menu</div>
-    <div id="build-section">
-        <div id="build-controls">
-            <select id="day-select">
-                <option value="0">Monday</option>
-                <option value="1">Tuesday</option>
-                <option value="2">Wednesday</option>
-                <option value="3">Thursday</option>
-                <option value="4">Friday</option>
-                <option value="5">Saturday</option>
-                <option value="6">Sunday</option>
-            </select>
-            <select id="resolution">
-                <option value="15">15 minutes</option>
-                <option value="30">30 minutes</option>
-                <option value="60">60 minutes</option>
-            </select>
-            <button onclick="initGrid()">Set Resolution</button>
-            <button id="toggle-theme" onclick="toggleTheme()">Toggle Dark Mode</button>
-            <br>
-            <label>Add Category:</label>
-            <input type="text" id="catName" placeholder="e.g., Sleep">
-            <input type="color" id="catColor" value="#0000ff">
-            <button onclick="addCategory()">Add</button>
-            <div id="categories"></div>
-            <div id="legend"><strong>Legend:</strong></div>
-        </div>
-        <div id="grid-container">
-            <div id="grid"></div>
-        </div>
-        <div id="totals">
-            <h3>Time Allocation Totals</h3>
-            <div id="category-totals"></div>
-            <div id="overall-total"></div>
-        </div>
+    <div id="controls">
+        <label>Time Resolution:</label>
+        <select id="resolution">
+            <option value="15">15 minutes</option>
+            <option value="30">30 minutes</option>
+            <option value="60">60 minutes</option>
+        </select>
+        <button onclick="initGrid()">Set Resolution</button>
+        <button id="toggle-theme" onclick="toggleTheme()">Toggle Dark Mode</button>
+        <br><br>
+        <label>Add Category:</label>
+        <input type="text" id="catName" placeholder="e.g., Sleep">
+        <input type="color" id="catColor" value="#0000ff">
+        <button onclick="addCategory()">Add</button>
+        <div id="categories"></div>
+        <div id="legend"><strong>Legend:</strong></div>
     </div>
-    <div id="manage-section">
-        <div id="manage-controls">
-            <label>Copy Day:</label>
-            <select id="copy-day-select">
-                <option value="0">Monday</option>
-                <option value="1">Tuesday</option>
-                <option value="2">Wednesday</option>
-                <option value="3">Thursday</option>
-                <option value="4">Friday</option>
-                <option value="5">Saturday</option>
-                <option value="6">Sunday</option>
-            </select>
-            <button onclick="copyDay()">Copy Current Day</button>
-            <br>
-            <label>Save Day Type:</label>
-            <input type="text" id="dayTypeName" placeholder="e.g., Work, Weekend">
-            <button onclick="saveDayType()">Save Day Type</button>
-            <br>
-            <label>Apply Day Type:</label>
-            <select id="day-type-select">
-                <option value="">Select Day Type</option>
-            </select>
-            <button onclick="applyDayType()">Apply Day Type</button>
-            <br>
-            <label>Save/Load Schedule:</label>
-            <button onclick="saveSchedule()">Save Schedule</button>
-            <input type="file" id="loadSchedule" accept=".json">
-            <br>
-            <label>Undo:</label>
-            <button onclick="undoAction()">Undo Last Action</button>
-        </div>
+    <select id="day-select">
+        <option value="0">Monday</option>
+        <option value="1">Tuesday</option>
+        <option value="2">Wednesday</option>
+        <option value="3">Thursday</option>
+        <option value="4">Friday</option>
+        <option value="5">Saturday</option>
+        <option value="6">Sunday</option>
+    </select>
+    <div id="grid-container">
+        <div id="time-markers"></div>
+        <div id="grid"></div>
+    </div>
+    <div id="totals">
+        <h3>Time Allocation Totals</h3>
+        <div id="category-totals"></div>
+        <div id="overall-total"></div>
+    </div>
+    <div id="features">
+        <label>Copy Day:</label>
+        <select id="copy-day-select">
+            <option value="0">Monday</option>
+            <option value="1">Tuesday</option>
+            <option value="2">Wednesday</option>
+            <option value="3">Thursday</option>
+            <option value="4">Friday</option>
+            <option value="5">Saturday</option>
+            <option value="6">Sunday</option>
+        </select>
+        <button onclick="copyDay()">Copy Current Day</button>
+        <br>
+        <label>Save Day Type:</label>
+        <input type="text" id="dayTypeName" placeholder="e.g., Work, Weekend">
+        <button onclick="saveDayType()">Save Day Type</button>
+        <br>
+        <label>Apply Day Type:</label>
+        <select id="day-type-select">
+            <option value="">Select Day Type</option>
+        </select>
+        <button onclick="applyDayType()">Apply Day Type</button>
+        <br>
+        <label>Save/Load Schedule:</label>
+        <button onclick="saveSchedule()">Save Schedule</button>
+        <input type="file" id="loadSchedule" accept=".json">
+        <br>
+        <label>Undo:</label>
+        <button onclick="undoAction()">Undo Last Action</button>
     </div>
     <button onclick="generateReport()">Generate Report</button>
     <button onclick="resetGrid()">Reset</button>
