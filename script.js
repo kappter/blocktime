@@ -28,16 +28,18 @@ function renderTimeMarkers() {
     if (markersDiv) markersDiv.innerHTML = '';
     const hoursToShow = [0, 6, 12, 18];
     const slotsPerHour = 60 / resolution;
-    const blockHeight = 70 / slotsPerDay; // Adjusted for 70vh grid height
+    const totalSlots = 24 * slotsPerHour;
+    const slotHeight = 70 / totalSlots; // Height per slot in vh, based on 70vh grid
     const orderedHours = timeDirection === 'bottom' ? hoursToShow : hoursToShow.slice().reverse();
     if (markersDiv) {
-        orderedHours.forEach((hour, i) => {
+        orderedHours.forEach((hour) => {
+            const slotIndex = hour * slotsPerHour;
+            const yPosition = timeDirection === 'bottom'
+                ? (totalSlots - 1 - slotIndex) * slotHeight
+                : slotIndex * slotHeight;
             const marker = document.createElement('div');
             marker.className = 'time-marker';
             marker.textContent = hour % 12 === 0 ? '12' + (hour < 12 ? 'AM' : 'PM') : (hour % 12) + (hour < 12 ? 'AM' : 'PM');
-            const yPosition = timeDirection === 'bottom'
-                ? (24 - hour) * slotsPerHour * blockHeight
-                : hour * slotsPerHour * blockHeight;
             marker.style.top = `${yPosition}vh`;
             markersDiv.appendChild(marker);
         });
@@ -112,15 +114,18 @@ function resetGrid() {
     label.textContent = days[currentDay];
     if (grid) grid.appendChild(label);
 
-    const blocks = timeDirection === 'bottom' ? gridData[currentDay].slice().reverse() : gridData[currentDay];
+    const totalSlots = 24 * (60 / resolution);
+    const blocks = [...gridData[currentDay]]; // Create a copy to avoid modifying original
+    if (timeDirection === 'bottom') {
+        blocks.reverse(); // Reverse for bottom-up rendering but maintain time slots
+    }
     blocks.forEach((cat, index) => {
+        const timeIndex = timeDirection === 'bottom' ? (totalSlots - 1 - index) : index;
+        const startMinutes = timeIndex * resolution;
+        const endMinutes = (timeIndex + 1) * resolution;
         const block = document.createElement('div');
         block.className = 'block';
         block.style.backgroundColor = cat.color;
-        const totalBlocks = gridData[currentDay].length;
-        const timeIndex = timeDirection === 'bottom' ? totalBlocks - 1 - index : index;
-        const startMinutes = timeIndex * resolution;
-        const endMinutes = (timeIndex + 1) * resolution;
         const labelDiv = document.createElement('div');
         labelDiv.className = 'block-label';
         labelDiv.textContent = `${cat.name}: ${formatTime(startMinutes)}-${formatTime(endMinutes)} (${getAttributeForCategory(cat.name)})`;
@@ -337,7 +342,7 @@ function toggleTimeDirection() {
     document.documentElement.style.setProperty('--day-flex-direction', timeDirection === 'bottom' ? 'column-reverse' : 'column');
     console.log(`Toggled time direction to ${timeDirection}`);
     renderTimeMarkers();
-    resetGrid(); // Ensure grid re-renders with new direction
+    resetGrid(); // Re-render grid with locked positions
     renderWeekView(); // Update week view to match direction
 }
 
@@ -435,9 +440,10 @@ function renderWeekView() {
         const hoursToShow = [0, 6, 12, 18];
         const orderedHours = timeDirection === 'bottom' ? hoursToShow : hoursToShow.slice().reverse();
         orderedHours.forEach((hour, i) => {
+            const slotIndex = hour * slotsPerHour;
             const y = timeDirection === 'bottom'
-                ? canvas.height - (hour * slotsPerHour * blockHeight)
-                : hour * slotsPerHour * blockHeight;
+                ? canvas.height - (slotIndex * blockHeight)
+                : slotIndex * blockHeight;
             ctx.fillText(
                 hour % 12 === 0 ? '12' + (hour < 12 ? 'AM' : 'PM') : (hour % 12) + (hour < 12 ? 'AM' : 'PM'),
                 55,
@@ -457,11 +463,13 @@ function renderWeekView() {
             ctx.fillText(day, x + dayWidth / 2, timeDirection === 'bottom' ? canvas.height - 10 : 15);
         }
 
-        const blocks = timeDirection === 'bottom' ? gridData[dayIndex].slice().reverse() : gridData[dayIndex];
+        const blocks = [...gridData[dayIndex]]; // Copy to avoid modifying original
+        if (timeDirection === 'bottom') {
+            blocks.reverse(); // Reverse for rendering but maintain time slots
+        }
         blocks.forEach((cat, index) => {
-            const totalBlocks = gridData[dayIndex].length;
-            const timeIndex = timeDirection === 'bottom' ? totalBlocks - 1 - index : index;
-            const y = timeDirection === 'bottom' ? (totalBlocks - 1 - index) * (70 / slotsPerDay) : index * (70 / slotsPerDay);
+            const timeIndex = timeDirection === 'bottom' ? (slotsPerDay - 1 - index) : index;
+            const y = timeIndex * (70 / slotsPerDay);
             if (ctx) {
                 ctx.fillStyle = cat.color;
                 ctx.fillRect(x + 1, y, dayWidth - 2, 70 / slotsPerDay);
@@ -518,7 +526,7 @@ function downloadPDF() {
     }
 
     const pieCanvas = document.getElementById('pieChart');
-    const pieImgData = pieCanvas ? pieCanvas.toDataURL('image/png') : '';
+    const pieImgData = pieCanvas ? pieChart.toDataURL('image/png') : '';
     if (pieImgData) {
         doc.text('Weekly Time Allocation', 20, doc.autoTable?.previous.finalY + 90 || 130);
         doc.addImage(pieImgData, 'PNG', 20, doc.autoTable?.previous.finalY + 100 || 140, 100, 100);
