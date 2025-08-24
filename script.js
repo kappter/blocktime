@@ -8,6 +8,7 @@ let dayTypes = {};
 let undoStack = [];
 let timeDirection = 'bottom'; // 'bottom' for 12AM at bottom, 'top' for 12AM at top
 const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const mindsets = ['Contentment', 'Obligation', 'Energy', 'Neutral']; // Mindset options
 
 function initGrid() {
     resolution = parseInt(document.getElementById('resolution').value);
@@ -67,15 +68,14 @@ function getAttributeForCategory(catName) {
 
 function updateTotals() {
     const counts = {};
-    const attributeCounts = {};
+    const mindsetCounts = {};
     categories.forEach(cat => {
         counts[cat.name] = 0;
-        attributeCounts[cat.name] = { 'Joyful-Eager': 0, 'Joyful-Willing': 0, 'Joyful-Reluctant': 0, 'Neutral-Eager': 0, 'Neutral-Reluctant': 0 };
+        mindsetCounts[cat.name] = { 'Contentment': 0, 'Obligation': 0, 'Energy': 0, 'Neutral': 0 };
     });
-    gridData.flat().forEach(cat => {
-        counts[cat.name]++;
-        const attr = getAttributeForCategory(cat.name);
-        attributeCounts[cat.name][attr]++;
+    gridData.flat().forEach(block => {
+        counts[block.name]++;
+        mindsetCounts[block.name][block.mindset]++;
     });
     const hoursPerBlock = resolution / 60;
     const totalHours = gridData.reduce((sum, day) => sum + day.length, 0) * hoursPerBlock;
@@ -88,7 +88,7 @@ function updateTotals() {
     const attributeSummary = document.getElementById('attribute-summary');
     if (attributeSummary) attributeSummary.innerHTML = '<strong>Activity Attributes:</strong><br>' + categories.map(cat => {
         const attr = getAttributeForCategory(cat.name);
-        return `${cat.name}: ${attr} (${(attributeCounts[cat.name][attr] * hoursPerBlock).toFixed(1)} hours)<br>`;
+        return `${cat.name}: ${attr} (${(mindsetCounts[cat.name][attr] * hoursPerBlock).toFixed(1)} hours)<br>`;
     }).join('');
 
     const overallTotal = document.getElementById('overall-total');
@@ -119,18 +119,18 @@ function resetGrid() {
     if (timeDirection === 'bottom') {
         blocks.reverse(); // Reverse for bottom-up rendering but maintain time slots
     }
-    blocks.forEach((cat, index) => {
+    blocks.forEach((block, index) => {
         const timeIndex = timeDirection === 'bottom' ? (totalSlots - 1 - index) : index;
         const startMinutes = timeIndex * resolution;
         const endMinutes = (timeIndex + 1) * resolution;
-        const block = document.createElement('div');
-        block.className = 'block';
-        block.style.backgroundColor = cat.color;
+        const blockDiv = document.createElement('div');
+        blockDiv.className = 'block';
+        blockDiv.style.backgroundColor = block.color;
         const labelDiv = document.createElement('div');
         labelDiv.className = 'block-label';
-        labelDiv.textContent = `${cat.name}: ${formatTime(startMinutes)}-${formatTime(endMinutes)} (${getAttributeForCategory(cat.name)})`;
-        block.appendChild(labelDiv);
-        if (dayDiv) dayDiv.appendChild(block);
+        labelDiv.textContent = `${block.name}: ${formatTime(startMinutes)}-${formatTime(endMinutes)} (${block.mindset})`;
+        blockDiv.appendChild(labelDiv);
+        if (dayDiv) dayDiv.appendChild(blockDiv);
     });
     updateTotals();
 }
@@ -246,8 +246,16 @@ function dropBlock(dayIndex) {
     if (gridData[dayIndex].length >= slotsPerDay) return alert('Day is full!');
     pushUndoState();
     const cat = categories[selectedCat];
-    gridData[dayIndex].push(cat);
-    resetGrid();
+    // Prompt user to select a mindset
+    const mindset = prompt(`Select mindset for ${cat.name}:\n${mindsets.join(', ')}`) || 'Neutral';
+    if (mindsets.includes(mindset)) {
+        gridData[dayIndex].push({ ...cat, mindset });
+        resetGrid();
+    } else {
+        alert('Invalid mindset! Defaulting to Neutral.');
+        gridData[dayIndex].push({ ...cat, mindset: 'Neutral' });
+        resetGrid();
+    }
 }
 
 function saveSchedule() {
@@ -299,9 +307,9 @@ function loadSchedule(event) {
             const allValid = [
                 ...data.gridData.flat(),
                 ...Object.values(data.dayTypes).flat()
-            ].every(block => categoryNames.includes(block.name));
+            ].every(block => categoryNames.includes(block.name) && (block.mindset === undefined || mindsets.includes(block.mindset)));
             if (!allValid) {
-                throw new Error('Grid data or day types reference unknown categories');
+                throw new Error('Grid data or day types reference unknown categories or invalid mindsets');
             }
 
             if (data.resolution && ![15, 30, 60].includes(data.resolution)) {
@@ -354,15 +362,14 @@ function generateReport() {
     }
 
     const counts = {};
-    const attributeCounts = {};
+    const mindsetCounts = {};
     categories.forEach(cat => {
         counts[cat.name] = 0;
-        attributeCounts[cat.name] = { 'Joyful-Eager': 0, 'Joyful-Willing': 0, 'Joyful-Reluctant': 0, 'Neutral-Eager': 0, 'Neutral-Reluctant': 0 };
+        mindsetCounts[cat.name] = { 'Contentment': 0, 'Obligation': 0, 'Energy': 0, 'Neutral': 0 };
     });
-    gridData.flat().forEach(cat => {
-        counts[cat.name]++;
-        const attr = getAttributeForCategory(cat.name);
-        attributeCounts[cat.name][attr]++;
+    gridData.flat().forEach(block => {
+        counts[block.name]++;
+        mindsetCounts[block.name][block.mindset]++;
     });
     const totalBlocks = gridData.reduce((sum, day) => sum + day.length, 0);
     const hoursPerBlock = resolution / 60;
@@ -374,7 +381,7 @@ function generateReport() {
     if (summaryText) summaryText.innerHTML = `
         <p><strong>Great job, ${studentName}! 🎉</strong> You've planned <strong>${totalHours.toFixed(1)}</strong> hours of your week! 
         Your top activity is <strong>${maxCategory}</strong> with <strong>${(counts[maxCategory] * hoursPerBlock).toFixed(1)}</strong> hours. 
-        Check your activity attributes below for insights!</p>
+        Check your mindset distribution below!</p>
     `;
 
     const tableBody = document.querySelector('#summaryTable tbody');
@@ -383,8 +390,7 @@ function generateReport() {
     Object.keys(counts).forEach(name => {
         const hours = counts[name] * hoursPerBlock;
         const pct = totalHours ? (hours / 168 * 100).toFixed(1) : 0;
-        const attr = getAttributeForCategory(name);
-        const row = `<tr><td>${name}</td><td>${hours}</td><td>${pct}%</td><td>${attr}</td></tr>`;
+        const row = `<tr><td>${name}</td><td>${hours}</td><td>${pct}%</td><td>${Object.entries(mindsetCounts[name]).map(([m, h]) => `${m}: ${(h * hoursPerBlock).toFixed(1)}h`).join(', ')}</td></tr>`;
         if (tableBody) tableBody.innerHTML += row;
         pieData.labels.push(name);
         pieData.datasets[0].data.push(hours);
@@ -467,18 +473,18 @@ function renderWeekView() {
         if (timeDirection === 'bottom') {
             blocks.reverse(); // Reverse for rendering but maintain time slots
         }
-        blocks.forEach((cat, index) => {
+        blocks.forEach((block, index) => {
             const timeIndex = timeDirection === 'bottom' ? (slotsPerDay - 1 - index) : index;
             const y = timeIndex * (70 / slotsPerDay);
             if (ctx) {
-                ctx.fillStyle = cat.color;
+                ctx.fillStyle = block.color;
                 ctx.fillRect(x + 1, y, dayWidth - 2, 70 / slotsPerDay);
 
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
                 ctx.font = '8px Arial';
                 ctx.textAlign = 'left';
                 ctx.fillText(
-                    `${cat.name}: ${formatTime(timeIndex * resolution)}-${formatTime((timeIndex + 1) * resolution)} (${getAttributeForCategory(cat.name)})`,
+                    `${block.name}: ${formatTime(timeIndex * resolution)}-${formatTime((timeIndex + 1) * resolution)} (${block.mindset})`,
                     x + 3,
                     y + (70 / slotsPerDay) / 2
                 );
@@ -510,7 +516,7 @@ function downloadPDF() {
     if (tableBody) {
         doc.autoTable({
             startY: 60,
-            head: [['Category', 'Hours', 'Percentage', 'Attribute']],
+            head: [['Category', 'Hours', 'Percentage', 'Mindset Distribution']],
             body: rows,
             theme: 'striped',
             styles: { fontSize: 10 },
@@ -526,7 +532,7 @@ function downloadPDF() {
     }
 
     const pieCanvas = document.getElementById('pieChart');
-    const pieImgData = pieCanvas ? pieChart.toDataURL('image/png') : '';
+    const pieImgData = pieCanvas ? pieCanvas.toDataURL('image/png') : '';
     if (pieImgData) {
         doc.text('Weekly Time Allocation', 20, doc.autoTable?.previous.finalY + 90 || 130);
         doc.addImage(pieImgData, 'PNG', 20, doc.autoTable?.previous.finalY + 100 || 140, 100, 100);
