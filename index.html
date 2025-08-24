@@ -50,6 +50,7 @@
 </head>
 <body>
     <div class="container">
+        <h1 class="app-title">BlockTime</h1>
         <div class="top-controls">
             <select id="resolution">
                 <option value="15">15 min</option>
@@ -70,12 +71,12 @@
                 <option value="5">Sat</option>
                 <option value="6">Sun</option>
             </select>
+            <div id="categories"></div>
         </div>
         <div class="grid-container">
             <div id="time-markers"></div>
             <div id="grid"></div>
         </div>
-        <div id="categories"></div>
         <div id="legend"></div>
         <div id="time-allocation-totals">
             <div id="category-totals"></div>
@@ -119,5 +120,4 @@
         </div>
     </div>
     <script src="script.js"></script>
-</body>
 </html>
