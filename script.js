@@ -24,12 +24,16 @@ function renderTimeMarkers() {
     markersDiv.innerHTML = '';
     const hoursToShow = [0, 6, 12, 18];
     const slotsPerHour = 60 / resolution;
+    const blockHeight = 80 / slotsPerDay; // Height per slot in vh
     const orderedHours = timeDirection === 'bottom' ? hoursToShow : hoursToShow.slice().reverse();
-    orderedHours.forEach(hour => {
+    orderedHours.forEach((hour, i) => {
         const marker = document.createElement('div');
         marker.className = 'time-marker';
         marker.textContent = hour % 12 === 0 ? '12' + (hour < 12 ? 'AM' : 'PM') : (hour % 12) + (hour < 12 ? 'AM' : 'PM');
-        marker.style.height = `calc(${(3 * slotsPerHour * (80 / slotsPerDay))}vh)`;
+        const yPosition = timeDirection === 'bottom'
+            ? (24 - hour) * slotsPerHour * blockHeight
+            : hour * slotsPerHour * blockHeight;
+        marker.style.top = `${yPosition}vh`;
         markersDiv.appendChild(marker);
     });
 }
@@ -400,11 +404,11 @@ function renderWeekView() {
     orderedHours.forEach((hour, i) => {
         const y = timeDirection === 'bottom'
             ? canvas.height - (hour * slotsPerHour * blockHeight)
-            : (hour === 0 ? 0 : (18 - hour) * slotsPerHour * blockHeight + blockHeight);
+            : hour * slotsPerHour * blockHeight;
         ctx.fillText(
             hour % 12 === 0 ? '12' + (hour < 12 ? 'AM' : 'PM') : (hour % 12) + (hour < 12 ? 'AM' : 'PM'),
             55,
-            y + (timeDirection === 'bottom' ? -blockHeight / 2 : blockHeight / 2)
+            y + blockHeight / 2
         );
     });
 
