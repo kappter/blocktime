@@ -534,6 +534,10 @@ document.getElementById('day-select').addEventListener('change', () => {
 
 document.getElementById('loadSchedule').addEventListener('change', loadSchedule);
 
+document.getElementById('resolution').addEventListener('change', () => {
+    initGrid();
+});
+
 window.addEventListener('load', () => {
     if (typeof Chart === 'undefined') {
         console.error('Chart.js not loaded. Check CDN: https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js');
