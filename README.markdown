@@ -1,7 +1,7 @@
 # BlockTime
 
 ## Overview
-BlockTime is a simple web app that helps users visualize and manage their weekly time allocation. Inspired by a Lego-based time management concept, it allows users to create custom categories, assign colors, and "drop" blocks into a 7-day grid (Monday to Sunday) to represent time spent on activities. Each block shows its category and time range (e.g., "Sleep: 8:00-8:30 PM"), with running totals for categories and the overall week displayed below the grid. Users can copy a day's schedule, save it as a reusable "day type" (e.g., Work, Weekend, Holiday, Travel), save/load the schedule as a JSON file, and undo mistaken block placements. The app supports time resolutions (15, 30, or 60 minutes per block) and generates a report with a summary, table, and pie chart, downloadable as a PDF. It’s optimized for desktop and mobile with a touch-friendly interface, ideal for students planning their week for assignments.
+BlockTime is a simple web app that helps users visualize and manage their weekly time allocation. Inspired by a Lego-based time management concept, it allows users to create custom categories, assign colors, and "drop" blocks into a 7-day grid (Monday to Sunday) to represent time spent on activities. Each block shows its category and time range (e.g., "Sleep: 8:00-8:30 PM"), with running totals for categories and the overall week displayed below the grid. Users can copy a day's schedule, save it as a reusable "day type" (e.g., Work, Weekend), save/load the schedule as a JSON file, and undo mistaken block placements. The app supports time resolutions (15, 30, or 60 minutes per block) and generates a report with a summary, table, color-coded week view, and pie chart, downloadable as a PDF. It’s optimized for desktop and mobile with a touch-friendly interface, ideal for students planning their week for assignments.
 
 ## Features
 - **Custom Categories**: Define activity categories with names and colors.
@@ -13,11 +13,11 @@ BlockTime is a simple web app that helps users visualize and manage their weekly
 - **Day Types**: Save a day’s schedule as a named type (e.g., "Work", "Weekend") and apply it to any day.
 - **Save/Load Schedule**: Save the entire schedule (categories, grid, day types) as a JSON file and load it back to edit.
 - **Undo Action**: Revert the last block placement, day copy, or day type application.
-- **Time Markers**: Simplified labels at 12AM, 6AM, 12PM, 6PM for clarity, integrated as a table-like column.
+- **Time Markers**: Simplified labels at 12AM, 6AM, 12PM, 6PM, integrated as a table-like column.
 - **Legend**: Scrollable strip showing all categories and colors.
 - **Dark Mode**: Toggle between light and dark themes.
-- **Enhanced Report**: Includes student name, dynamic summary with motivational text, table, and pie chart.
-- **PDF Export**: Download the report as a PDF with name, summary, table, and chart.
+- **Enhanced Report**: Includes student name, dynamic summary with motivational text, table, color-coded week view (all 7 days), and pie chart.
+- **PDF Export**: Download the report as a PDF with name, summary, table, week view, and pie chart.
 - **Reset Option**: Clear the grid to start over.
 - **Mobile-Friendly**: Single-day view, touch and click support, responsive design.
 
@@ -36,6 +36,7 @@ BlockTime is a simple web app that helps users visualize and manage their weekly
    - Internet connection for CDNs:
      - Chart.js (`https://cdn.jsdelivr.net/npm/chart.js`) for the pie chart.
      - jsPDF (`https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js`) for PDF export.
+     - jspdf-autotable (`https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js`) for table rendering in PDF.
 
 ## Usage
 1. **Build the Day (Top Section)**:
@@ -54,41 +55,18 @@ BlockTime is a simple web app that helps users visualize and manage their weekly
    - Tap/click "Undo Last Action" to revert the last block placement, day copy, or day type application.
 3. **Generate Report**:
    - Enter your name in the report section.
-   - Tap/click "Generate Report" to see a summary, table, and pie chart.
+   - Tap/click "Generate Report" to see a summary, table, color-coded week view (all 7 days), and pie chart.
    - The summary includes total hours, top category, and motivational text (e.g., "Great job, [Name]! 🎉").
+   - The week view shows all days with color-coded blocks and time labels (12AM, 6AM, 12PM, 6PM).
 4. **Download PDF**:
-   - Tap/click "Download PDF" to save the report as `BlockTime_Report_[Name].pdf` (includes name, summary, table, and chart).
+   - Tap/click "Download PDF" to save the report as `BlockTime_Report_[Name].pdf` (includes name, summary, table, week view, and pie chart).
 5. **Reset**:
    - Tap/click "Reset" to clear the grid and totals.
 6. **Toggle Theme**:
-   - Tap/click "Toggle Dark Mode" to switch themes.
+   - Tap/click "Toggle Dark Mode" to switch themes, updating the week view accordingly.
 
 ## Example
 - Use top controls to choose "30 minutes" resolution (48 slots per day).
 - Add categories: "Sleep" (blue), "Study" (yellow), "Work" (red).
 - Select "Monday", tap/click "Sleep", then tap/click the column 16 times for 8 hours of sleep (blocks labeled, e.g., "Sleep: 12:00-12:30 AM").
-- If you accidentally add a "Work" block, use the bottom "Undo Last Action" to remove it.
-- Check totals (e.g., "Sleep: 8.0 hours, Total: 8.0 hours").
-- Use bottom features to save Monday as "Work" day type, then apply it to Tuesday.
-- Copy Monday’s schedule to Wednesday.
-- Tap/click "Save Schedule" to download `BlockTime_Schedule.json`.
-- Start a new session, upload the JSON file, and verify the schedule is restored.
-- Enter your name (e.g., "Alex"), tap/click "Generate Report" to see a breakdown (e.g., "Sleep: 56 hours, 33.3%"), and download as PDF.
-
-## Notes
-- The app runs in the browser and does not save data between sessions (day types, schedules, and undo stack reset on reload unless saved/loaded).
-- Block labels show the category and time range, making it clear what time each block represents.
-- The "Time Allocation Totals" section shows running hours per category and overall, updated as you add, copy, load, or undo blocks.
-- The "Undo Last Action" button reverts the last block placement, day copy, or day type application (up to 10 actions).
-- The "Copy Day" feature duplicates a day’s schedule, and "Day Types" let you save and reuse schedules (e.g., for Work or Weekend days).
-- The "Save Schedule" feature downloads a JSON file with all data, and "Load Schedule" restores it from a valid JSON file.
-- The PDF export includes your name, a motivational summary, table, and pie chart, suitable for assignment submission.
-- The single-day view, touch/click support, and responsive design (85vw grid, 80vh height) ensure a smooth mobile experience.
-- Time markers are integrated as a table-like column on the left, with labels spanning multiple slots for clarity.
-- Controls are simplified with a clean, minimal design (reduced padding, shadows, and font sizes).
-- If controls don’t appear or layout issues occur, check DevTools (F12) Console for errors.
-- If you encounter issues (e.g., script loading), ensure files are in the same directory and use a local server. Test in Incognito mode to rule out extension interference (e.g., MindStudio content scripts).
-- Future enhancements could include persistent storage, swipe gestures, or default day types with pre-set categories.
-
-## License
-This is a free, open-source tool for educational use. No warranty is provided.
+- If you accidentally add a "Work" block, use the bottom "Undo

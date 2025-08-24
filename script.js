@@ -320,6 +320,8 @@ function generateReport() {
 
     document.getElementById('report').style.display = 'block';
 
+    renderWeekView();
+
     const ctx = document.getElementById('pieChart').getContext('2d');
     if (window.myPieChart) window.myPieChart.destroy();
     window.myPieChart = new Chart(ctx, {
@@ -332,6 +334,62 @@ function generateReport() {
                 title: { display: true, text: 'Weekly Time Allocation (Hours)' } 
             } 
         }
+    });
+}
+
+function renderWeekView() {
+    const canvas = document.getElementById('weekChart');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 600;
+    canvas.height = 100;
+
+    const dayWidth = (canvas.width - 35) / 7;
+    const blockHeight = canvas.height / slotsPerDay;
+    const slotsPerHour = 60 / resolution;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#333' : '#eee';
+    for (let i = 0; i < slotsPerDay; i++) {
+        ctx.fillRect(35, i * blockHeight, canvas.width - 35, 1);
+    }
+
+    ctx.font = '8px Arial';
+    ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#fff' : '#000';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    [0, 6, 12, 18].forEach(hour => {
+        const y = canvas.height - (hour * slotsPerHour * blockHeight);
+        ctx.fillText(
+            hour % 12 === 0 ? '12' + (hour < 12 ? 'AM' : 'PM') : (hour % 12) + (hour < 12 ? 'AM' : 'PM'),
+            30,
+            y - blockHeight / 2
+        );
+    });
+
+    days.forEach((day, dayIndex) => {
+        const x = 35 + dayIndex * dayWidth;
+        ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#444' : '#ddd';
+        ctx.fillRect(x, 0, 1, canvas.height);
+        ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#fff' : '#000';
+        ctx.font = '10px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(day, x + dayWidth / 2, canvas.height - 5);
+
+        gridData[dayIndex].forEach((cat, index) => {
+            const y = canvas.height - (index + 1) * blockHeight;
+            ctx.fillStyle = cat.color;
+            ctx.fillRect(x + 1, y, dayWidth - 2, blockHeight);
+
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.font = '6px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText(
+                `${cat.name}: ${formatTime(index * resolution)}-${formatTime((index + 1) * resolution)}`,
+                x + 2,
+                y + blockHeight / 2
+            );
+        });
     });
 }
 
@@ -357,15 +415,21 @@ function downloadPDF() {
         styles: { fontSize: 10 },
     });
 
-    const canvas = document.getElementById('pieChart');
-    const imgData = canvas.toDataURL('image/png');
-    doc.addImage(imgData, 'PNG', 20, doc.autoTable.previous.finalY + 10, 80, 80);
+    const weekCanvas = document.getElementById('weekChart');
+    const weekImgData = weekCanvas.toDataURL('image/png');
+    doc.text('Weekly Schedule', 20, doc.autoTable.previous.finalY + 10);
+    doc.addImage(weekImgData, 'PNG', 20, doc.autoTable.previous.finalY + 20, 160, 20);
+
+    const pieCanvas = document.getElementById('pieChart');
+    const pieImgData = pieCanvas.toDataURL('image/png');
+    doc.addImage(pieImgData, 'PNG', 20, doc.autoTable.previous.finalY + 50, 80, 80);
 
     doc.save(`BlockTime_Report_${studentName || 'Student'}.pdf`);
 }
 
 function toggleTheme() {
     document.body.classList.toggle('dark-mode');
+    renderWeekView();
 }
 
 document.getElementById('day-select').addEventListener('change', () => {
@@ -374,15 +438,5 @@ document.getElementById('day-select').addEventListener('change', () => {
 });
 
 document.getElementById('loadSchedule').addEventListener('change', loadSchedule);
-
-const chartScript = document.createElement('script');
-chartScript.src = 'https://cdn.jsdelivr.net/npm/chart.js';
-chartScript.async = true;
-document.head.appendChild(chartScript);
-
-const pdfScript = document.createElement('script');
-pdfScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-pdfScript.async = true;
-document.head.appendChild(pdfScript);
 
 initGrid();
