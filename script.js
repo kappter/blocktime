@@ -16,10 +16,11 @@ function initGrid() {
     document.documentElement.style.setProperty('--day-flex-direction', timeDirection === 'bottom' ? 'column-reverse' : 'column');
     console.log(`Resolution changed to ${resolution} min, slotsPerDay: ${slotsPerDay}`);
     undoStack = [];
-    // Truncate gridData if it exceeds new slotsPerDay
+    // Truncate gridData to new slotsPerDay and force re-render
     gridData = gridData.map(day => day.slice(0, slotsPerDay));
     resetGrid();
     renderTimeMarkers();
+    renderWeekView(); // Ensure week view updates with new scale
 }
 
 function renderTimeMarkers() {
@@ -334,9 +335,10 @@ function toggleTimeDirection() {
     timeDirection = timeDirection === 'bottom' ? 'top' : 'bottom';
     document.getElementById('toggle-time-direction').textContent = `Time Render: 12AM at ${timeDirection === 'bottom' ? 'Bottom' : 'Top'}`;
     document.documentElement.style.setProperty('--day-flex-direction', timeDirection === 'bottom' ? 'column-reverse' : 'column');
+    console.log(`Toggled time direction to ${timeDirection}`);
     renderTimeMarkers();
-    resetGrid();
-    renderWeekView();
+    resetGrid(); // Ensure grid re-renders with new direction
+    renderWeekView(); // Update week view to match direction
 }
 
 function generateReport() {
@@ -542,6 +544,8 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Resolution dropdown changed');
         initGrid();
     });
+
+    document.getElementById('toggle-time-direction').addEventListener('click', toggleTimeDirection);
 });
 
 window.addEventListener('load', () => {
