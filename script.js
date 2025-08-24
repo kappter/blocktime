@@ -14,21 +14,6 @@ function initGrid() {
     document.documentElement.style.setProperty('--slots-per-day', slotsPerDay);
     undoStack = [];
     resetGrid();
-    renderTimeMarkers();
-}
-
-function renderTimeMarkers() {
-    const markersDiv = document.getElementById('time-markers');
-    markersDiv.innerHTML = '';
-    const hoursToShow = [0, 6, 12, 18];
-    const slotsPerHour = 60 / resolution;
-    hoursToShow.forEach(hour => {
-        const marker = document.createElement('div');
-        marker.textContent = hour % 12 === 0 ? '12' + (hour < 12 ? 'AM' : 'PM') : (hour % 12) + (hour < 12 ? 'AM' : 'PM');
-        marker.style.position = 'absolute';
-        marker.style.bottom = `calc(${(hour * slotsPerHour * (80 / slotsPerDay))}vh - 6px)`;
-        markersDiv.appendChild(marker);
-    });
 }
 
 function formatTime(minutes) {
@@ -73,6 +58,18 @@ function resetGrid() {
     label.className = 'day-label';
     label.textContent = days[currentDay];
     grid.appendChild(label);
+
+    const slotsPerHour = 60 / resolution;
+    const hoursToShow = [0, 6, 12, 18];
+    hoursToShow.forEach(hour => {
+        const slotIndex = hour * slotsPerHour;
+        const timeLabel = document.createElement('div');
+        timeLabel.className = 'time-label';
+        timeLabel.textContent = hour % 12 === 0 ? '12' + (hour < 12 ? 'AM' : 'PM') : (hour % 12) + (hour < 12 ? 'AM' : 'PM');
+        timeLabel.style.bottom = `calc(${(slotIndex * (80 / slotsPerDay))}vh - 4px)`;
+        dayDiv.appendChild(timeLabel);
+    });
+
     gridData[currentDay].forEach((cat, index) => {
         const block = document.createElement('div');
         block.className = 'block';
@@ -132,9 +129,9 @@ function renderLegend() {
     categories.forEach(cat => {
         const span = document.createElement('span');
         span.style.backgroundColor = cat.color;
-        span.style.padding = '4px 10px';
-        span.style.margin = '0 5px';
-        span.style.borderRadius = '4px';
+        span.style.padding = '3px 8px';
+        span.style.margin = '0 4px';
+        span.style.borderRadius = '3px';
         span.textContent = cat.name;
         legendDiv.appendChild(span);
     });
@@ -375,12 +372,12 @@ document.getElementById('day-select').addEventListener('change', () => {
 
 document.getElementById('menu-toggle').addEventListener('touchstart', (e) => {
     e.preventDefault();
-    document.getElementById('menu').classList.toggle('show');
+    document.getElementById('build-controls').classList.toggle('show');
     console.log('Menu toggled (touchstart)');
 });
 document.getElementById('menu-toggle').addEventListener('click', (e) => {
     e.preventDefault();
-    document.getElementById('menu').classList.toggle('show');
+    document.getElementById('build-controls').classList.toggle('show');
     console.log('Menu toggled (click)');
 });
 
