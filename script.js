@@ -21,21 +21,23 @@ function initGrid() {
 
 function renderTimeMarkers() {
     const markersDiv = document.getElementById('time-markers');
-    markersDiv.innerHTML = '';
+    if (markersDiv) markersDiv.innerHTML = '';
     const hoursToShow = [0, 6, 12, 18];
     const slotsPerHour = 60 / resolution;
     const blockHeight = 80 / slotsPerDay; // Height per slot in vh
     const orderedHours = timeDirection === 'bottom' ? hoursToShow : hoursToShow.slice().reverse();
-    orderedHours.forEach((hour, i) => {
-        const marker = document.createElement('div');
-        marker.className = 'time-marker';
-        marker.textContent = hour % 12 === 0 ? '12' + (hour < 12 ? 'AM' : 'PM') : (hour % 12) + (hour < 12 ? 'AM' : 'PM');
-        const yPosition = timeDirection === 'bottom'
-            ? (24 - hour) * slotsPerHour * blockHeight
-            : hour * slotsPerHour * blockHeight;
-        marker.style.top = `${yPosition}vh`;
-        markersDiv.appendChild(marker);
-    });
+    if (markersDiv) {
+        orderedHours.forEach((hour, i) => {
+            const marker = document.createElement('div');
+            marker.className = 'time-marker';
+            marker.textContent = hour % 12 === 0 ? '12' + (hour < 12 ? 'AM' : 'PM') : (hour % 12) + (hour < 12 ? 'AM' : 'PM');
+            const yPosition = timeDirection === 'bottom'
+                ? (24 - hour) * slotsPerHour * blockHeight
+                : hour * slotsPerHour * blockHeight;
+            marker.style.top = `${yPosition}vh`;
+            markersDiv.appendChild(marker);
+        });
+    }
 }
 
 function formatTime(minutes) {
@@ -73,24 +75,23 @@ function updateTotals() {
     const totalHours = gridData.reduce((sum, day) => sum + day.length, 0) * hoursPerBlock;
 
     const categoryTotals = document.getElementById('category-totals');
-    categoryTotals.innerHTML = categories.map(cat => 
+    if (categoryTotals) categoryTotals.innerHTML = categories.map(cat => 
         `${cat.name}: ${(counts[cat.name] * hoursPerBlock).toFixed(1)} hours`
     ).join('<br>');
 
     const attributeSummary = document.getElementById('attribute-summary');
-    attributeSummary.innerHTML = '<strong>Activity Attributes:</strong><br>';
-    categories.forEach(cat => {
+    if (attributeSummary) attributeSummary.innerHTML = '<strong>Activity Attributes:</strong><br>' + categories.map(cat => {
         const attr = getAttributeForCategory(cat.name);
-        attributeSummary.innerHTML += `${cat.name}: ${attr} (${(attributeCounts[cat.name][attr] * hoursPerBlock).toFixed(1)} hours)<br>`;
-    });
+        return `${cat.name}: ${attr} (${(attributeCounts[cat.name][attr] * hoursPerBlock).toFixed(1)} hours)<br>`;
+    }).join('');
 
     const overallTotal = document.getElementById('overall-total');
-    overallTotal.innerHTML = `<strong>Total: ${totalHours.toFixed(1)} hours</strong>`;
+    if (overallTotal) overallTotal.innerHTML = `<strong>Total: ${totalHours.toFixed(1)} hours</strong>`;
 }
 
 function resetGrid() {
     const grid = document.getElementById('grid');
-    grid.innerHTML = '';
+    if (grid) grid.innerHTML = '';
     const dayDiv = document.createElement('div');
     dayDiv.className = 'day';
     dayDiv.addEventListener('touchstart', (e) => {
@@ -101,11 +102,11 @@ function resetGrid() {
         e.preventDefault();
         dropBlock(currentDay);
     });
-    grid.appendChild(dayDiv);
+    if (grid) grid.appendChild(dayDiv);
     const label = document.createElement('div');
     label.className = 'day-label';
     label.textContent = days[currentDay];
-    grid.appendChild(label);
+    if (grid) grid.appendChild(label);
 
     const len = gridData[currentDay].length;
     const blocks = timeDirection === 'top' ? gridData[currentDay] : gridData[currentDay].slice().reverse();
@@ -120,7 +121,7 @@ function resetGrid() {
         labelDiv.className = 'block-label';
         labelDiv.textContent = `${cat.name}: ${formatTime(startMinutes)}-${formatTime(endMinutes)} (${getAttributeForCategory(cat.name)})`;
         block.appendChild(labelDiv);
-        dayDiv.appendChild(block);
+        if (dayDiv) dayDiv.appendChild(block);
     });
     updateTotals();
 }
@@ -139,7 +140,7 @@ function addCategory() {
 
 function renderCategories() {
     const catsDiv = document.getElementById('categories');
-    catsDiv.innerHTML = '';
+    if (catsDiv) catsDiv.innerHTML = '';
     categories.forEach((cat, i) => {
         const catDiv = document.createElement('div');
         catDiv.className = 'category';
@@ -159,13 +160,13 @@ function renderCategories() {
             catDiv.classList.add('selected');
             console.log(`Selected category: ${cat.name}`);
         });
-        catsDiv.appendChild(catDiv);
+        if (catsDiv) catsDiv.appendChild(catDiv);
     });
 }
 
 function renderLegend() {
     const legendDiv = document.getElementById('legend');
-    legendDiv.innerHTML = '<strong>Legend:</strong> ';
+    if (legendDiv) legendDiv.innerHTML = '<strong>Legend:</strong> ';
     categories.forEach(cat => {
         const span = document.createElement('span');
         span.style.backgroundColor = cat.color;
@@ -173,7 +174,7 @@ function renderLegend() {
         span.style.margin = '0 5px';
         span.style.borderRadius = '4px';
         span.textContent = cat.name;
-        legendDiv.appendChild(span);
+        if (legendDiv) legendDiv.appendChild(span);
     });
 }
 
@@ -199,12 +200,12 @@ function saveDayType() {
 
 function renderDayTypes() {
     const dayTypeSelect = document.getElementById('day-type-select');
-    dayTypeSelect.innerHTML = '<option value="">Select Day Type</option>';
+    if (dayTypeSelect) dayTypeSelect.innerHTML = '<option value="">Select Day Type</option>';
     Object.keys(dayTypes).forEach(type => {
         const option = document.createElement('option');
         option.value = type;
         option.textContent = type;
-        dayTypeSelect.appendChild(option);
+        if (dayTypeSelect) dayTypeSelect.appendChild(option);
     });
 }
 
@@ -357,36 +358,37 @@ function generateReport() {
     const hoursPerBlock = resolution / 60;
     const totalHours = totalBlocks * hoursPerBlock;
 
-    const studentName = document.getElementById('studentName').value.trim() || 'Student';
+    const studentName = document.getElementById('studentName')?.value.trim() || 'Student';
     const maxCategory = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b, categories[0]?.name || 'None');
     const summaryText = document.getElementById('summaryText');
-    summaryText.innerHTML = `
+    if (summaryText) summaryText.innerHTML = `
         <p><strong>Great job, ${studentName}! 🎉</strong> You've planned <strong>${totalHours.toFixed(1)}</strong> hours of your week! 
         Your top activity is <strong>${maxCategory}</strong> with <strong>${(counts[maxCategory] * hoursPerBlock).toFixed(1)}</strong> hours. 
         Check your activity attributes below for insights!</p>
     `;
 
     const tableBody = document.querySelector('#summaryTable tbody');
-    tableBody.innerHTML = '';
+    if (tableBody) tableBody.innerHTML = '';
     const pieData = { labels: [], datasets: [{ data: [], backgroundColor: [] }] };
     Object.keys(counts).forEach(name => {
         const hours = counts[name] * hoursPerBlock;
         const pct = totalHours ? (hours / 168 * 100).toFixed(1) : 0;
         const attr = getAttributeForCategory(name);
         const row = `<tr><td>${name}</td><td>${hours}</td><td>${pct}%</td><td>${attr}</td></tr>`;
-        tableBody.innerHTML += row;
+        if (tableBody) tableBody.innerHTML += row;
         pieData.labels.push(name);
         pieData.datasets[0].data.push(hours);
         pieData.datasets[0].backgroundColor.push(categories.find(c => c.name === name).color);
     });
 
-    document.getElementById('report').style.display = 'block';
+    const reportDiv = document.getElementById('report');
+    if (reportDiv) reportDiv.style.display = 'block';
 
     renderWeekView();
 
-    const ctx = document.getElementById('pieChart').getContext('2d');
-    if (window.myPieChart) window.myPieChart.destroy();
-    window.myPieChart = new Chart(ctx, {
+    const ctx = document.getElementById('pieChart')?.getContext('2d');
+    if (ctx && window.myPieChart) window.myPieChart.destroy();
+    if (ctx) window.myPieChart = new Chart(ctx, {
         type: 'pie',
         data: pieData,
         options: { 
@@ -401,63 +403,73 @@ function generateReport() {
 
 function renderWeekView() {
     const canvas = document.getElementById('weekChart');
-    const ctx = canvas.getContext('2d');
-    canvas.width = 1200;
-    canvas.height = 300;
-
-    const dayWidth = (canvas.width - 60) / 7;
-    const blockHeight = canvas.height / slotsPerDay;
-    const slotsPerHour = 60 / resolution;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#333' : '#eee';
-    for (let i = 0; i < slotsPerDay; i++) {
-        ctx.fillRect(60, i * blockHeight, canvas.width - 60, 1);
+    const ctx = canvas?.getContext('2d');
+    if (canvas) {
+        canvas.width = 1200;
+        canvas.height = 300;
     }
 
-    ctx.font = '10px Arial';
-    ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#fff' : '#000';
-    ctx.textAlign = 'right';
-    ctx.textBaseline = 'middle';
-    const hoursToShow = [0, 6, 12, 18];
-    const orderedHours = timeDirection === 'bottom' ? hoursToShow : hoursToShow.slice().reverse();
-    orderedHours.forEach((hour, i) => {
-        const y = timeDirection === 'bottom'
-            ? canvas.height - (hour * slotsPerHour * blockHeight)
-            : hour * slotsPerHour * blockHeight;
-        ctx.fillText(
-            hour % 12 === 0 ? '12' + (hour < 12 ? 'AM' : 'PM') : (hour % 12) + (hour < 12 ? 'AM' : 'PM'),
-            55,
-            y + blockHeight / 2
-        );
-    });
+    const dayWidth = (canvas?.width - 60) / 7 || 0;
+    const blockHeight = canvas?.height / slotsPerDay || 0;
+    const slotsPerHour = 60 / resolution;
+
+    if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (ctx) {
+        ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#333' : '#eee';
+        for (let i = 0; i < slotsPerDay; i++) {
+            ctx.fillRect(60, i * blockHeight, canvas.width - 60, 1);
+        }
+    }
+
+    if (ctx) {
+        ctx.font = '10px Arial';
+        ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#fff' : '#000';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        const hoursToShow = [0, 6, 12, 18];
+        const orderedHours = timeDirection === 'bottom' ? hoursToShow : hoursToShow.slice().reverse();
+        orderedHours.forEach((hour, i) => {
+            const y = timeDirection === 'bottom'
+                ? canvas.height - (hour * slotsPerHour * blockHeight)
+                : hour * slotsPerHour * blockHeight;
+            ctx.fillText(
+                hour % 12 === 0 ? '12' + (hour < 12 ? 'AM' : 'PM') : (hour % 12) + (hour < 12 ? 'AM' : 'PM'),
+                55,
+                y + blockHeight / 2
+            );
+        });
+    }
 
     days.forEach((day, dayIndex) => {
         const x = 60 + dayIndex * dayWidth;
-        ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#444' : '#ddd';
-        ctx.fillRect(x, 0, 1, canvas.height);
-        ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#fff' : '#000';
-        ctx.font = '12px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(day, x + dayWidth / 2, timeDirection === 'bottom' ? canvas.height - 10 : 15);
+        if (ctx) {
+            ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#444' : '#ddd';
+            ctx.fillRect(x, 0, 1, canvas.height);
+            ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#fff' : '#000';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(day, x + dayWidth / 2, timeDirection === 'bottom' ? canvas.height - 10 : 15);
+        }
 
         const len = gridData[dayIndex].length;
         const blocks = timeDirection === 'bottom' ? gridData[dayIndex].slice().reverse() : gridData[dayIndex];
         blocks.forEach((cat, index) => {
             const actualIndex = timeDirection === 'top' ? index : len - 1 - index;
             const y = index * blockHeight;
-            ctx.fillStyle = cat.color;
-            ctx.fillRect(x + 1, y, dayWidth - 2, blockHeight);
+            if (ctx) {
+                ctx.fillStyle = cat.color;
+                ctx.fillRect(x + 1, y, dayWidth - 2, blockHeight);
 
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.font = '8px Arial';
-            ctx.textAlign = 'left';
-            ctx.fillText(
-                `${cat.name}: ${formatTime(actualIndex * resolution)}-${formatTime((actualIndex + 1) * resolution)} (${getAttributeForCategory(cat.name)})`,
-                x + 3,
-                y + blockHeight / 2
-            );
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.font = '8px Arial';
+                ctx.textAlign = 'left';
+                ctx.fillText(
+                    `${cat.name}: ${formatTime(actualIndex * resolution)}-${formatTime((actualIndex + 1) * resolution)} (${getAttributeForCategory(cat.name)})`,
+                    x + 3,
+                    y + blockHeight / 2
+                );
+            }
         });
     });
 }
@@ -471,35 +483,41 @@ function downloadPDF() {
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'landscape' });
-    const studentName = document.getElementById('studentName').value.trim() || 'Student';
-    const summaryText = document.getElementById('summaryText').textContent;
+    const studentName = document.getElementById('studentName')?.value.trim() || 'Student';
+    const summaryText = document.getElementById('summaryText')?.textContent || '';
     const tableBody = document.querySelector('#summaryTable tbody');
-    const rows = Array.from(tableBody.children).map(row => Array.from(row.children).map(cell => cell.textContent));
+    const rows = tableBody ? Array.from(tableBody.children).map(row => Array.from(row.children).map(cell => cell.textContent)) : [];
 
     doc.setFontSize(16);
     doc.text('BlockTime Weekly Report', 20, 20);
     doc.setFontSize(12);
     doc.text(`Prepared by: ${studentName}`, 20, 30);
-    doc.text(summaryText.split('\n').map(line => line.trim()), 20, 40, { maxWidth: 260 });
+    if (summaryText) doc.text(summaryText.split('\n').map(line => line.trim()), 20, 40, { maxWidth: 260 });
 
-    doc.autoTable({
-        startY: 60,
-        head: [['Category', 'Hours', 'Percentage', 'Attribute']],
-        body: rows,
-        theme: 'striped',
-        styles: { fontSize: 10 },
-        margin: { left: 20, right: 20 }
-    });
+    if (tableBody) {
+        doc.autoTable({
+            startY: 60,
+            head: [['Category', 'Hours', 'Percentage', 'Attribute']],
+            body: rows,
+            theme: 'striped',
+            styles: { fontSize: 10 },
+            margin: { left: 20, right: 20 }
+        });
+    }
 
     const weekCanvas = document.getElementById('weekChart');
-    const weekImgData = weekCanvas.toDataURL('image/png');
-    doc.text('Weekly Schedule', 20, doc.autoTable.previous.finalY + 10);
-    doc.addImage(weekImgData, 'PNG', 20, doc.autoTable.previous.finalY + 20, 260, 60);
+    const weekImgData = weekCanvas ? weekCanvas.toDataURL('image/png') : '';
+    if (weekImgData) {
+        doc.text('Weekly Schedule', 20, doc.autoTable?.previous.finalY + 10 || 60);
+        doc.addImage(weekImgData, 'PNG', 20, doc.autoTable?.previous.finalY + 20 || 70, 260, 60);
+    }
 
     const pieCanvas = document.getElementById('pieChart');
-    const pieImgData = pieCanvas.toDataURL('image/png');
-    doc.text('Weekly Time Allocation', 20, doc.autoTable.previous.finalY + 90);
-    doc.addImage(pieImgData, 'PNG', 20, doc.autoTable.previous.finalY + 100, 100, 100);
+    const pieImgData = pieCanvas ? pieCanvas.toDataURL('image/png') : '';
+    if (pieImgData) {
+        doc.text('Weekly Time Allocation', 20, doc.autoTable?.previous.finalY + 90 || 130);
+        doc.addImage(pieImgData, 'PNG', 20, doc.autoTable?.previous.finalY + 100 || 140, 100, 100);
+    }
 
     doc.save(`BlockTime_Report_${studentName || 'Student'}.pdf`);
 }

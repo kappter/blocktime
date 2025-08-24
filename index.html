@@ -42,94 +42,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlockTime - Time Management App</title>
-    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <title>BlockTime</title>
     <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <h1>BlockTime</h1>
-    <div id="controls">
-        <label>Time Resolution:</label>
-        <select id="resolution">
-            <option value="15">15 minutes</option>
-            <option value="30">30 minutes</option>
-            <option value="60">60 minutes</option>
-        </select>
-        <button onclick="initGrid()">Set Resolution</button>
-        <button id="toggle-theme" onclick="toggleTheme()">Toggle Dark Mode</button>
-        <button id="toggle-time-direction" onclick="toggleTimeDirection()">Time Render: 12AM at Bottom</button>
-        <br><br>
-        <label>Add Category:</label>
-        <input type="text" id="catName" placeholder="e.g., Sleep">
-        <input type="color" id="catColor" value="#0000ff">
-        <button onclick="addCategory()">Add</button>
-        <button onclick="undoAction()">Undo Last Action</button>
-        <div id="categories"></div>
-        <div id="legend"><strong>Legend:</strong></div>
-    </div>
-    <select id="day-select">
-        <option value="0">Monday</option>
-        <option value="1">Tuesday</option>
-        <option value="2">Wednesday</option>
-        <option value="3">Thursday</option>
-        <option value="4">Friday</option>
-        <option value="5">Saturday</option>
-        <option value="6">Sunday</option>
-    </select>
-    <div id="grid-container">
-        <div id="time-markers"></div>
-        <div id="grid"></div>
-    </div>
-    <div id="totals">
-        <h3>Time Allocation Totals</h3>
-        <div id="category-totals"></div>
-        <div id="overall-total"></div>
-    </div>
-    <div id="features">
-        <label>Copy Day:</label>
-        <select id="copy-day-select">
-            <option value="0">Monday</option>
-            <option value="1">Tuesday</option>
-            <option value="2">Wednesday</option>
-            <option value="3">Thursday</option>
-            <option value="4">Friday</option>
-            <option value="5">Saturday</option>
-            <option value="6">Sunday</option>
-        </select>
-        <button onclick="copyDay()">Copy Current Day</button>
-        <br>
-        <label>Save Day Type:</label>
-        <input type="text" id="dayTypeName" placeholder="e.g., Work, Weekend">
-        <button onclick="saveDayType()">Save Day Type</button>
-        <br>
-        <label>Apply Day Type:</label>
-        <select id="day-type-select">
-            <option value="">Select Day Type</option>
-        </select>
-        <button onclick="applyDayType()">Apply Day Type</button>
-        <br>
-        <label>Save/Load Schedule:</label>
-        <button onclick="saveSchedule()">Save Schedule</button>
-        <input type="file" id="loadSchedule" accept=".json">
-    </div>
-    <button onclick="generateReport()">Generate Report</button>
-    <button onclick="resetGrid()">Reset</button>
-    <div id="report">
-        <h2>Weekly Time Summary</h2>
-        <label>Your Name:</label>
-        <input type="text" id="studentName" placeholder="Enter your name">
-        <div id="summaryText"></div>
-        <table id="summaryTable" border="1">
-            <thead><tr><th>Category</th><th>Hours</th><th>Percentage</th></tr></thead>
-            <tbody></tbody>
-        </table>
-        <canvas id="weekChart"></canvas>
-        <canvas id="pieChart"></canvas>
-        <button onclick="downloadPDF()">Download PDF</button>
-    </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="top-controls">
+            <select id="resolution">
+                <option value="15">15 min</option>
+                <option value="30">30 min</option>
+                <option value="60">60 min</option>
+            </select>
+            <button id="toggle-time-direction">Time Render: 12AM at Bottom</button>
+            <input type="text" id="catName" placeholder="Category Name">
+            <input type="color" id="catColor" value="#000000">
+            <button onclick="addCategory()">Add</button>
+            <button onclick="undoAction()">Undo Last Action</button>
+            <select id="day-select">
+                <option value="0">Mon</option>
+                <option value="1">Tue</option>
+                <option value="2">Wed</option>
+                <option value="3">Thu</option>
+                <option value="4">Fri</option>
+                <option value="5">Sat</option>
+                <option value="6">Sun</option>
+            </select>
+        </div>
+        <div class="grid-container">
+            <div id="time-markers"></div>
+            <div id="grid"></div>
+        </div>
+        <div id="categories"></div>
+        <div id="legend"></div>
+        <div id="time-allocation-totals">
+            <div id="category-totals"></div>
+            <div id="attribute-summary"></div>
+            <div id="overall-total"></div>
+        </div>
+        <div class="bottom-features">
+            <select id="copy-day-select">
+                <option value="0">Mon</option>
+                <option value="1">Tue</option>
+                <option value="2">Wed</option>
+                <option value="3">Thu</option>
+                <option value="4">Fri</option>
+                <option value="5">Sat</option>
+                <option value="6">Sun</option>
+            </select>
+            <button onclick="copyDay()">Copy Current Day</button>
+            <input type="text" id="dayTypeName" placeholder="Day Type Name">
+            <button onclick="saveDayType()">Save Day Type</button>
+            <select id="day-type-select">
+                <option value="">Select Day Type</option>
+            </select>
+            <button onclick="applyDayType()">Apply Day Type</button>
+            <button onclick="saveSchedule()">Save Schedule</button>
+            <input type="file" id="loadSchedule" accept=".json">
+            <button onclick="generateReport()">Generate Report</button>
+            <input type="text" id="studentName" placeholder="Your Name">
+            <button onclick="downloadPDF()">Download PDF</button>
+            <button onclick="toggleTheme()">Toggle Dark Mode</button>
+            <button onclick="window.location.reload()">Reset</button>
+        </div>
+        <div id="report" style="display: none;">
+            <h3>Weekly Report</h3>
+            <div id="summaryText"></div>
+            <table id="summaryTable">
+                <thead><tr><th>Category</th><th>Hours</th><th>Percentage</th><th>Attribute</th></tr></thead>
+                <tbody></tbody>
+            </table>
+            <canvas id="pieChart" width="400" height="400"></canvas>
+            <canvas id="weekChart" width="1200" height="300"></canvas>
+        </div>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
