@@ -86,9 +86,10 @@ function resetGrid() {
         const block = document.createElement('div');
         block.className = 'block';
         block.style.backgroundColor = cat.color;
-        const timeIndex = timeDirection === 'bottom' ? index : gridData[currentDay].length - 1 - index;
-        const startMinutes = index * resolution;
-        const endMinutes = (index + 1) * resolution;
+        const totalBlocks = gridData[currentDay].length;
+        const timeIndex = timeDirection === 'bottom' ? totalBlocks - 1 - index : index;
+        const startMinutes = timeIndex * resolution;
+        const endMinutes = (timeIndex + 1) * resolution;
         const labelDiv = document.createElement('div');
         labelDiv.className = 'block-label';
         labelDiv.textContent = `${cat.name}: ${formatTime(startMinutes)}-${formatTime(endMinutes)}`;
@@ -216,7 +217,8 @@ function dropBlock(dayIndex) {
     block.style.backgroundColor = cat.color;
     block.style.opacity = '0';
     const index = gridData[dayIndex].length - 1;
-    const timeIndex = timeDirection === 'bottom' ? index : gridData[dayIndex].length - 1 - index;
+    const totalBlocks = gridData[dayIndex].length;
+    const timeIndex = timeDirection === 'bottom' ? totalBlocks - 1 - index : index;
     const startMinutes = timeIndex * resolution;
     const endMinutes = (timeIndex + 1) * resolution;
     const labelDiv = document.createElement('div');
