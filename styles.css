@@ -7,6 +7,7 @@
     --report-border: #ccc;
     --accent-color: #6200ea;
     --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --day-flex-direction: column-reverse;
 }
 .dark-mode {
     --bg-color: #121212;
@@ -71,7 +72,7 @@ h1 {
 }
 #time-markers {
     display: flex;
-    flex-direction: column-reverse;
+    flex-direction: var(--day-flex-direction);
     justify-content: space-between;
     font-size: 9px;
     text-align: right;
@@ -89,7 +90,7 @@ h1 {
     height: 80vh;
     border: 1px solid var(--grid-border);
     display: flex;
-    flex-direction: column-reverse;
+    flex-direction: var(--day-flex-direction);
     position: relative;
     border-radius: 4px;
 }
@@ -224,7 +225,7 @@ h1 {
     height: 400px;
     margin: 10px auto;
 }
-button, #toggle-theme {
+button, #toggle-theme, #toggle-time-direction {
     padding: 5px 10px;
     margin: 5px;
     border: none;
@@ -235,7 +236,7 @@ button, #toggle-theme {
     cursor: pointer;
     transition: transform 0.2s;
 }
-button:hover, #toggle-theme:hover {
+button:hover, #toggle-theme:hover, #toggle-time-direction:hover {
     transform: scale(1.05);
 }
 @media (max-width: 600px) {
@@ -252,7 +253,7 @@ button:hover, #toggle-theme:hover {
     .day {
         width: 85vw;
     }
-    button, #toggle-theme {
+    button, #toggle-theme, #toggle-time-direction {
         width: 100%;
         padding: 8px;
     }

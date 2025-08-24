@@ -6,12 +6,14 @@ let gridData = Array(7).fill().map(() => []);
 let currentDay = 0;
 let dayTypes = {};
 let undoStack = [];
+let timeDirection = 'bottom'; // 'bottom' for 12AM at bottom, 'top' for 12AM at top
 const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 function initGrid() {
     resolution = parseInt(document.getElementById('resolution').value);
     slotsPerDay = 24 * 60 / resolution;
     document.documentElement.style.setProperty('--slots-per-day', slotsPerDay);
+    document.documentElement.style.setProperty('--day-flex-direction', timeDirection === 'bottom' ? 'column-reverse' : 'column');
     undoStack = [];
     resetGrid();
     renderTimeMarkers();
@@ -22,7 +24,8 @@ function renderTimeMarkers() {
     markersDiv.innerHTML = '';
     const hoursToShow = [0, 6, 12, 18];
     const slotsPerHour = 60 / resolution;
-    hoursToShow.forEach(hour => {
+    const orderedHours = timeDirection === 'bottom' ? hoursToShow : hoursToShow.slice().reverse();
+    orderedHours.forEach(hour => {
         const marker = document.createElement('div');
         marker.className = 'time-marker';
         marker.textContent = hour % 12 === 0 ? '12' + (hour < 12 ? 'AM' : 'PM') : (hour % 12) + (hour < 12 ? 'AM' : 'PM');
@@ -73,12 +76,15 @@ function resetGrid() {
     label.className = 'day-label';
     label.textContent = days[currentDay];
     grid.appendChild(label);
-    gridData[currentDay].forEach((cat, index) => {
+
+    const blocks = timeDirection === 'bottom' ? gridData[currentDay] : gridData[currentDay].slice().reverse();
+    blocks.forEach((cat, index) => {
         const block = document.createElement('div');
         block.className = 'block';
         block.style.backgroundColor = cat.color;
-        const startMinutes = index * resolution;
-        const endMinutes = (index + 1) * resolution;
+        const actualIndex = timeDirection === 'bottom' ? index : gridData[currentDay].length - 1 - index;
+        const startMinutes = actualIndex * resolution;
+        const endMinutes = (actualIndex + 1) * resolution;
         const labelDiv = document.createElement('div');
         labelDiv.className = 'block-label';
         labelDiv.textContent = `${cat.name}: ${formatTime(startMinutes)}-${formatTime(endMinutes)}`;
@@ -206,8 +212,9 @@ function dropBlock(dayIndex) {
     block.style.backgroundColor = cat.color;
     block.style.opacity = '0';
     const index = gridData[dayIndex].length - 1;
-    const startMinutes = index * resolution;
-    const endMinutes = (index + 1) * resolution;
+    const actualIndex = timeDirection === 'bottom' ? index : gridData[dayIndex].length - 1 - index;
+    const startMinutes = actualIndex * resolution;
+    const endMinutes = (actualIndex + 1) * resolution;
     const labelDiv = document.createElement('div');
     labelDiv.className = 'block-label';
     labelDiv.textContent = `${cat.name}: ${formatTime(startMinutes)}-${formatTime(endMinutes)}`;
@@ -220,6 +227,7 @@ function dropBlock(dayIndex) {
 function saveSchedule() {
     const schedule = {
         resolution: resolution,
+        timeDirection: timeDirection,
         categories: categories,
         gridData: gridData,
         dayTypes: dayTypes
@@ -274,8 +282,14 @@ function loadSchedule(event) {
                 throw new Error('Invalid resolution value');
             }
 
+            if (data.timeDirection && !['bottom', 'top'].includes(data.timeDirection)) {
+                throw new Error('Invalid time direction value');
+            }
+
             resolution = data.resolution || 15;
+            timeDirection = data.timeDirection || 'bottom';
             document.getElementById('resolution').value = resolution;
+            document.getElementById('toggle-time-direction').textContent = `Time Render: 12AM at ${timeDirection === 'bottom' ? 'Bottom' : 'Top'}`;
             categories = data.categories;
             gridData = data.gridData;
             dayTypes = data.dayTypes;
@@ -294,6 +308,15 @@ function loadSchedule(event) {
         }
     };
     reader.readAsText(file);
+}
+
+function toggleTimeDirection() {
+    timeDirection = timeDirection === 'bottom' ? 'top' : 'bottom';
+    document.getElementById('toggle-time-direction').textContent = `Time Render: 12AM at ${timeDirection === 'bottom' ? 'Bottom' : 'Top'}`;
+    document.documentElement.style.setProperty('--day-flex-direction', timeDirection === 'bottom' ? 'column-reverse' : 'column');
+    renderTimeMarkers();
+    resetGrid();
+    renderWeekView();
 }
 
 function generateReport() {
@@ -372,8 +395,11 @@ function renderWeekView() {
     ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#fff' : '#000';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
-    [0, 6, 12, 18].forEach(hour => {
-        const y = canvas.height - (hour * slotsPerHour * blockHeight);
+    const hoursToShow = timeDirection === 'bottom' ? [0, 6, 12, 18] : [18, 12, 6, 0];
+    hoursToShow.forEach(hour => {
+        const y = timeDirection === 'bottom' 
+            ? canvas.height - (hour * slotsPerHour * blockHeight)
+            : (hour * slotsPerHour * blockHeight);
         ctx.fillText(
             hour % 12 === 0 ? '12' + (hour < 12 ? 'AM' : 'PM') : (hour % 12) + (hour < 12 ? 'AM' : 'PM'),
             55,
@@ -388,10 +414,14 @@ function renderWeekView() {
         ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#fff' : '#000';
         ctx.font = '12px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText(day, x + dayWidth / 2, canvas.height - 10);
+        ctx.fillText(day, x + dayWidth / 2, timeDirection === 'bottom' ? canvas.height - 10 : 15);
 
-        gridData[dayIndex].forEach((cat, index) => {
-            const y = canvas.height - (index + 1) * blockHeight;
+        const blocks = timeDirection === 'bottom' ? gridData[dayIndex] : gridData[dayIndex].slice().reverse();
+        blocks.forEach((cat, index) => {
+            const actualIndex = timeDirection === 'bottom' ? index : gridData[dayIndex].length - 1 - index;
+            const y = timeDirection === 'bottom'
+                ? canvas.height - (index + 1) * blockHeight
+                : index * blockHeight;
             ctx.fillStyle = cat.color;
             ctx.fillRect(x + 1, y, dayWidth - 2, blockHeight);
 
@@ -399,7 +429,7 @@ function renderWeekView() {
             ctx.font = '8px Arial';
             ctx.textAlign = 'left';
             ctx.fillText(
-                `${cat.name}: ${formatTime(index * resolution)}-${formatTime((index + 1) * resolution)}`,
+                `${cat.name}: ${formatTime(actualIndex * resolution)}-${formatTime((actualIndex + 1) * resolution)}`,
                 x + 3,
                 y + blockHeight / 2
             );
