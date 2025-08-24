@@ -81,15 +81,15 @@ function resetGrid() {
     label.textContent = days[currentDay];
     grid.appendChild(label);
 
-    const blocks = timeDirection === 'bottom' ? gridData[currentDay] : gridData[currentDay].slice().reverse();
+    const len = gridData[currentDay].length;
+    const blocks = timeDirection === 'top' ? gridData[currentDay] : gridData[currentDay].slice().reverse();
     blocks.forEach((cat, index) => {
         const block = document.createElement('div');
         block.className = 'block';
         block.style.backgroundColor = cat.color;
-        const totalBlocks = gridData[currentDay].length;
-        const timeIndex = timeDirection === 'bottom' ? totalBlocks - 1 - index : index;
-        const startMinutes = timeIndex * resolution;
-        const endMinutes = (timeIndex + 1) * resolution;
+        const actualIndex = timeDirection === 'top' ? index : len - 1 - index;
+        const startMinutes = actualIndex * resolution;
+        const endMinutes = (actualIndex + 1) * resolution;
         const labelDiv = document.createElement('div');
         labelDiv.className = 'block-label';
         labelDiv.textContent = `${cat.name}: ${formatTime(startMinutes)}-${formatTime(endMinutes)}`;
@@ -211,23 +211,7 @@ function dropBlock(dayIndex) {
     pushUndoState();
     const cat = categories[selectedCat];
     gridData[dayIndex].push(cat);
-    const dayDiv = document.querySelector('.day');
-    const block = document.createElement('div');
-    block.className = 'block';
-    block.style.backgroundColor = cat.color;
-    block.style.opacity = '0';
-    const index = gridData[dayIndex].length - 1;
-    const totalBlocks = gridData[dayIndex].length;
-    const timeIndex = timeDirection === 'bottom' ? totalBlocks - 1 - index : index;
-    const startMinutes = timeIndex * resolution;
-    const endMinutes = (timeIndex + 1) * resolution;
-    const labelDiv = document.createElement('div');
-    labelDiv.className = 'block-label';
-    labelDiv.textContent = `${cat.name}: ${formatTime(startMinutes)}-${formatTime(endMinutes)}`;
-    block.appendChild(labelDiv);
-    dayDiv.appendChild(block);
-    setTimeout(() => block.style.opacity = '1', 10);
-    updateTotals();
+    resetGrid();
 }
 
 function saveSchedule() {
@@ -423,12 +407,11 @@ function renderWeekView() {
         ctx.textAlign = 'center';
         ctx.fillText(day, x + dayWidth / 2, timeDirection === 'bottom' ? canvas.height - 10 : 15);
 
-        const blocks = timeDirection === 'bottom' ? gridData[dayIndex] : gridData[dayIndex].slice().reverse();
+        const len = gridData[dayIndex].length;
+        const blocks = timeDirection === 'bottom' ? gridData[dayIndex].slice().reverse() : gridData[dayIndex];
         blocks.forEach((cat, index) => {
-            const actualIndex = timeDirection === 'bottom' ? index : gridData[dayIndex].length - 1 - index;
-            const y = timeDirection === 'bottom'
-                ? canvas.height - (index + 1) * blockHeight
-                : index * blockHeight;
+            const actualIndex = timeDirection === 'top' ? index : len - 1 - index;
+            const y = index * blockHeight;
             ctx.fillStyle = cat.color;
             ctx.fillRect(x + 1, y, dayWidth - 2, blockHeight);
 
