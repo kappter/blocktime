@@ -53,12 +53,10 @@
     </div>
 
     <script>
+        // Wait for message and render only when data is received
         window.addEventListener('message', (event) => {
             if (event.data.type === 'reportData') {
                 const data = event.data.data;
-                window.categories = data.categoriesList; // Set global categories
-                window.gridData = data.gridData; // Set global gridData
-                window.resolution = data.resolution; // Set global resolution
 
                 document.getElementById('student-info').textContent = `Prepared by: ${data.studentName}`;
                 document.getElementById('summary').innerHTML = `
@@ -69,4 +67,79 @@
 
                 // Populate week schedule table
                 const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-                const
+                const weekTableBody = document.querySelector('#week-schedule-table tbody');
+                weekTableBody.innerHTML = '';
+                data.gridData.forEach((day, dayIndex) => {
+                    day.forEach(block => {
+                        weekTableBody.innerHTML += `
+                            <tr>
+                                <td>${days[dayIndex]}</td>
+                                <td>${block.slotIndex * (data.resolution / 60)}:00 - ${(block.slotIndex + 1) * (data.resolution / 60)}:00</td>
+                                <td>${block.name}</td>
+                                <td>${block.mindset}</td>
+                            </tr>
+                        `;
+                    });
+                });
+
+                // Populate category summary table
+                const tbody = document.querySelector('#summary-table tbody');
+                tbody.innerHTML = '';
+                data.categories.forEach(cat => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${cat.name}</td>
+                            <td>${cat.hours}</td>
+                            <td>${cat.pct}%</td>
+                            <td>${cat.avgHappiness}</td>
+                            <td>${cat.avgWillingness}</td>
+                        </tr>
+                    `;
+                });
+
+                // Time Allocation Pie Chart
+                const timeCtx = document.getElementById('timePieChart').getContext('2d');
+                new Chart(timeCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: data.categories.map(c => c.name),
+                        datasets: [{
+                            data: data.categories.map(c => c.hours),
+                            backgroundColor: data.categoriesList.map(c => c.color)
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'top' },
+                            title: { display: true, text: `Weekly Time Allocation (Hours, ${data.resolution}-min slots)` }
+                        }
+                    }
+                });
+
+                // Happiness/Willingness Pie Chart
+                const happinessCtx = document.getElementById('happinessPieChart').getContext('2d');
+                new Chart(happinessCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: data.categories.map(c => `${c.name} (Happiness: ${c.avgHappiness})`),
+                        datasets: [{
+                            data: data.categories.map(c => c.avgHappiness * 100), // Scaled to percentage
+                            backgroundColor: data.categoriesList.map(c => c.color)
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'top' },
+                            title: { display: true, text: 'Happiness/Willingness Breakdown (%)' }
+                        }
+                    }
+                });
+            }
+        });
+
+        // No fallback needed since data is handled in the event listener
+    </script>
+</body>
+</html>
