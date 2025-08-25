@@ -35,12 +35,18 @@
             <h3>Add Category</h3>
             <input type="text" id="catName" placeholder="Category Name">
             <input type="color" id="catColor" value="#ff0000">
+            <select id="mindset-select">
+                <option value="Joyful Engagement">Joyful Engagement</option>
+                <option value="Sweet Resistance">Sweet Resistance</option>
+                <option value="Painful Desire">Painful Desire</option>
+                <option value="Forced Suffering">Forced Suffering</option>
+                <option value="Peace, Groundedness" selected>Peace, Groundedness</option>
+            </select>
             <button onclick="addCategory()">Add</button>
         </div>
         <div id="categories"></div>
         <div id="legend"></div>
         <div id="grid"></div>
-        <div id="time-markers"></div>
         <div class="control-module">
             <h3>Day Operations</h3>
             <select id="copy-day-select">
@@ -53,13 +59,6 @@
                 <option value="6">Sunday</option>
             </select>
             <button onclick="copyDay()">Copy Day</button>
-            <select id="mindset-select">
-                <option value="Joyful Engagement">Joyful Engagement</option>
-                <option value="Sweet Resistance">Sweet Resistance</option>
-                <option value="Painful Desire">Painful Desire</option>
-                <option value="Forced Suffering">Forced Suffering</option>
-                <option value="Peace, Groundedness">Peace, Groundedness</option>
-            </select>
             <input type="text" id="dayTypeName" placeholder="Day Type Name">
             <button onclick="saveDayType()">Save Day Type</button>
             <select id="day-type-select">
@@ -118,5 +117,4 @@
         });
         window.addEventListener('load', initGrid);
     </script>
-</body>
 </html>
