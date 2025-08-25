@@ -6,15 +6,17 @@
     <title>BlockTime Report</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
-        .container { max-width: 800px; margin: 0 auto; }
+        .container { max-width: 1000px; margin: 0 auto; }
         h1 { text-align: center; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background-color: #f2f2f2; }
-        .chart-container { margin-top: 20px; }
+        .chart-container { margin-top: 20px; text-align: center; }
+        .no-print { display: none; }
         @media print {
             body { margin: 0; }
             .no-print { display: none; }
+            .chart-container canvas { max-width: 100%; height: auto !important; }
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
@@ -24,13 +26,29 @@
         <h1>BlockTime Weekly Report</h1>
         <p id="student-info"></p>
         <p id="summary"></p>
+
+        <h2>Weekly Schedule</h2>
+        <table id="week-schedule-table">
+            <thead><tr><th>Day</th><th>Slot</th><th>Category</th><th>Mindset</th></tr></thead>
+            <tbody></tbody>
+        </table>
+
+        <h2>Category Summary</h2>
         <table id="summary-table">
             <thead><tr><th>Category</th><th>Hours</th><th>Percentage</th><th>Happiness</th><th>Willingness</th></tr></thead>
             <tbody></tbody>
         </table>
+
         <div class="chart-container">
-            <canvas id="pieChart"></canvas>
+            <h2>Weekly Time Allocation</h2>
+            <canvas id="timePieChart"></canvas>
         </div>
+
+        <div class="chart-container">
+            <h2>Happiness/Willingness Breakdown</h2>
+            <canvas id="happinessPieChart"></canvas>
+        </div>
+
         <button class="no-print" onclick="window.print()">Print or Save as PDF</button>
     </div>
 
@@ -44,7 +62,27 @@
                     Your happiest activity is <strong>${data.maxHappinessCat}</strong> with an average happiness of ${data.maxHappinessAvg}. 
                     However, <strong>${data.maxPainCat}</strong> (average happiness ${data.maxPainAvg}) might be worth rethinking—consider reducing painful or resistant tasks for a happier routine!
                 `;
+
+                // Populate week schedule table
+                const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                const weekTableBody = document.querySelector('#week-schedule-table tbody');
+                weekTableBody.innerHTML = '';
+                data.gridData.forEach((day, dayIndex) => {
+                    day.forEach(block => {
+                        weekTableBody.innerHTML += `
+                            <tr>
+                                <td>${days[dayIndex]}</td>
+                                <td>${block.slotIndex * (resolution / 60)}:00 - ${(block.slotIndex + 1) * (resolution / 60)}:00</td>
+                                <td>${block.name}</td>
+                                <td>${block.mindset}</td>
+                            </tr>
+                        `;
+                    });
+                });
+
+                // Populate category summary table
                 const tbody = document.querySelector('#summary-table tbody');
+                tbody.innerHTML = '';
                 data.categories.forEach(cat => {
                     tbody.innerHTML += `
                         <tr>
@@ -57,14 +95,15 @@
                     `;
                 });
 
-                const ctx = document.getElementById('pieChart').getContext('2d');
-                new Chart(ctx, {
+                // Time Allocation Pie Chart
+                const timeCtx = document.getElementById('timePieChart').getContext('2d');
+                new Chart(timeCtx, {
                     type: 'pie',
                     data: {
                         labels: data.categories.map(c => c.name),
                         datasets: [{
                             data: data.categories.map(c => c.hours),
-                            backgroundColor: categories.map(c => c.color) // Assuming categories is available globally
+                            backgroundColor: categories.map(c => c.color) || ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
                         }]
                     },
                     options: {
@@ -75,13 +114,37 @@
                         }
                     }
                 });
+
+                // Happiness/Willingness Pie Chart
+                const happinessCtx = document.getElementById('happinessPieChart').getContext('2d');
+                new Chart(happinessCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: data.categories.map(c => `${c.name} (Happiness: ${c.avgHappiness})`),
+                        datasets: [{
+                            data: data.categories.map(c => c.avgHappiness * 100), // Scaled to percentage
+                            backgroundColor: categories.map(c => c.color) || ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'top' },
+                            title: { display: true, text: 'Happiness/Willingness Breakdown (%)' }
+                        }
+                    }
+                });
             }
         });
 
-        // Fallback if categories is not available
+        // Fallback if categories or gridData is not available
         if (typeof categories === 'undefined') {
             console.warn('Categories not available in report page. Using dummy colors.');
             window.categories = [{ color: '#FF6384' }, { color: '#36A2EB' }, { color: '#FFCE56' }, { color: '#4BC0C0' }, { color: '#9966FF' }];
+        }
+        if (typeof gridData === 'undefined') {
+            console.warn('gridData not available in report page. Using empty array.');
+            window.gridData = Array(7).fill([]); // 7 days with empty arrays
         }
     </script>
 </body>
