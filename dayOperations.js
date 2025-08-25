@@ -56,8 +56,14 @@ function undoAction() {
 }
 
 function dropBlock(dayIndex) {
-    if (selectedCat === null) return alert('Select a category first!');
-    if (gridData[dayIndex].length >= slotsPerDay) return alert('Day is full! Adjust resolution or reset.');
+    if (selectedCat === null) {
+        alert('Please select a category from the "Add Category" section before adding a block.');
+        return;
+    }
+    if (gridData[dayIndex].length >= slotsPerDay) {
+        alert('Day is full! Adjust resolution or reset.');
+        return;
+    }
     pushUndoState();
     const cat = categories[selectedCat];
     const mindsetSelect = document.getElementById('mindset-select');
