@@ -60,10 +60,6 @@ function dropBlock(dayIndex, slotIndex) {
         alert('Please select a category from the "Add Category" section before adding a block.');
         return;
     }
-    if (gridData[dayIndex].some(block => block.slotIndex === slotIndex)) {
-        alert('This slot is already occupied!');
-        return;
-    }
     if (gridData[dayIndex].length >= slotsPerDay) {
         alert('Day is full! Adjust resolution or reset.');
         return;
@@ -72,12 +68,24 @@ function dropBlock(dayIndex, slotIndex) {
     const cat = categories[selectedCat];
     const mindsetSelect = document.getElementById('mindset-select');
     const mindset = mindsetSelect.value;
-    if (mindsets.includes(mindset)) {
-        gridData[dayIndex].push({ ...cat, mindset, slotIndex });
-        resetGrid();
+
+    const existingBlockIndex = gridData[dayIndex].findIndex(block => block.slotIndex === slotIndex);
+    if (existingBlockIndex !== -1) {
+        const existingCatName = gridData[dayIndex][existingBlockIndex].name;
+        if (existingCatName === cat.name) {
+            alert('Cannot replace a block with the same category!');
+            return;
+        }
+        // Replace the existing block with the new category and keep the slotIndex and mindset
+        gridData[dayIndex][existingBlockIndex] = { ...cat, mindset, slotIndex };
     } else {
-        alert('Invalid mindset selected! Defaulting to Peace, Groundedness.');
-        gridData[dayIndex].push({ ...cat, mindset: 'Peace, Groundedness', slotIndex });
-        resetGrid();
+        // Add new block if slot is empty
+        if (mindsets.includes(mindset)) {
+            gridData[dayIndex].push({ ...cat, mindset, slotIndex });
+        } else {
+            alert('Invalid mindset selected! Defaulting to Peace, Groundedness.');
+            gridData[dayIndex].push({ ...cat, mindset: 'Peace, Groundedness', slotIndex });
+        }
     }
+    resetGrid();
 }
