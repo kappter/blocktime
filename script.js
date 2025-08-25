@@ -536,4 +536,66 @@ function renderWeekView() {
         const blocks = [...gridData[dayIndex]];
         blocks.forEach((block, index) => {
             if (block && block.name && block.color) {
-                const slotIndex = timeDirection === 'bottom' ? slotsPerDay -
+                const slotIndex = timeDirection === 'bottom' ? slotsPerDay - 1 - index : index;
+                const y = slotIndex * blockHeight;
+                if (ctx) {
+                    ctx.fillStyle = block.color;
+                    ctx.fillRect(x + 1, y, dayWidth - 2, blockHeight);
+
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                    ctx.font = '8px Arial';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(
+                        `${block.name}: ${formatTime(index)} (${block.mindset})`,
+                        x + 3,
+                        y + blockHeight / 2
+                    );
+                }
+            }
+        });
+    });
+}
+
+function downloadPDF() {
+    if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
+        console.error('jsPDF or jspdf-autotable failed to load. Please check your internet connection or CDN availability.');
+        alert('Cannot download PDF: jsPDF library failed to load. Please check your internet connection and try again.');
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape' });
+    const studentName = document.getElementById('studentName')?.value.trim() || 'Student';
+    const summaryText = document.getElementById('summaryText')?.textContent || '';
+    const tableBody = document.querySelector('#summaryTable tbody');
+    const rows = tableBody ? Array.from(tableBody.children).map(row => Array.from(row.children).map(cell => cell.textContent)) : [];
+
+    doc.setFontSize(16);
+    doc.text('BlockTime Weekly Report', 20, 20);
+    doc.setFontSize(12);
+    doc.text(`Prepared by: ${studentName}`, 20, 30);
+    if (summaryText) doc.text(summaryText.split('\n').map(line => line.trim()), 20, 40, { maxWidth: 260 });
+
+    if (tableBody) {
+        doc.autoTable({
+            startY: 60,
+            head: [['Category', 'Hours', 'Percentage', 'Happiness/Willingness']],
+            body: rows,
+            theme: 'striped',
+            styles: { fontSize: 10 },
+            margin: { left: 20, right: 20 }
+        });
+    }
+
+    const weekCanvas = document.getElementById('weekChart');
+    const weekImgData = weekCanvas ? weekCanvas.toDataURL('image/png') : '';
+    if (weekImgData) {
+        doc.text('Weekly Schedule', 20, doc.autoTable?.previous.finalY + 10 || 60);
+        doc.addImage(weekImgData, 'PNG', 20, doc.autoTable?.previous.finalY + 20 || 70, 260, 60);
+    }
+
+    const pieCanvas = document.getElementById('pieChart');
+    const pieImgData = pieCanvas ? pieCanvas.toDataURL('image/png') : '';
+    if (pieImgData) {
+        doc.text('Weekly Time Allocation', 20, doc.autoTable?.previous.finalY + 90 || 130);
+        doc.addImage
