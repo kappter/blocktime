@@ -58,7 +58,7 @@ function updateTotals() {
         const totalBlocks = counts[cat.name] || 1;
         const avgHappiness = (happinessTotals[cat.name] / totalBlocks).toFixed(2);
         const avgWillingness = (willingnessTotals[cat.name] / totalBlocks).toFixed(2);
-        return `${cat.name}: Happiness ${avgHappiness}, Willingness ${avgWillingness} (${mindsetCounts[cat.name][getAttributeForCategory(cat.name)] * hoursPerBlock || 0} hours)<br>`;
+        return `${cat.name}: Happiness ${avgHappiness}, Willingness ${avgWillingness} (${mindsetCounts[cat.name][cat.mindset || getAttributeForCategory(cat.name)] * hoursPerBlock || 0} hours)<br>`;
     }).join('');
 
     const overallTotal = document.getElementById('overall-total');
@@ -68,13 +68,16 @@ function updateTotals() {
 function addCategory() {
     const name = document.getElementById('catName').value.trim();
     const color = document.getElementById('catColor').value;
+    const mindsetSelect = document.getElementById('mindset-select');
+    const mindset = mindsetSelect.value;
     if (name && !categories.find(c => c.name === name)) {
-        categories.push({name, color});
+        categories.push({ name, color, mindset });
         renderCategories();
         renderLegend();
         updateTotals();
     }
     document.getElementById('catName').value = '';
+    mindsetSelect.value = 'Peace, Groundedness'; // Reset to default
 }
 
 function renderCategories() {
