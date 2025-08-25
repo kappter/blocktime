@@ -6,7 +6,7 @@ let timeDirection = 'bottom';
 const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 function initGrid() {
-    resolution = 60;
+    resolution = 60; // Default resolution, can be changed via dropdown
     slotsPerDay = 24 * 60 / resolution;
     document.documentElement.style.setProperty('--slots-per-day', slotsPerDay);
     document.documentElement.style.setProperty('--day-flex-direction', timeDirection === 'bottom' ? 'column-reverse' : 'column');
@@ -19,7 +19,11 @@ function initGrid() {
 
 function renderTimeMarkers() {
     const markersDiv = document.getElementById('time-markers');
-    if (markersDiv) markersDiv.innerHTML = '';
+    if (!markersDiv) {
+        console.error('Time markers div not found');
+        return;
+    }
+    markersDiv.innerHTML = '';
     const hoursToShow = [0, 6, 12, 18];
     const slotsPerHour = 60 / resolution;
     const totalSlots = 24 * slotsPerHour;
@@ -31,8 +35,11 @@ function renderTimeMarkers() {
         marker.className = 'time-marker';
         marker.textContent = hour % 12 === 0 ? '12' + (hour < 12 ? 'AM' : 'PM') : (hour % 12) + (hour < 12 ? 'AM' : 'PM');
         marker.style.top = `${yPosition}vh`;
+        marker.style.position = 'absolute'; // Ensure positioning
+        marker.style.left = '0';
         markersDiv.appendChild(marker);
     });
+    console.log('Time markers rendered');
 }
 
 function formatTime(slotIndex) {
@@ -52,16 +59,20 @@ function formatTime(slotIndex) {
 
 function resetGrid() {
     const grid = document.getElementById('grid');
-    if (grid) grid.innerHTML = '';
+    if (!grid) {
+        console.error('Grid div not found');
+        return;
+    }
+    grid.innerHTML = '';
     const dayDiv = document.createElement('div');
     dayDiv.className = 'day';
     dayDiv.addEventListener('touchstart', () => dropBlock(currentDay), { passive: true });
     dayDiv.addEventListener('click', () => dropBlock(currentDay), { passive: true });
-    if (grid) grid.appendChild(dayDiv);
+    grid.appendChild(dayDiv);
     const label = document.createElement('div');
     label.className = 'day-label';
     label.textContent = days[currentDay];
-    if (grid) grid.appendChild(label);
+    grid.appendChild(label);
 
     const totalSlots = 24 * (60 / resolution);
     for (let i = 0; i < totalSlots; i++) {
@@ -134,41 +145,4 @@ function renderWeekView() {
         if (ctx) {
             ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#444' : '#ddd';
             ctx.fillRect(x, 0, 1, canvas.height);
-            ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#fff' : '#000';
-            ctx.font = '12px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText(day, x + dayWidth / 2, timeDirection === 'bottom' ? canvas.height - 10 : 15);
-        }
-
-        const blocks = [...gridData[dayIndex]];
-        blocks.forEach((block, index) => {
-            if (block && block.name && block.color) {
-                const slotIndex = timeDirection === 'bottom' ? slotsPerDay - 1 - index : index;
-                const y = slotIndex * blockHeight;
-                if (ctx) {
-                    ctx.fillStyle = block.color;
-                    ctx.fillRect(x + 1, y, dayWidth - 2, blockHeight);
-
-                    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-                    ctx.font = '8px Arial';
-                    ctx.textAlign = 'left';
-                    ctx.fillText(
-                        `${block.name}: ${formatTime(index)} (${block.mindset})`,
-                        x + 3,
-                        y + blockHeight / 2
-                    );
-                }
-            }
-        });
-    });
-}
-
-function toggleTimeDirection() {
-    timeDirection = timeDirection === 'bottom' ? 'top' : 'bottom';
-    document.getElementById('toggle-time-direction').textContent = `Time Render: 12AM at ${timeDirection === 'bottom' ? 'Bottom' : 'Top'}`;
-    document.documentElement.style.setProperty('--day-flex-direction', timeDirection === 'bottom' ? 'column-reverse' : 'column');
-    console.log(`Toggled time direction to ${timeDirection}`);
-    renderTimeMarkers();
-    resetGrid();
-    renderWeekView();
-}
+            ctx.fillStyle
