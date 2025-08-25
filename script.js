@@ -55,10 +55,8 @@ function renderTimeMarkers() {
     const totalSlots = 24 * slotsPerHour;
     const slotHeight = 70 / totalSlots;
     hoursToShow.forEach((hour) => {
-        const slotIndex = hour * slotsPerHour;
-        const yPosition = timeDirection === 'bottom'
-            ? (totalSlots - slotIndex) * slotHeight
-            : slotIndex * slotHeight;
+        const slotIndex = timeDirection === 'bottom' ? (23 - hour) * slotsPerHour : hour * slotsPerHour;
+        const yPosition = (slotIndex + 0.5) * slotHeight;
         const marker = document.createElement('div');
         marker.className = 'time-marker';
         marker.textContent = hour % 12 === 0 ? '12' + (hour < 12 ? 'AM' : 'PM') : (hour % 12) + (hour < 12 ? 'AM' : 'PM');
@@ -67,13 +65,19 @@ function renderTimeMarkers() {
     });
 }
 
-function formatTime(minutes) {
-    const totalMinutes = minutes % 1440;
-    const hours = Math.floor(totalMinutes / 60);
-    const mins = totalMinutes % 60;
+function formatTime(slotIndex) {
+    const totalMinutes = slotIndex * resolution;
+    const startMinutes = totalMinutes % 1440;
+    const endMinutes = (totalMinutes + resolution) % 1440;
+    const hours = Math.floor(startMinutes / 60);
+    const mins = startMinutes % 60;
+    const endHours = Math.floor(endMinutes / 60);
+    const endMins = endMinutes % 60;
     const period = hours < 12 ? 'AM' : 'PM';
+    const endPeriod = endHours < 12 ? 'AM' : 'PM';
     const displayHours = hours % 12 === 0 ? 12 : hours % 12;
-    return `${displayHours}:${mins.toString().padStart(2, '0')} ${period}`;
+    const displayEndHours = endHours % 12 === 0 ? 12 : endHours % 12;
+    return `${displayHours}:${mins.toString().padStart(2, '0')} ${period}-${displayEndHours}:${endMins.toString().padStart(2, '0')} ${endPeriod}`;
 }
 
 function getAttributeForCategory(catName) {
@@ -138,20 +142,29 @@ function resetGrid() {
     if (grid) grid.appendChild(label);
 
     const totalSlots = 24 * (60 / resolution);
+    for (let i = 0; i < totalSlots; i++) {
+        const slotDiv = document.createElement('div');
+        slotDiv.className = 'slot';
+        slotDiv.id = `slot-${i}`;
+        dayDiv.appendChild(slotDiv);
+    }
+
     const blocks = [...gridData[currentDay]];
     blocks.forEach((block, index) => {
         if (block && block.name && block.color) {
-            const timeIndex = index;
-            const startMinutes = timeIndex * resolution;
-            const endMinutes = (timeIndex + 1) * resolution;
-            const blockDiv = document.createElement('div');
-            blockDiv.className = 'block';
-            blockDiv.style.backgroundColor = block.color;
-            const labelDiv = document.createElement('div');
-            labelDiv.className = 'block-label';
-            labelDiv.textContent = `${block.name}: ${formatTime(startMinutes)}-${formatTime(endMinutes)} (${block.mindset})`;
-            blockDiv.appendChild(labelDiv);
-            if (dayDiv) dayDiv.appendChild(blockDiv);
+            const slotIndex = timeDirection === 'bottom' ? totalSlots - 1 - index : index;
+            const slotDiv = document.getElementById(`slot-${slotIndex}`);
+            if (slotDiv) {
+                const blockDiv = document.createElement('div');
+                blockDiv.className = 'block';
+                blockDiv.style.backgroundColor = block.color;
+                const labelDiv = document.createElement('div');
+                labelDiv.className = 'block-label';
+                const timeIndex = index;
+                labelDiv.textContent = `${block.name}: ${formatTime(timeIndex)} (${block.mindset})`;
+                blockDiv.appendChild(labelDiv);
+                slotDiv.appendChild(blockDiv);
+            }
         }
     });
     updateTotals();
@@ -466,10 +479,8 @@ function renderWeekView() {
         ctx.textBaseline = 'middle';
         const hoursToShow = [0, 6, 12, 18];
         hoursToShow.forEach((hour) => {
-            const slotIndex = hour * slotsPerHour;
-            const y = timeDirection === 'bottom'
-                ? canvas.height - (slotIndex * blockHeight) - (blockHeight / 2)
-                : slotIndex * blockHeight + (blockHeight / 2);
+            const slotIndex = timeDirection === 'bottom' ? (23 - hour) * slotsPerHour : hour * slotsPerHour;
+            const y = slotIndex * blockHeight + (blockHeight / 2);
             ctx.fillText(
                 hour % 12 === 0 ? '12' + (hour < 12 ? 'AM' : 'PM') : (hour % 12) + (hour < 12 ? 'AM' : 'PM'),
                 55,
@@ -492,10 +503,8 @@ function renderWeekView() {
         const blocks = [...gridData[dayIndex]];
         blocks.forEach((block, index) => {
             if (block && block.name && block.color) {
-                const timeIndex = index;
-                const y = timeDirection === 'bottom'
-                    ? (slotsPerDay - 1 - index) * blockHeight
-                    : index * blockHeight;
+                const slotIndex = timeDirection === 'bottom' ? slotsPerDay - 1 - index : index;
+                const y = slotIndex * blockHeight;
                 if (ctx) {
                     ctx.fillStyle = block.color;
                     ctx.fillRect(x + 1, y, dayWidth - 2, blockHeight);
@@ -504,7 +513,7 @@ function renderWeekView() {
                     ctx.font = '8px Arial';
                     ctx.textAlign = 'left';
                     ctx.fillText(
-                        `${block.name}: ${formatTime(timeIndex * resolution)}-${formatTime((timeIndex + 1) * resolution)} (${block.mindset})`,
+                        `${block.name}: ${formatTime(index)} (${block.mindset})`,
                         x + 3,
                         y + blockHeight / 2
                     );
