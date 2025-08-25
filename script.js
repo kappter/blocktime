@@ -598,4 +598,29 @@ function downloadPDF() {
     const pieImgData = pieCanvas ? pieCanvas.toDataURL('image/png') : '';
     if (pieImgData) {
         doc.text('Weekly Time Allocation', 20, doc.autoTable?.previous.finalY + 90 || 130);
-        doc.addImage
+        doc.addImage(pieImgData, 'PNG', 20, doc.autoTable?.previous.finalY + 100 || 140, 260, 60);
+    }
+
+    doc.save(`BlockTime_Report_${studentName}_${new Date().toLocaleDateString()}.pdf`);
+}
+
+window.addEventListener('load', () => {
+    document.getElementById('addCategory').addEventListener('click', addCategory);
+    document.getElementById('copyDay').addEventListener('click', copyDay);
+    document.getElementById('saveDayType').addEventListener('click', saveDayType);
+    document.getElementById('applyDayType').addEventListener('click', applyDayType);
+    document.getElementById('undo').addEventListener('click', undoAction);
+    document.getElementById('resolution').addEventListener('change', initGrid);
+    document.getElementById('toggle-time-direction').addEventListener('click', toggleTimeDirection);
+    document.getElementById('generateReport').addEventListener('click', generateReport);
+    document.getElementById('saveSchedule').addEventListener('click', saveSchedule);
+    document.getElementById('loadSchedule').addEventListener('change', loadSchedule);
+    document.getElementById('downloadPDF').addEventListener('click', downloadPDF);
+
+    initGrid();
+    renderCategories();
+    renderLegend();
+    renderDayTypes();
+    resetGrid();
+    updateTotals();
+});
