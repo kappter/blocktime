@@ -47,13 +47,12 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" onerror="alert('Failed to load Chart.js. Please check your internet connection.')"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" onerror="alert('Failed to load jsPDF. Please check your internet connection.')"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" onerror="alert('Failed to load jsPDF autotable. Please check your internet connection.')"></script>
-    <base href="/BlockTime/"> <!-- Adjust for GitHub Pages repo name -->
+    <!-- Use lowercase repository name or remove if using user site -->
+    <base href="/blocktime/">
 </head>
 <body>
     <div class="container">
         <h1 class="app-title">BlockTime Scheduler</h1>
-
-        <!-- Grid Settings Module -->
         <div class="control-module">
             <h3>Grid Settings</h3>
             <select id="resolution">
@@ -72,8 +71,6 @@
             </select>
             <button id="toggle-time-direction">Time Render: 12AM at Bottom</button>
         </div>
-
-        <!-- Category Management Module -->
         <div class="control-module">
             <h3>Category Management</h3>
             <input id="catName" type="text" placeholder="Category Name">
@@ -87,21 +84,16 @@
             </select>
             <div id="categories"></div>
         </div>
-
         <div class="grid-container">
             <div id="time-markers"></div>
             <div id="grid"></div>
         </div>
-
         <div id="legend"></div>
-
         <div id="time-allocation-totals">
             <div id="category-totals"></div>
             <div id="attribute-summary"></div>
             <div id="overall-total"></div>
         </div>
-
-        <!-- Day Operations Module -->
         <div class="control-module">
             <h3>Day Operations</h3>
             <select id="copy-day-select">
@@ -120,28 +112,21 @@
             <button onclick="applyDayType()">Apply Day Type</button>
             <button onclick="undoAction()">Undo</button>
         </div>
-
-        <!-- Schedule Management Module -->
         <div class="control-module">
             <h3>Schedule Management</h3>
             <button onclick="saveSchedule()">Save Schedule</button>
             <input type="file" id="loadSchedule" accept=".json">
         </div>
-
-        <!-- Report Module -->
         <div class="control-module">
             <h3>Report</h3>
             <input id="studentName" type="text" placeholder="Your Name">
             <button onclick="generateReport()">Generate Report</button>
             <button onclick="downloadPDF()">Download PDF</button>
         </div>
-
-        <!-- Theme Module -->
         <div class="control-module">
             <h3>Theme</h3>
             <button onclick="toggleTheme()">Toggle Theme</button>
         </div>
-
         <div id="report" style="display: none;">
             <h2>Weekly Summary</h2>
             <div id="summaryText"></div>
