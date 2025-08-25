@@ -1,43 +1,4 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -59,92 +20,92 @@
                 <option value="30">30 min</option>
                 <option value="60" selected>60 min</option>
             </select>
-            <select id="day-select">
-                <option value="0">Mon</option>
-                <option value="1">Tue</option>
-                <option value="2">Wed</option>
-                <option value="3">Thu</option>
-                <option value="4">Fri</option>
-                <option value="5">Sat</option>
-                <option value="6">Sun</option>
-            </select>
             <button id="toggle-time-direction">Time Render: 12AM at Bottom</button>
+            <select id="day-select">
+                <option value="0">Monday</option>
+                <option value="1">Tuesday</option>
+                <option value="2">Wednesday</option>
+                <option value="3">Thursday</option>
+                <option value="4">Friday</option>
+                <option value="5">Saturday</option>
+                <option value="6">Sunday</option>
+            </select>
         </div>
         <div class="control-module">
-            <h3>Category Management</h3>
-            <input id="catName" type="text" placeholder="Category Name">
-            <input id="catColor" type="color" value="#ff0000">
-            <button onclick="addCategory()">Add Category</button>
-            <select id="mindset-select">
-                <option value="Joyful Engagement">Joyful Engagement</option>
-                <option value="Sweet Resistance">Sweet Resistance</option>
-                <option value="Painful Desire">Painful Desire</option>
-                <option value="Forced Suffering">Forced Suffering</option>
-                <option value="Peace, Groundedness">Peace, Groundedness</option>
-            </select>
-            <div id="categories"></div>
+            <h3>Add Category</h3>
+            <input type="text" id="catName" placeholder="Category Name">
+            <input type="color" id="catColor" value="#ff0000">
+            <button onclick="addCategory()">Add</button>
         </div>
-        <div class="grid-container">
-            <div id="time-markers"></div>
-            <div id="grid"></div>
-        </div>
+        <div id="categories"></div>
         <div id="legend"></div>
-        <div id="time-allocation-totals">
-            <div id="category-totals"></div>
-            <div id="attribute-summary"></div>
-            <div id="overall-total"></div>
-        </div>
         <div class="control-module">
             <h3>Day Operations</h3>
             <select id="copy-day-select">
-                <option value="0">Mon</option>
-                <option value="1">Tue</option>
-                <option value="2">Wed</option>
-                <option value="3">Thu</option>
-                <option value="4">Fri</option>
-                <option value="5">Sat</option>
-                <option value="6">Sun</option>
+                <option value="0">Monday</option>
+                <option value="1">Tuesday</option>
+                <option value="2">Wednesday</option>
+                <option value="3">Thursday</option>
+                <option value="4">Friday</option>
+                <option value="5">Saturday</option>
+                <option value="6">Sunday</option>
             </select>
             <button onclick="copyDay()">Copy Day</button>
-            <input id="dayTypeName" type="text" placeholder="Day Type Name">
+            <input type="text" id="dayTypeName" placeholder="Day Type Name">
             <button onclick="saveDayType()">Save Day Type</button>
-            <select id="day-type-select"></select>
+            <select id="day-type-select">
+                <option value="">Select Day Type</option>
+            </select>
             <button onclick="applyDayType()">Apply Day Type</button>
             <button onclick="undoAction()">Undo</button>
         </div>
         <div class="control-module">
-            <h3>Schedule Management</h3>
-            <button onclick="saveSchedule()">Save Schedule</button>
+            <h3>Schedule</h3>
             <input type="file" id="loadSchedule" accept=".json">
+            <button onclick="saveSchedule()">Save Schedule</button>
         </div>
         <div class="control-module">
             <h3>Report</h3>
-            <input id="studentName" type="text" placeholder="Your Name">
+            <input type="text" id="studentName" placeholder="Your Name">
             <button onclick="generateReport()">Generate Report</button>
             <button onclick="downloadPDF()">Download PDF</button>
-        </div>
-        <div class="control-module">
-            <h3>Theme</h3>
             <button onclick="toggleTheme()">Toggle Theme</button>
         </div>
+        <div id="grid"></div>
+        <div id="time-markers"></div>
+        <div id="category-totals"></div>
+        <div id="attribute-summary"></div>
+        <div id="overall-total"></div>
         <div id="report" style="display: none;">
-            <h2>Weekly Summary</h2>
+            <h3>Summary</h3>
             <div id="summaryText"></div>
             <table id="summaryTable">
-                <thead>
-                    <tr>
-                        <th>Category</th>
-                        <th>Hours</th>
-                        <th>Percentage</th>
-                        <th>Happiness/Willingness</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>Category</th><th>Hours</th><th>Percentage</th><th>Happiness/Willingness</th></tr></thead>
                 <tbody></tbody>
             </table>
-            <canvas id="weekChart"></canvas>
-            <canvas id="pieChart"></canvas>
+            <canvas id="pieChart" width="400" height="400"></canvas>
         </div>
+        <canvas id="weekChart" width="1200" height="300"></canvas>
     </div>
-    <script src="script.js"></script>
+    <script src="grid.js"></script>
+    <script src="categories.js"></script>
+    <script src="dayOperations.js"></script>
+    <script src="schedule.js"></script>
+    <script src="report.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('day-select').addEventListener('change', () => {
+                currentDay = parseInt(document.getElementById('day-select').value);
+                resetGrid();
+            });
+            document.getElementById('loadSchedule').addEventListener('change', loadSchedule);
+            document.getElementById('resolution').addEventListener('change', () => {
+                console.log('Resolution dropdown changed');
+                initGrid();
+            });
+            document.getElementById('toggle-time-direction').addEventListener('click', toggleTimeDirection);
+        });
+        window.addEventListener('load', initGrid);
+    </script>
 </body>
 </html>
