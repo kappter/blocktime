@@ -78,23 +78,18 @@ input[type="text"], input[type="color"], input[type="file"] {
     margin: 10px 0;
 }
 
-.time-markers {
+#time-markers {
     width: 50px;
     height: 70vh;
-    position: relative;
-}
-
-#time-markers {
-    position: relative;
-    height: 70vh; /* Match the grid height */
-    width: 50px; /* Adjust as needed */
-    margin-left: -50px; /* Position it to the left of the grid */
+    position: absolute;
+    left: 0;
+    top: 0;
 }
 
 .time-marker {
     position: absolute;
     transform: translateY(-50%);
-    color: #000;
+    color: var(--text-color); /* Dynamic color for dark/light mode */
     font-size: 12px;
     white-space: nowrap;
 }
@@ -105,19 +100,25 @@ input[type="text"], input[type="color"], input[type="file"] {
     display: flex;
     flex-direction: column;
     align-items: stretch;
+    margin-left: 50px; /* Offset for time-markers */
 }
 
 .day {
     display: flex;
     flex-direction: var(--day-flex-direction);
-    height: 70vh; /* Consistent height */
+    height: 70vh;
     position: relative;
 }
 
 .slot {
     position: relative;
     flex: 1;
-    border: 1px solid #ccc;
+    border: 1px solid var(--border-color); /* Dynamic border color */
+    transition: background-color 0.2s; /* Smooth hover effect */
+}
+
+.slot:hover {
+    background-color: rgba(0, 255, 0, 0.2); /* Light green highlight on hover */
 }
 
 .block {
@@ -129,7 +130,7 @@ input[type="text"], input[type="color"], input[type="file"] {
 
 .block-label {
     font-size: 8px;
-    color: rgba(0, 0, 0, 0.7);
+    color: rgba(0, 0, 0, 0.7); /* Consider dynamic color for dark mode */
     text-align: center;
     white-space: nowrap;
     overflow: hidden;
@@ -141,6 +142,7 @@ input[type="text"], input[type="color"], input[type="file"] {
     text-align: center;
     font-weight: bold;
     padding: 5px;
+    color: var(--text-color); /* Dynamic color */
 }
 
 #categories, #legend {
@@ -157,30 +159,19 @@ input[type="text"], input[type="color"], input[type="file"] {
 }
 
 .category.selected {
-    border: 2px solid #000;
+    border: 2px solid var(--text-color); /* Dynamic border color */
 }
 
 #slot-tooltip {
     z-index: 1000; /* Above other elements */
     font-size: 12px;
-}
-
-.day {
-    display: flex;
-    flex-direction: var(--day-flex-direction);
-    height: 70vh;
-    position: relative;
-}
-
-.slot {
-    position: relative;
-    flex: 1;
-    border: 1px solid #ccc;
-    transition: background-color 0.2s; /* Smooth hover effect */
-}
-
-.slot:hover {
-    background-color: rgba(0, 255, 0, 0.2); /* Light green highlight on hover */
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px;
+    border-radius: 3px;
+    position: absolute;
+    pointer-events: none;
+    display: none;
 }
 
 #legend span {
@@ -213,6 +204,7 @@ input[type="text"], input[type="color"], input[type="file"] {
     border: 1px solid var(--border-color);
     padding: 8px;
     text-align: left;
+    color: var(--text-color); /* Dynamic color */
 }
 
 #weekChart, #pieChart {
