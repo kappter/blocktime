@@ -66,11 +66,11 @@ function generateReport() {
         type: 'pie',
         data: pieData,
         options: { 
-            responsive: true, 
+            responsive: true,
             plugins: { 
-                legend: { position: 'top' }, 
-                title: { display: true, text: `Weekly Time Allocation (Hours, ${resolution}-min slots)` } 
-            } 
+                legend: { position: 'top' },
+                title: { display: true, text: `Weekly Time Allocation (Hours, ${resolution}-min slots)` }
+            }
         }
     });
 }
@@ -85,11 +85,20 @@ function downloadPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'landscape' });
 
-    // Collect data within this function
+    // Ensure charts are rendered before export
+    const weekCanvas = document.getElementById('weekChart');
+    const pieCanvas = document.getElementById('pieChart');
+    if (!weekCanvas || !pieCanvas) {
+        console.error('Canvas elements not found for PDF export.');
+        alert('Error generating PDF: Canvas elements are missing. Please generate the report first.');
+        return;
+    }
+
+    // Collect data
     const counts = {};
     const mindsetCounts = {};
-    let happinessTotals = {}; // Explicitly define here
-    let willingnessTotals = {}; // Explicitly define here
+    const happinessTotals = {};
+    const willingnessTotals = {};
     categories.forEach(cat => {
         counts[cat.name] = 0;
         mindsetCounts[cat.name] = {};
@@ -140,21 +149,22 @@ function downloadPDF() {
         });
     }
 
-    // Add week view chart
-    const weekCanvas = document.getElementById('weekChart');
-    const weekImgData = weekCanvas ? weekCanvas.toDataURL('image/png') : '';
+    // Add week view chart with error handling
+    const weekImgData = weekCanvas.toDataURL('image/png');
     if (weekImgData) {
         doc.text('Weekly Schedule', 20, doc.autoTable?.previous.finalY + 10 || 100);
         doc.addImage(weekImgData, 'PNG', 20, doc.autoTable?.previous.finalY + 20 || 110, 260, 60);
+    } else {
+        console.warn('Week chart image data is invalid, skipping.');
     }
 
-    // Generate and add happiness/willingness pie chart
+    // Generate and add happiness/willingness pie chart with error handling
     const happinessData = { labels: [], datasets: [{ data: [], backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'] }] };
     Object.keys(happinessTotals).forEach(name => {
         const totalBlocks = counts[name] || 1;
         const avgHappiness = (happinessTotals[name] / totalBlocks).toFixed(2);
         happinessData.labels.push(`${name} (Happiness: ${avgHappiness})`);
-        happinessData.datasets[0].data.push(avgHappiness * 100); // Scale to percentage for pie chart
+        happinessData.datasets[0].data.push(avgHappiness * 100); // Scale to percentage
     });
 
     const happinessCanvas = document.createElement('canvas');
@@ -165,17 +175,19 @@ function downloadPDF() {
         type: 'pie',
         data: happinessData,
         options: { 
-            responsive: true, 
+            responsive: true,
             plugins: { 
-                legend: { position: 'top' }, 
-                title: { display: true, text: 'Happiness/Willingness Breakdown (%)' } 
-            } 
+                legend: { position: 'top' },
+                title: { display: true, text: 'Happiness/Willingness Breakdown (%)' }
+            }
         }
     });
     const happinessImgData = happinessCanvas.toDataURL('image/png');
     if (happinessImgData) {
         doc.text('Happiness/Willingness Breakdown', 20, doc.autoTable?.previous.finalY + 90 || 170);
         doc.addImage(happinessImgData, 'PNG', 20, doc.autoTable?.previous.finalY + 100 || 180, 260, 60);
+    } else {
+        console.warn('Happiness chart image data is invalid, skipping.');
     }
 
     // Save the PDF
