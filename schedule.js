@@ -18,14 +18,21 @@ function saveSchedule() {
 
 function loadSchedule(event) {
     const file = event.target.files[0];
-    if (!file) return;
-    if (!file.name.endsWith('.json')) return alert('Please upload a .json file!');
+    console.log('File selected:', file);
+    if (!file) {
+        console.log('No file selected');
+        return;
+    }
+    if (!file.name.endsWith('.json')) {
+        alert('Please upload a .json file!');
+        return;
+    }
     
     const reader = new FileReader();
     reader.onload = function(e) {
+        console.log('Reading file:', e.target.result);
         try {
             const data = JSON.parse(e.target.result);
-            
             if (!data.version || data.version !== "1.0") {
                 throw new Error('Unsupported schedule version');
             }
@@ -76,7 +83,7 @@ function loadSchedule(event) {
             alert('Schedule loaded successfully!');
         } catch (error) {
             console.error('Error loading schedule:', error);
-            alert('Failed to load schedule. Please ensure the file is a valid BlockTime schedule JSON.');
+            alert(`Failed to load schedule: ${error.message}. Please ensure the file is a valid BlockTime schedule JSON.`);
         }
     };
     reader.readAsText(file);
