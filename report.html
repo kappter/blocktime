@@ -56,6 +56,10 @@
         window.addEventListener('message', (event) => {
             if (event.data.type === 'reportData') {
                 const data = event.data.data;
+                window.categories = data.categoriesList; // Set global categories
+                window.gridData = data.gridData; // Set global gridData
+                window.resolution = data.resolution; // Set global resolution
+
                 document.getElementById('student-info').textContent = `Prepared by: ${data.studentName}`;
                 document.getElementById('summary').innerHTML = `
                     <strong>Great job, ${data.studentName}! 🎉</strong> You've planned <strong>${data.totalHours}</strong> hours of your week! 
@@ -65,87 +69,4 @@
 
                 // Populate week schedule table
                 const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-                const weekTableBody = document.querySelector('#week-schedule-table tbody');
-                weekTableBody.innerHTML = '';
-                data.gridData.forEach((day, dayIndex) => {
-                    day.forEach(block => {
-                        weekTableBody.innerHTML += `
-                            <tr>
-                                <td>${days[dayIndex]}</td>
-                                <td>${block.slotIndex * (resolution / 60)}:00 - ${(block.slotIndex + 1) * (resolution / 60)}:00</td>
-                                <td>${block.name}</td>
-                                <td>${block.mindset}</td>
-                            </tr>
-                        `;
-                    });
-                });
-
-                // Populate category summary table
-                const tbody = document.querySelector('#summary-table tbody');
-                tbody.innerHTML = '';
-                data.categories.forEach(cat => {
-                    tbody.innerHTML += `
-                        <tr>
-                            <td>${cat.name}</td>
-                            <td>${cat.hours}</td>
-                            <td>${cat.pct}%</td>
-                            <td>${cat.avgHappiness}</td>
-                            <td>${cat.avgWillingness}</td>
-                        </tr>
-                    `;
-                });
-
-                // Time Allocation Pie Chart
-                const timeCtx = document.getElementById('timePieChart').getContext('2d');
-                new Chart(timeCtx, {
-                    type: 'pie',
-                    data: {
-                        labels: data.categories.map(c => c.name),
-                        datasets: [{
-                            data: data.categories.map(c => c.hours),
-                            backgroundColor: categories.map(c => c.color) || ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: { position: 'top' },
-                            title: { display: true, text: `Weekly Time Allocation (Hours, ${resolution}-min slots)` }
-                        }
-                    }
-                });
-
-                // Happiness/Willingness Pie Chart
-                const happinessCtx = document.getElementById('happinessPieChart').getContext('2d');
-                new Chart(happinessCtx, {
-                    type: 'pie',
-                    data: {
-                        labels: data.categories.map(c => `${c.name} (Happiness: ${c.avgHappiness})`),
-                        datasets: [{
-                            data: data.categories.map(c => c.avgHappiness * 100), // Scaled to percentage
-                            backgroundColor: categories.map(c => c.color) || ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: { position: 'top' },
-                            title: { display: true, text: 'Happiness/Willingness Breakdown (%)' }
-                        }
-                    }
-                });
-            }
-        });
-
-        // Fallback if categories or gridData is not available
-        if (typeof categories === 'undefined') {
-            console.warn('Categories not available in report page. Using dummy colors.');
-            window.categories = [{ color: '#FF6384' }, { color: '#36A2EB' }, { color: '#FFCE56' }, { color: '#4BC0C0' }, { color: '#9966FF' }];
-        }
-        if (typeof gridData === 'undefined') {
-            console.warn('gridData not available in report page. Using empty array.');
-            window.gridData = Array(7).fill([]); // 7 days with empty arrays
-        }
-    </script>
-</body>
-</html>
+                const
