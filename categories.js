@@ -87,16 +87,18 @@ function renderCategories() {
         catDiv.textContent = cat.name;
         catDiv.addEventListener('touchstart', () => {
     selectedCat = i;
-    document.querySelectorAll('.category').forEach(c => c.classList.remove('selected'));
+    const categoriesList = document.querySelectorAll('.category');
+    categoriesList.forEach(c => c.classList.remove('selected'));
     catDiv.classList.add('selected');
     console.log(`Selected category: ${cat.name}`);
-});
+}, { passive: true });
 catDiv.addEventListener('click', () => {
     selectedCat = i;
-    document.querySelectorAll('.category').forEach(c => c.classList.remove('selected'));
+    const categoriesList = document.querySelectorAll('.category');
+    categoriesList.forEach(c => c.classList.remove('selected'));
     catDiv.classList.add('selected');
     console.log(`Selected category: ${cat.name}`);
-});
+}, { passive: true });
         if (catsDiv) catsDiv.appendChild(catDiv);
     });
 }
