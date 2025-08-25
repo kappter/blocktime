@@ -35,7 +35,7 @@ function renderTimeMarkers() {
         marker.className = 'time-marker';
         marker.textContent = hour % 12 === 0 ? '12' + (hour < 12 ? 'AM' : 'PM') : (hour % 12) + (hour < 12 ? 'AM' : 'PM');
         marker.style.top = `${yPosition}vh`;
-        marker.style.position = 'absolute'; // Ensure positioning
+        marker.style.position = 'absolute';
         marker.style.left = '0';
         markersDiv.appendChild(marker);
     });
@@ -66,8 +66,6 @@ function resetGrid() {
     grid.innerHTML = '';
     const dayDiv = document.createElement('div');
     dayDiv.className = 'day';
-    dayDiv.addEventListener('touchstart', () => dropBlock(currentDay), { passive: true });
-    dayDiv.addEventListener('click', () => dropBlock(currentDay), { passive: true });
     grid.appendChild(dayDiv);
     const label = document.createElement('div');
     label.className = 'day-label';
@@ -79,22 +77,21 @@ function resetGrid() {
         const slotDiv = document.createElement('div');
         slotDiv.className = 'slot';
         slotDiv.id = `slot-${i}`;
+        slotDiv.addEventListener('click', () => dropBlock(currentDay, i), { passive: true }); // Pass slot index
         dayDiv.appendChild(slotDiv);
     }
 
-    const blocks = [...gridData[currentDay]];
+    const blocks = gridData[currentDay];
     blocks.forEach((block, index) => {
-        if (block && block.name && block.color) {
-            const slotIndex = timeDirection === 'bottom' ? totalSlots - 1 - index : index;
-            const slotDiv = document.getElementById(`slot-${slotIndex}`);
+        if (block && block.name && block.color && block.slotIndex !== undefined) {
+            const slotDiv = document.getElementById(`slot-${block.slotIndex}`);
             if (slotDiv) {
                 const blockDiv = document.createElement('div');
                 blockDiv.className = 'block';
                 blockDiv.style.backgroundColor = block.color;
                 const labelDiv = document.createElement('div');
                 labelDiv.className = 'block-label';
-                const timeIndex = index;
-                labelDiv.textContent = `${block.name}: ${formatTime(timeIndex)} (${block.mindset})`;
+                labelDiv.textContent = `${block.name}: ${formatTime(block.slotIndex)} (${block.mindset})`;
                 blockDiv.appendChild(labelDiv);
                 slotDiv.appendChild(blockDiv);
             }
@@ -151,10 +148,10 @@ function renderWeekView() {
             ctx.fillText(day, x + dayWidth / 2, timeDirection === 'bottom' ? canvas.height - 10 : 15);
         }
 
-        const blocks = [...gridData[dayIndex]];
+        const blocks = gridData[dayIndex];
         blocks.forEach((block, index) => {
-            if (block && block.name && block.color) {
-                const slotIndex = timeDirection === 'bottom' ? slotsPerDay - 1 - index : index;
+            if (block && block.name && block.color && block.slotIndex !== undefined) {
+                const slotIndex = block.slotIndex;
                 const y = slotIndex * blockHeight;
                 if (ctx) {
                     ctx.fillStyle = block.color;
@@ -164,7 +161,7 @@ function renderWeekView() {
                     ctx.font = '8px Arial';
                     ctx.textAlign = 'left';
                     ctx.fillText(
-                        `${block.name}: ${formatTime(index)} (${block.mindset})`,
+                        `${block.name}: ${formatTime(slotIndex)} (${block.mindset})`,
                         x + 3,
                         y + blockHeight / 2
                     );
