@@ -115,19 +115,16 @@ input[type="text"], input[type="color"], input[type="file"] {
 }
 
 .slot {
+    position: relative;
     flex: 1;
     border: 1px solid #ccc;
 }
 
 .block {
-    width: 100%;
-    height: 100%;
     position: absolute;
-    top: 0;
-    left: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 100%; /* Full width of the slot */
+    height: 100%; /* Full height of one slot */
+    z-index: 1;
 }
 
 .block-label {
