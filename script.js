@@ -406,7 +406,7 @@ function generateReport() {
     gridData.flat().forEach(block => {
         if (block && block.name && block.mindset) {
             counts[block.name]++;
-            mindsetCounts[block.name][block.mindset]++;
+            mindsetCounts[cat.name][block.mindset]++;
             const { happiness, willingness } = getHappinessWillingness(block.mindset);
             happinessTotals[block.name] += happiness;
             willingnessTotals[block.name] += willingness;
@@ -611,11 +611,3 @@ window.addEventListener('load', () => {
     }
     initGrid();
 });
-</xaiArtifact>
-
-### Deployment Steps
-1. **Replace script.js**: Copy the above code into your repo's script.js file. Commit and push:
-   ```bash
-   git add script.js
-   git commit -m "Complete script.js with 60 min default and new mindsets"
-   git push origin main
