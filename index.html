@@ -109,19 +109,19 @@
     <script src="schedule.js"></script>
     <script src="report.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('day-select').addEventListener('change', () => {
-                currentDay = parseInt(document.getElementById('day-select').value);
-                resetGrid();
-            });
-            document.getElementById('loadSchedule').addEventListener('change', loadSchedule);
-            document.getElementById('resolution').addEventListener('change', () => {
-                console.log('Resolution dropdown changed');
-                initGrid();
-            });
-            document.getElementById('toggle-time-direction').addEventListener('click', toggleTimeDirection);
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('day-select').addEventListener('change', () => {
+            currentDay = parseInt(document.getElementById('day-select').value);
+            resetGrid();
         });
-        window.addEventListener('load', initGrid);
-    </script>
+        document.getElementById('loadSchedule').addEventListener('change', loadSchedule);
+        document.getElementById('resolution').addEventListener('change', () => {
+            console.log('Resolution dropdown changed');
+            initGrid();
+        });
+        document.getElementById('toggle-time-direction').addEventListener('click', toggleTimeDirection);
+    });
+    window.addEventListener('load', initGrid);
+</script>
 </body>
 </html>
