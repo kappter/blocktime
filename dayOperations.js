@@ -67,7 +67,7 @@ function dropBlock(dayIndex, slotIndex) {
     pushUndoState();
     const cat = categories[selectedCat];
     const mindsetSelect = document.getElementById('mindset-select');
-    const mindset = mindsetSelect.value;
+    const selectedMindset = mindsetSelect.value;
 
     const existingBlockIndex = gridData[dayIndex].findIndex(block => block.slotIndex === slotIndex);
     if (existingBlockIndex !== -1) {
@@ -76,10 +76,11 @@ function dropBlock(dayIndex, slotIndex) {
             alert('Cannot replace a block with the same category!');
             return;
         }
-        // Replace the existing block with the new category and keep the slotIndex and mindset
-        gridData[dayIndex][existingBlockIndex] = { ...cat, mindset, slotIndex };
+        // Replace the existing block with the new category, using selectedMindset or category's default mindset
+        gridData[dayIndex][existingBlockIndex] = { ...cat, mindset: selectedMindset || cat.mindset, slotIndex };
     } else {
-        // Add new block if slot is empty
+        // Add new block if slot is empty, using selectedMindset or category's default mindset
+        const mindset = selectedMindset || cat.mindset || 'Peace, Groundedness';
         if (mindsets.includes(mindset)) {
             gridData[dayIndex].push({ ...cat, mindset, slotIndex });
         } else {
