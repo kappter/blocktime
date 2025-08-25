@@ -117,7 +117,7 @@ function updateTotals() {
     gridData.flat().forEach(block => {
         if (block && block.name && block.mindset) {
             counts[block.name]++;
-            mindsetCounts[block.name][block.mindset]++;
+            mindsetCounts[cat.name][block.mindset]++;
             const { happiness, willingness } = getHappinessWillingness(block.mindset);
             happinessTotals[block.name] += happiness;
             willingnessTotals[block.name] += willingness;
@@ -536,10 +536,4 @@ function renderWeekView() {
         const blocks = [...gridData[dayIndex]];
         blocks.forEach((block, index) => {
             if (block && block.name && block.color) {
-                const slotIndex = timeDirection === 'bottom' ? slotsPerDay - 1 - index : index;
-                const y = slotIndex * blockHeight;
-                if (ctx) {
-                    ctx.fillStyle = block.color;
-                    ctx.fillRect(x + 1, y, dayWidth - 2, blockHeight);
-
-                    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                const slotIndex = timeDirection === 'bottom' ? slotsPerDay -
