@@ -55,14 +55,8 @@ function resetGrid() {
     if (grid) grid.innerHTML = '';
     const dayDiv = document.createElement('div');
     dayDiv.className = 'day';
-    dayDiv.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        dropBlock(currentDay);
-    }, { passive: true });
-    dayDiv.addEventListener('click', (e) => {
-        e.preventDefault();
-        dropBlock(currentDay);
-    }, { passive: true });
+    dayDiv.addEventListener('touchstart', () => dropBlock(currentDay));
+    dayDiv.addEventListener('click', () => dropBlock(currentDay));
     if (grid) grid.appendChild(dayDiv);
     const label = document.createElement('div');
     label.className = 'day-label';
