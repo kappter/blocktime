@@ -543,39 +543,3 @@ function renderWeekView() {
                     ctx.fillRect(x + 1, y, dayWidth - 2, blockHeight);
 
                     ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-                    ctx.font = '8px Arial';
-                    ctx.textAlign = 'left';
-                    ctx.fillText(
-                        `${block.name}: ${formatTime(index)} (${block.mindset})`,
-                        x + 3,
-                        y + blockHeight / 2
-                    );
-                }
-            }
-        });
-    });
-}
-
-function downloadPDF() {
-    if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
-        console.error('jsPDF or jspdf-autotable failed to load. Please check your internet connection or CDN availability.');
-        alert('Cannot download PDF: jsPDF library failed to load. Please check your internet connection and try again.');
-        return;
-    }
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'landscape' });
-    const studentName = document.getElementById('studentName')?.value.trim() || 'Student';
-    const summaryText = document.getElementById('summaryText')?.textContent || '';
-    const tableBody = document.querySelector('#summaryTable tbody');
-    const rows = tableBody ? Array.from(tableBody.children).map(row => Array.from(row.children).map(cell => cell.textContent)) : [];
-
-    doc.setFontSize(16);
-    doc.text('BlockTime Weekly Report', 20, 20);
-    doc.setFontSize(12);
-    doc.text(`Prepared by: ${studentName}`, 20, 30);
-    if (summaryText) doc.text(summaryText.split('\n').map(line => line.trim()), 20, 40, { maxWidth: 260 });
-
-    if (tableBody) {
-        doc.autoTable({
-            startY
