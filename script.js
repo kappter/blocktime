@@ -1,4 +1,4 @@
-let resolution = 15;
+let resolution = 60;
 let slotsPerDay = 24 * 60 / resolution;
 let categories = [];
 let selectedCat = null;
@@ -8,11 +8,11 @@ let dayTypes = {};
 let undoStack = [];
 let timeDirection = 'bottom'; // 'bottom' for 12AM at bottom, 'top' for 12AM at top
 const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const mindsets = ['Contentment', 'Obligation', 'Energy', 'Neutral'];
+const mindsets = ['Joyful Engagement', 'Sweet Resistance', 'Painful Desire', 'Forced Suffering', 'Peace, Groundedness'];
 
 function initGrid() {
     const oldResolution = resolution;
-    resolution = parseInt(document.getElementById('resolution').value);
+    resolution = parseInt(document.getElementById('resolution').value) || 60; // Default to 60 if invalid
     const oldSlotsPerDay = slotsPerDay;
     slotsPerDay = 24 * 60 / resolution;
     document.documentElement.style.setProperty('--slots-per-day', slotsPerDay);
@@ -82,26 +82,45 @@ function formatTime(slotIndex) {
 
 function getAttributeForCategory(catName) {
     const attributes = {
-        'Sleep': 'Joyful-Eager',
-        'Study': 'Neutral-Reluctant',
-        'Work': 'Neutral-Eager',
-        'Exercise': 'Joyful-Willing',
-        'Relax': 'Joyful-Reluctant'
+        'Sleep': 'Peace, Groundedness',
+        'Study': 'Painful Desire',
+        'Work': 'Forced Suffering',
+        'Exercise': 'Joyful Engagement',
+        'Relax': 'Sweet Resistance'
     };
-    return attributes[catName] || 'Neutral-Willing';
+    return attributes[catName] || 'Peace, Groundedness';
+}
+
+function getHappinessWillingness(mindset) {
+    const spectrum = {
+        'Joyful Engagement': { happiness: 1.0, willingness: 1.0 },
+        'Sweet Resistance': { happiness: 0.7, willingness: 0.3 },
+        'Peace, Groundedness': { happiness: 0.8, willingness: 0.8 },
+        'Painful Desire': { happiness: 0.3, willingness: 0.7 },
+        'Forced Suffering': { happiness: 0.0, willingness: 0.0 }
+    };
+    return spectrum[mindset] || { happiness: 0.5, willingness: 0.5 };
 }
 
 function updateTotals() {
     const counts = {};
     const mindsetCounts = {};
+    const happinessTotals = {};
+    const willingnessTotals = {};
     categories.forEach(cat => {
         counts[cat.name] = 0;
-        mindsetCounts[cat.name] = { 'Contentment': 0, 'Obligation': 0, 'Energy': 0, 'Neutral': 0 };
+        mindsetCounts[cat.name] = {};
+        mindsets.forEach(m => mindsetCounts[cat.name][m] = 0);
+        happinessTotals[cat.name] = 0;
+        willingnessTotals[cat.name] = 0;
     });
     gridData.flat().forEach(block => {
-        if (block && block.name) {
+        if (block && block.name && block.mindset) {
             counts[block.name]++;
             mindsetCounts[block.name][block.mindset]++;
+            const { happiness, willingness } = getHappinessWillingness(block.mindset);
+            happinessTotals[block.name] += happiness;
+            willingnessTotals[block.name] += willingness;
         }
     });
     const hoursPerBlock = resolution / 60;
@@ -114,8 +133,10 @@ function updateTotals() {
 
     const attributeSummary = document.getElementById('attribute-summary');
     if (attributeSummary) attributeSummary.innerHTML = '<strong>Activity Attributes:</strong><br>' + categories.map(cat => {
-        const attr = getAttributeForCategory(cat.name);
-        return `${cat.name}: ${attr} (${(mindsetCounts[cat.name][attr] * hoursPerBlock).toFixed(1)} hours)<br>`;
+        const totalBlocks = counts[cat.name] || 1; // Avoid division by zero
+        const avgHappiness = (happinessTotals[cat.name] / totalBlocks).toFixed(2);
+        const avgWillingness = (willingnessTotals[cat.name] / totalBlocks).toFixed(2);
+        return `${cat.name}: Happiness ${avgHappiness}, Willingness ${avgWillingness} (${mindsetCounts[cat.name][getAttributeForCategory(cat.name)] * hoursPerBlock || 0} hours)<br>`;
     }).join('');
 
     const overallTotal = document.getElementById('overall-total');
@@ -287,8 +308,8 @@ function dropBlock(dayIndex) {
         gridData[dayIndex].push({ ...cat, mindset });
         resetGrid();
     } else {
-        alert('Invalid mindset selected! Defaulting to Neutral.');
-        gridData[dayIndex].push({ ...cat, mindset: 'Neutral' });
+        alert('Invalid mindset selected! Defaulting to Peace, Groundedness.');
+        gridData[dayIndex].push({ ...cat, mindset: 'Peace, Groundedness' });
         resetGrid();
     }
 }
@@ -353,7 +374,7 @@ function loadSchedule(event) {
                 throw new Error('Invalid time direction value');
             }
 
-            resolution = data.resolution || 15;
+            resolution = data.resolution || 60;
             timeDirection = data.timeDirection || 'bottom';
             document.getElementById('resolution').value = resolution;
             document.getElementById('toggle-time-direction').textContent = `Time Render: 12AM at ${timeDirection === 'bottom' ? 'Bottom' : 'Top'}`;
@@ -396,14 +417,22 @@ function generateReport() {
 
     const counts = {};
     const mindsetCounts = {};
+    const happinessTotals = {};
+    const willingnessTotals = {};
     categories.forEach(cat => {
         counts[cat.name] = 0;
-        mindsetCounts[cat.name] = { 'Contentment': 0, 'Obligation': 0, 'Energy': 0, 'Neutral': 0 };
+        mindsetCounts[cat.name] = {};
+        mindsets.forEach(m => mindsetCounts[cat.name][m] = 0);
+        happinessTotals[cat.name] = 0;
+        willingnessTotals[cat.name] = 0;
     });
     gridData.flat().forEach(block => {
-        if (block && block.name) {
+        if (block && block.name && block.mindset) {
             counts[block.name]++;
             mindsetCounts[block.name][block.mindset]++;
+            const { happiness, willingness } = getHappinessWillingness(block.mindset);
+            happinessTotals[block.name] += happiness;
+            willingnessTotals[block.name] += willingness;
         }
     });
     const hoursPerBlock = resolution / 60;
@@ -411,21 +440,25 @@ function generateReport() {
     const totalHours = totalBlocks * hoursPerBlock;
 
     const studentName = document.getElementById('studentName')?.value.trim() || 'Student';
-    const maxCategory = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b, categories[0]?.name || 'None');
+    const maxHappinessCat = Object.keys(happinessTotals).reduce((a, b) => happinessTotals[a] / (counts[a] || 1) > happinessTotals[b] / (counts[b] || 1) ? a : b, categories[0]?.name || 'None');
+    const maxPainCat = Object.keys(happinessTotals).reduce((a, b) => happinessTotals[a] / (counts[a] || 1) < happinessTotals[b] / (counts[b] || 1) ? a : b, categories[0]?.name || 'None');
     const summaryText = document.getElementById('summaryText');
     if (summaryText) summaryText.innerHTML = `
         <p><strong>Great job, ${studentName}! 🎉</strong> You've planned <strong>${totalHours.toFixed(1)}</strong> hours of your week! 
-        Your top activity is <strong>${maxCategory}</strong> with <strong>${(counts[maxCategory] * hoursPerBlock).toFixed(1)}</strong> hours. 
-        Check your mindset distribution below!</p>
+        Your happiest activity is <strong>${maxHappinessCat}</strong> with an average happiness of ${(happinessTotals[maxHappinessCat] / (counts[maxHappinessCat] || 1)).toFixed(2)}. 
+        However, <strong>${maxPainCat}</strong> (average happiness ${(happinessTotals[maxPainCat] / (counts[maxPainCat] || 1)).toFixed(2)}) might be worth rethinking—consider reducing painful or resistant tasks for a happier routine!</p>
     `;
 
     const tableBody = document.querySelector('#summaryTable tbody');
     if (tableBody) tableBody.innerHTML = '';
     const pieData = { labels: [], datasets: [{ data: [], backgroundColor: [] }] };
     Object.keys(counts).forEach(name => {
+        const totalBlocks = counts[name] || 1;
         const hours = counts[name] * hoursPerBlock;
         const pct = totalHours ? (hours / 168 * 100).toFixed(1) : 0;
-        const row = `<tr><td>${name}</td><td>${hours.toFixed(2)}</td><td>${pct}%</td><td>${Object.entries(mindsetCounts[name]).map(([m, h]) => `${m}: ${(h * hoursPerBlock).toFixed(2)}h`).join(', ')}</td></tr>`;
+        const avgHappiness = (happinessTotals[name] / totalBlocks).toFixed(2);
+        const avgWillingness = (willingnessTotals[name] / totalBlocks).toFixed(2);
+        const row = `<tr><td>${name}</td><td>${hours.toFixed(2)}</td><td>${pct}%</td><td>Happiness: ${avgHappiness}, Willingness: ${avgWillingness}</td></tr>`;
         if (tableBody) tableBody.innerHTML += row;
         pieData.labels.push(name);
         pieData.datasets[0].data.push(hours);
@@ -545,60 +578,4 @@ function downloadPDF() {
 
     if (tableBody) {
         doc.autoTable({
-            startY: 60,
-            head: [['Category', 'Hours', 'Percentage', 'Mindset Distribution']],
-            body: rows,
-            theme: 'striped',
-            styles: { fontSize: 10 },
-            margin: { left: 20, right: 20 }
-        });
-    }
-
-    const weekCanvas = document.getElementById('weekChart');
-    const weekImgData = weekCanvas ? weekCanvas.toDataURL('image/png') : '';
-    if (weekImgData) {
-        doc.text('Weekly Schedule', 20, doc.autoTable?.previous.finalY + 10 || 60);
-        doc.addImage(weekImgData, 'PNG', 20, doc.autoTable?.previous.finalY + 20 || 70, 260, 60);
-    }
-
-    const pieCanvas = document.getElementById('pieChart');
-    const pieImgData = pieCanvas ? pieCanvas.toDataURL('image/png') : '';
-    if (pieImgData) {
-        doc.text('Weekly Time Allocation', 20, doc.autoTable?.previous.finalY + 90 || 130);
-        doc.addImage(pieImgData, 'PNG', 20, doc.autoTable?.previous.finalY + 100 || 140, 100, 100);
-    }
-
-    doc.save(`BlockTime_Report_${studentName || 'Student'}.pdf`);
-}
-
-function toggleTheme() {
-    document.body.classList.toggle('dark-mode');
-    renderWeekView();
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('day-select').addEventListener('change', () => {
-        currentDay = parseInt(document.getElementById('day-select').value);
-        resetGrid();
-    });
-
-    document.getElementById('loadSchedule').addEventListener('change', loadSchedule);
-
-    document.getElementById('resolution').addEventListener('change', () => {
-        console.log('Resolution dropdown changed');
-        initGrid();
-    });
-
-    document.getElementById('toggle-time-direction').addEventListener('click', toggleTimeDirection);
-
-    initGrid();
-});
-
-window.addEventListener('load', () => {
-    if (typeof Chart === 'undefined') {
-        console.error('Chart.js not loaded. Check CDN: https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js');
-    }
-    if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
-        console.error('jsPDF not loaded. Check CDNs: https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js and https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');
-    }
-});
+            startY
