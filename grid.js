@@ -145,4 +145,42 @@ function renderWeekView() {
         if (ctx) {
             ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#444' : '#ddd';
             ctx.fillRect(x, 0, 1, canvas.height);
-            ctx.fillStyle
+            ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#fff' : '#000';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(day, x + dayWidth / 2, timeDirection === 'bottom' ? canvas.height - 10 : 15);
+        }
+
+        const blocks = [...gridData[dayIndex]];
+        blocks.forEach((block, index) => {
+            if (block && block.name && block.color) {
+                const slotIndex = timeDirection === 'bottom' ? slotsPerDay - 1 - index : index;
+                const y = slotIndex * blockHeight;
+                if (ctx) {
+                    ctx.fillStyle = block.color;
+                    ctx.fillRect(x + 1, y, dayWidth - 2, blockHeight);
+
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                    ctx.font = '8px Arial';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(
+                        `${block.name}: ${formatTime(index)} (${block.mindset})`,
+                        x + 3,
+                        y + blockHeight / 2
+                    );
+                }
+            }
+        });
+    });
+}
+
+function toggleTimeDirection() {
+    timeDirection = timeDirection === 'bottom' ? 'top' : 'bottom';
+    const toggleButton = document.getElementById('toggle-time-direction');
+    if (toggleButton) toggleButton.textContent = `Time Render: 12AM at ${timeDirection === 'bottom' ? 'Bottom' : 'Top'}`;
+    document.documentElement.style.setProperty('--day-flex-direction', timeDirection === 'bottom' ? 'column-reverse' : 'column');
+    console.log(`Toggled time direction to ${timeDirection}`);
+    renderTimeMarkers();
+    resetGrid();
+    renderWeekView();
+}
