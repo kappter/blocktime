@@ -14,32 +14,23 @@
     <div class="container">
         <h1 class="app-title">BlockTime Scheduler</h1>
         <div class="control-module">
-    <h3>Day Operations</h3>
-    <select id="copy-day-select">
-        <option value="0">Monday</option>
-        <option value="1">Tuesday</option>
-        <option value="2">Wednesday</option>
-        <option value="3">Thursday</option>
-        <option value="4">Friday</option>
-        <option value="5">Saturday</option>
-        <option value="6">Sunday</option>
-    </select>
-    <button onclick="copyDay()">Copy Day</button>
-    <select id="mindset-select">
-        <option value="Joyful Engagement">Joyful Engagement</option>
-        <option value="Sweet Resistance">Sweet Resistance</option>
-        <option value="Painful Desire">Painful Desire</option>
-        <option value="Forced Suffering">Forced Suffering</option>
-        <option value="Peace, Groundedness">Peace, Groundedness</option>
-    </select>
-    <input type="text" id="dayTypeName" placeholder="Day Type Name">
-    <button onclick="saveDayType()">Save Day Type</button>
-    <select id="day-type-select">
-        <option value="">Select Day Type</option>
-    </select>
-    <button onclick="applyDayType()">Apply Day Type</button>
-    <button onclick="undoAction()">Undo</button>
-</div>
+            <h3>Grid Settings</h3>
+            <select id="resolution">
+                <option value="15">15 min</option>
+                <option value="30">30 min</option>
+                <option value="60" selected>60 min</option>
+            </select>
+            <button id="toggle-time-direction">Time Render: 12AM at Bottom</button>
+            <select id="day-select">
+                <option value="0">Monday</option>
+                <option value="1">Tuesday</option>
+                <option value="2">Wednesday</option>
+                <option value="3">Thursday</option>
+                <option value="4">Friday</option>
+                <option value="5">Saturday</option>
+                <option value="6">Sunday</option>
+            </select>
+        </div>
         <div class="control-module">
             <h3>Add Category</h3>
             <input type="text" id="catName" placeholder="Category Name">
@@ -48,7 +39,7 @@
         </div>
         <div id="categories"></div>
         <div id="legend"></div>
-        <div id="grid"></div> <!-- Moved here -->
+        <div id="grid"></div>
         <div id="time-markers"></div>
         <div class="control-module">
             <h3>Day Operations</h3>
@@ -61,6 +52,7 @@
                 <option value="5">Saturday</option>
                 <option value="6">Sunday</option>
             </select>
+            <button onclick="copyDay()">Copy Day</button>
             <select id="mindset-select">
                 <option value="Joyful Engagement">Joyful Engagement</option>
                 <option value="Sweet Resistance">Sweet Resistance</option>
@@ -68,7 +60,6 @@
                 <option value="Forced Suffering">Forced Suffering</option>
                 <option value="Peace, Groundedness">Peace, Groundedness</option>
             </select>
-            <button onclick="copyDay()">Copy Day</button>
             <input type="text" id="dayTypeName" placeholder="Day Type Name">
             <button onclick="saveDayType()">Save Day Type</button>
             <select id="day-type-select">
@@ -109,19 +100,23 @@
     <script src="schedule.js"></script>
     <script src="report.js"></script>
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('day-select').addEventListener('change', () => {
-            currentDay = parseInt(document.getElementById('day-select').value);
-            resetGrid();
+        document.addEventListener('DOMContentLoaded', () => {
+            const daySelect = document.getElementById('day-select');
+            if (daySelect) daySelect.addEventListener('change', () => {
+                currentDay = parseInt(daySelect.value);
+                resetGrid();
+            });
+            const loadScheduleInput = document.getElementById('loadSchedule');
+            if (loadScheduleInput) loadScheduleInput.addEventListener('change', loadSchedule);
+            const resolutionSelect = document.getElementById('resolution');
+            if (resolutionSelect) resolutionSelect.addEventListener('change', () => {
+                console.log('Resolution dropdown changed');
+                initGrid();
+            });
+            const toggleButton = document.getElementById('toggle-time-direction');
+            if (toggleButton) toggleButton.addEventListener('click', toggleTimeDirection);
         });
-        document.getElementById('loadSchedule').addEventListener('change', loadSchedule);
-        document.getElementById('resolution').addEventListener('change', () => {
-            console.log('Resolution dropdown changed');
-            initGrid();
-        });
-        document.getElementById('toggle-time-direction').addEventListener('click', toggleTimeDirection);
-    });
-    window.addEventListener('load', initGrid);
-</script>
+        window.addEventListener('load', initGrid);
+    </script>
 </body>
 </html>
