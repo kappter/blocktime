@@ -1,5 +1,5 @@
-let resolution = 60;
-let slotsPerDay = 24 * 60 / resolution;
+let resolution = 60; // Hardcoded to 60 minutes as requested
+let slotsPerDay = 24 * 60 / resolution; // 24 slots for 60-minute resolution
 let categories = [];
 let selectedCat = null;
 let gridData = Array(7).fill().map(() => []);
@@ -11,36 +11,13 @@ const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const mindsets = ['Joyful Engagement', 'Sweet Resistance', 'Painful Desire', 'Forced Suffering', 'Peace, Groundedness'];
 
 function initGrid() {
-    const oldResolution = resolution;
-    resolution = parseInt(document.getElementById('resolution').value) || 60; // Default to 60 if invalid
-    const oldSlotsPerDay = slotsPerDay;
+    resolution = 60; // Enforce 60-minute resolution
     slotsPerDay = 24 * 60 / resolution;
     document.documentElement.style.setProperty('--slots-per-day', slotsPerDay);
     document.documentElement.style.setProperty('--day-flex-direction', timeDirection === 'bottom' ? 'column-reverse' : 'column');
-    console.log(`Resolution changed from ${oldResolution} min to ${resolution} min, slotsPerDay: ${slotsPerDay}`);
+    console.log(`Resolution set to ${resolution} min, slotsPerDay: ${slotsPerDay}`);
 
-    if (resolution < oldResolution && oldResolution > 0) {
-        const resolutionRatio = oldResolution / resolution;
-        gridData = gridData.map(day => {
-            const newDay = [];
-            day.forEach((block, index) => {
-                for (let i = 0; i < resolutionRatio; i++) {
-                    newDay.push({ ...block });
-                }
-            });
-            return newDay.slice(0, slotsPerDay);
-        });
-    } else if (resolution > oldResolution) {
-        gridData = gridData.map(day => {
-            const newDay = [];
-            for (let i = 0; i < day.length; i += resolution / oldResolution) {
-                if (day[i]) newDay.push({ ...day[i] });
-            }
-            return newDay.slice(0, slotsPerDay);
-        });
-    } else {
-        gridData = gridData.map(day => day.slice(0, slotsPerDay));
-    }
+    gridData = gridData.map(day => day.slice(0, slotsPerDay));
 
     resetGrid();
     renderTimeMarkers();
@@ -117,7 +94,7 @@ function updateTotals() {
     gridData.flat().forEach(block => {
         if (block && block.name && block.mindset) {
             counts[block.name]++;
-            mindsetCounts[cat.name][block.mindset]++;
+            mindsetCounts[block.name][block.mindset]++;
             const { happiness, willingness } = getHappinessWillingness(block.mindset);
             happinessTotals[block.name] += happiness;
             willingnessTotals[block.name] += willingness;
@@ -133,7 +110,7 @@ function updateTotals() {
 
     const attributeSummary = document.getElementById('attribute-summary');
     if (attributeSummary) attributeSummary.innerHTML = '<strong>Activity Attributes:</strong><br>' + categories.map(cat => {
-        const totalBlocks = counts[cat.name] || 1; // Avoid division by zero
+        const totalBlocks = counts[cat.name] || 1;
         const avgHappiness = (happinessTotals[cat.name] / totalBlocks).toFixed(2);
         const avgWillingness = (willingnessTotals[cat.name] / totalBlocks).toFixed(2);
         return `${cat.name}: Happiness ${avgHappiness}, Willingness ${avgWillingness} (${mindsetCounts[cat.name][getAttributeForCategory(cat.name)] * hoursPerBlock || 0} hours)<br>`;
