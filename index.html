@@ -44,6 +44,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BlockTime Scheduler</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" onerror="alert('Failed to load Chart.js. Please check your internet connection.')"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" onerror="alert('Failed to load jsPDF. Please check your internet connection.')"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" onerror="alert('Failed to load jsPDF autotable. Please check your internet connection.')"></script>
@@ -56,7 +57,7 @@
             <select id="resolution">
                 <option value="15">15 min</option>
                 <option value="30">30 min</option>
-                <option value="60">60 min</option>
+                <option value="60" selected>60 min</option>
             </select>
             <select id="day-select">
                 <option value="0">Mon</option>
@@ -75,10 +76,11 @@
             <input id="catColor" type="color" value="#ff0000">
             <button onclick="addCategory()">Add Category</button>
             <select id="mindset-select">
-                <option value="Contentment">Contentment</option>
-                <option value="Obligation">Obligation</option>
-                <option value="Energy">Energy</option>
-                <option value="Neutral">Neutral</option>
+                <option value="Joyful Engagement">Joyful Engagement</option>
+                <option value="Sweet Resistance">Sweet Resistance</option>
+                <option value="Painful Desire">Painful Desire</option>
+                <option value="Forced Suffering">Forced Suffering</option>
+                <option value="Peace, Groundedness">Peace, Groundedness</option>
             </select>
             <div id="categories"></div>
         </div>
@@ -134,7 +136,7 @@
                         <th>Category</th>
                         <th>Hours</th>
                         <th>Percentage</th>
-                        <th>Mindset Distribution</th>
+                        <th>Happiness/Willingness</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
