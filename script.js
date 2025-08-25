@@ -95,8 +95,10 @@ function updateTotals() {
         mindsetCounts[cat.name] = { 'Contentment': 0, 'Obligation': 0, 'Energy': 0, 'Neutral': 0 };
     });
     gridData.flat().forEach(block => {
-        counts[block.name]++;
-        mindsetCounts[block.name][block.mindset]++;
+        if (block && block.name) {
+            counts[block.name]++;
+            mindsetCounts[block.name][block.mindset]++;
+        }
     });
     const hoursPerBlock = resolution / 60;
     const totalHours = gridData.reduce((sum, day) => sum + day.length, 0) * hoursPerBlock;
@@ -138,17 +140,19 @@ function resetGrid() {
     const totalSlots = 24 * (60 / resolution);
     const blocks = [...gridData[currentDay]];
     blocks.forEach((block, index) => {
-        const timeIndex = index;
-        const startMinutes = timeIndex * resolution;
-        const endMinutes = (timeIndex + 1) * resolution;
-        const blockDiv = document.createElement('div');
-        blockDiv.className = 'block';
-        blockDiv.style.backgroundColor = block.color;
-        const labelDiv = document.createElement('div');
-        labelDiv.className = 'block-label';
-        labelDiv.textContent = `${block.name}: ${formatTime(startMinutes)}-${formatTime(endMinutes)} (${block.mindset})`;
-        blockDiv.appendChild(labelDiv);
-        if (dayDiv) dayDiv.appendChild(blockDiv);
+        if (block && block.name && block.color) {
+            const timeIndex = index;
+            const startMinutes = timeIndex * resolution;
+            const endMinutes = (timeIndex + 1) * resolution;
+            const blockDiv = document.createElement('div');
+            blockDiv.className = 'block';
+            blockDiv.style.backgroundColor = block.color;
+            const labelDiv = document.createElement('div');
+            labelDiv.className = 'block-label';
+            labelDiv.textContent = `${block.name}: ${formatTime(startMinutes)}-${formatTime(endMinutes)} (${block.mindset})`;
+            blockDiv.appendChild(labelDiv);
+            if (dayDiv) dayDiv.appendChild(blockDiv);
+        }
     });
     updateTotals();
 }
@@ -278,7 +282,7 @@ function dropBlock(dayIndex) {
 
 function saveSchedule() {
     const schedule = {
-        version: "1.0", // Added for future compatibility
+        version: "1.0",
         resolution: resolution,
         timeDirection: timeDirection,
         categories: categories,
@@ -325,7 +329,7 @@ function loadSchedule(event) {
             const allValid = [
                 ...data.gridData.flat(),
                 ...Object.values(data.dayTypes).flat()
-            ].every(block => categoryNames.includes(block.name) && (block.mindset === undefined || mindsets.includes(block.mindset)));
+            ].every(block => block && block.name && categoryNames.includes(block.name) && (block.mindset === undefined || mindsets.includes(block.mindset)));
             if (!allValid) {
                 throw new Error('Grid data or day types reference unknown categories or invalid mindsets');
             }
@@ -384,8 +388,10 @@ function generateReport() {
         mindsetCounts[cat.name] = { 'Contentment': 0, 'Obligation': 0, 'Energy': 0, 'Neutral': 0 };
     });
     gridData.flat().forEach(block => {
-        counts[block.name]++;
-        mindsetCounts[block.name][block.mindset]++;
+        if (block && block.name) {
+            counts[block.name]++;
+            mindsetCounts[block.name][block.mindset]++;
+        }
     });
     const hoursPerBlock = resolution / 60;
     const totalBlocks = gridData.reduce((sum, day) => sum + day.length, 0);
@@ -485,22 +491,24 @@ function renderWeekView() {
 
         const blocks = [...gridData[dayIndex]];
         blocks.forEach((block, index) => {
-            const timeIndex = index;
-            const y = timeDirection === 'bottom'
-                ? (slotsPerDay - 1 - index) * blockHeight
-                : index * blockHeight;
-            if (ctx) {
-                ctx.fillStyle = block.color;
-                ctx.fillRect(x + 1, y, dayWidth - 2, blockHeight);
+            if (block && block.name && block.color) {
+                const timeIndex = index;
+                const y = timeDirection === 'bottom'
+                    ? (slotsPerDay - 1 - index) * blockHeight
+                    : index * blockHeight;
+                if (ctx) {
+                    ctx.fillStyle = block.color;
+                    ctx.fillRect(x + 1, y, dayWidth - 2, blockHeight);
 
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-                ctx.font = '8px Arial';
-                ctx.textAlign = 'left';
-                ctx.fillText(
-                    `${block.name}: ${formatTime(timeIndex * resolution)}-${formatTime((timeIndex + 1) * resolution)} (${block.mindset})`,
-                    x + 3,
-                    y + blockHeight / 2
-                );
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                    ctx.font = '8px Arial';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(
+                        `${block.name}: ${formatTime(timeIndex * resolution)}-${formatTime((timeIndex + 1) * resolution)} (${block.mindset})`,
+                        x + 3,
+                        y + blockHeight / 2
+                    );
+                }
             }
         });
     });
@@ -551,7 +559,7 @@ function downloadPDF() {
         doc.addImage(pieImgData, 'PNG', 20, doc.autoTable?.previous.finalY + 100 || 140, 100, 100);
     }
 
-    doc.save(`BlockTime_Report_${studentName || 'Student'}.pdf');
+    doc.save(`BlockTime_Report_${studentName || 'Student'}.pdf`);
 }
 
 function toggleTheme() {
@@ -573,6 +581,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('toggle-time-direction').addEventListener('click', toggleTimeDirection);
+
+    initGrid();
 });
 
 window.addEventListener('load', () => {
@@ -582,5 +592,4 @@ window.addEventListener('load', () => {
     if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
         console.error('jsPDF not loaded. Check CDNs: https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js and https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');
     }
-    initGrid();
 });
