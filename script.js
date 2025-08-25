@@ -581,23 +581,41 @@ function downloadPDF() {
     doc.save(`BlockTime_Report_${studentName}_${new Date().toLocaleDateString()}.pdf`);
 }
 
-window.addEventListener('load', () => {
-    document.getElementById('addCategory').addEventListener('click', addCategory);
-    document.getElementById('copyDay').addEventListener('click', copyDay);
-    document.getElementById('saveDayType').addEventListener('click', saveDayType);
-    document.getElementById('applyDayType').addEventListener('click', applyDayType);
-    document.getElementById('undo').addEventListener('click', undoAction);
-    document.getElementById('resolution').addEventListener('change', initGrid);
-    document.getElementById('toggle-time-direction').addEventListener('click', toggleTimeDirection);
-    document.getElementById('generateReport').addEventListener('click', generateReport);
-    document.getElementById('saveSchedule').addEventListener('click', saveSchedule);
-    document.getElementById('loadSchedule').addEventListener('change', loadSchedule);
-    document.getElementById('downloadPDF').addEventListener('click', downloadPDF);
+function toggleTheme() {
+    document.body.classList.toggle('dark-mode');
+    renderWeekView();
+}
 
-    initGrid();
-    renderCategories();
-    renderLegend();
-    renderDayTypes();
-    resetGrid();
-    updateTotals();
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('day-select').addEventListener('change', () => {
+        currentDay = parseInt(document.getElementById('day-select').value);
+        resetGrid();
+    });
+
+    document.getElementById('loadSchedule').addEventListener('change', loadSchedule);
+
+    document.getElementById('resolution').addEventListener('change', () => {
+        console.log('Resolution dropdown changed');
+        initGrid();
+    });
+
+    document.getElementById('toggle-time-direction').addEventListener('click', toggleTimeDirection);
 });
+
+window.addEventListener('load', () => {
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js not loaded. Check CDN: https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js');
+    }
+    if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
+        console.error('jsPDF not loaded. Check CDNs: https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js and https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');
+    }
+    initGrid();
+});
+</xaiArtifact>
+
+### Deployment Steps
+1. **Replace script.js**: Copy the above code into your repo's script.js file. Commit and push:
+   ```bash
+   git add script.js
+   git commit -m "Complete script.js with 60 min default and new mindsets"
+   git push origin main
