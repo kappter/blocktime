@@ -84,13 +84,19 @@ input[type="text"], input[type="color"], input[type="file"] {
     position: relative;
 }
 
+#time-markers {
+    position: relative;
+    height: 70vh; /* Match the grid height */
+    width: 50px; /* Adjust as needed */
+    margin-left: -50px; /* Position it to the left of the grid */
+}
+
 .time-marker {
     position: absolute;
-    width: 100%;
-    text-align: right;
-    padding-right: 5px;
-    font-size: 12px;
     transform: translateY(-50%);
+    color: #000;
+    font-size: 12px;
+    white-space: nowrap;
 }
 
 #grid {
@@ -102,17 +108,15 @@ input[type="text"], input[type="color"], input[type="file"] {
 }
 
 .day {
-    flex-grow: 1;
     display: flex;
     flex-direction: var(--day-flex-direction);
-    border: 1px solid var(--border-color);
+    height: 70vh; /* Consistent height */
     position: relative;
 }
 
 .slot {
     flex: 1;
-    border-bottom: 1px solid var(--border-color);
-    position: relative;
+    border: 1px solid #ccc;
 }
 
 .block {
