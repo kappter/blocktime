@@ -85,20 +85,18 @@ function renderCategories() {
         catDiv.className = 'category';
         catDiv.style.backgroundColor = cat.color;
         catDiv.textContent = cat.name;
-        catDiv.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            selectedCat = i;
-            document.querySelectorAll('.category').forEach(c => c.classList.remove('selected'));
-            catDiv.classList.add('selected');
-            console.log(`Selected category: ${cat.name}`);
-        }, { passive: true });
-        catDiv.addEventListener('click', (e) => {
-            e.preventDefault();
-            selectedCat = i;
-            document.querySelectorAll('.category').forEach(c => c.classList.remove('selected'));
-            catDiv.classList.add('selected');
-            console.log(`Selected category: ${cat.name}`);
-        }, { passive: true });
+        catDiv.addEventListener('touchstart', () => {
+    selectedCat = i;
+    document.querySelectorAll('.category').forEach(c => c.classList.remove('selected'));
+    catDiv.classList.add('selected');
+    console.log(`Selected category: ${cat.name}`);
+});
+catDiv.addEventListener('click', () => {
+    selectedCat = i;
+    document.querySelectorAll('.category').forEach(c => c.classList.remove('selected'));
+    catDiv.classList.add('selected');
+    console.log(`Selected category: ${cat.name}`);
+});
         if (catsDiv) catsDiv.appendChild(catDiv);
     });
 }
