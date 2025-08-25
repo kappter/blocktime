@@ -76,7 +76,6 @@ function generateReport() {
 }
 
 function downloadPDF() {
-    // Redirect to printable report page
     const studentName = document.getElementById('studentName')?.value.trim() || 'Student';
     const counts = {};
     const mindsetCounts = {};
@@ -116,10 +115,10 @@ function downloadPDF() {
             pct: totalHours ? ((counts[name] * hoursPerBlock) / 168 * 100).toFixed(1) : 0,
             avgHappiness: (happinessTotals[name] / (counts[name] || 1)).toFixed(2),
             avgWillingness: (willingnessTotals[name] / (counts[name] || 1)).toFixed(2)
-        }))
+        })),
+        gridData: JSON.parse(JSON.stringify(gridData)) // Include grid data for schedule
     };
 
-    // Open printable report page
     const reportWindow = window.open('report.html', '_blank');
     if (reportWindow) {
         reportWindow.onload = () => {
