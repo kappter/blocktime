@@ -14,7 +14,7 @@ tooltip.style.color = 'white';
 tooltip.style.padding = '5px';
 tooltip.style.borderRadius = '3px';
 tooltip.style.pointerEvents = 'none';
-tooltip.style.display = 'none';
+tooltip.style.zIndex = '1000';
 document.body.appendChild(tooltip);
 
 function initGrid() {
@@ -25,33 +25,7 @@ function initGrid() {
     console.log(`Resolution set to ${resolution} min, slotsPerDay: ${slotsPerDay}`);
     gridData = gridData.map(day => day.slice(0, slotsPerDay));
     resetGrid();
-    renderTimeMarkers();
     renderWeekView();
-}
-
-function renderTimeMarkers() {
-    const markersDiv = document.getElementById('time-markers');
-    if (!markersDiv) {
-        console.error('Time markers div not found');
-        return;
-    }
-    markersDiv.innerHTML = '';
-    const hoursToShow = [0, 6, 12, 18];
-    const slotsPerHour = 60 / resolution;
-    const totalSlots = 24 * slotsPerHour;
-    const slotHeight = 70 / totalSlots;
-    hoursToShow.forEach((hour) => {
-        const slotIndex = timeDirection === 'bottom' ? (23 - hour) * slotsPerHour : hour * slotsPerHour;
-        const yPosition = (slotIndex + 0.5) * slotHeight;
-        const marker = document.createElement('div');
-        marker.className = 'time-marker';
-        marker.textContent = hour % 12 === 0 ? '12' + (hour < 12 ? 'AM' : 'PM') : (hour % 12) + (hour < 12 ? 'AM' : 'PM');
-        marker.style.top = `${yPosition}vh`;
-        marker.style.position = 'absolute';
-        marker.style.left = '0';
-        markersDiv.appendChild(marker);
-    });
-    console.log('Time markers rendered');
 }
 
 function formatTime(slotIndex) {
@@ -94,11 +68,13 @@ function resetGrid() {
             const rect = slotDiv.getBoundingClientRect();
             tooltip.textContent = formatTime(i);
             tooltip.style.left = `${rect.left + window.scrollX + 5}px`;
-            tooltip.style.top = `${rect.top + window.scrollY + 5}px`;
+            tooltip.style.top = `${rect.top + window.scrollY - 20}px`; // Above cursor
             tooltip.style.display = 'block';
+            slotDiv.classList.add('hover-highlight');
         });
         slotDiv.addEventListener('mouseout', () => {
             tooltip.style.display = 'none';
+            slotDiv.classList.remove('hover-highlight');
         });
         dayDiv.appendChild(slotDiv);
     }
@@ -147,7 +123,7 @@ function renderWeekView() {
         ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#fff' : '#000';
         ctx.textAlign = 'right';
         ctx.textBaseline = 'middle';
-        const hoursToShow = [0, 6, 12, 18];
+        const hoursToShow = [0, 6, 12, 18]; // Optional: Remove if no markers desired in week view
         hoursToShow.forEach((hour) => {
             const slotIndex = timeDirection === 'bottom' ? (23 - hour) * slotsPerHour : hour * slotsPerHour;
             const y = slotIndex * blockHeight + (blockHeight / 2);
@@ -199,7 +175,6 @@ function toggleTimeDirection() {
     if (toggleButton) toggleButton.textContent = `Time Render: 12AM at ${timeDirection === 'bottom' ? 'Bottom' : 'Top'}`;
     document.documentElement.style.setProperty('--day-flex-direction', timeDirection === 'bottom' ? 'column-reverse' : 'column');
     console.log(`Toggled time direction to ${timeDirection}`);
-    renderTimeMarkers();
     resetGrid();
     renderWeekView();
 }
