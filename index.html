@@ -14,23 +14,32 @@
     <div class="container">
         <h1 class="app-title">BlockTime Scheduler</h1>
         <div class="control-module">
-            <h3>Grid Settings</h3>
-            <select id="resolution">
-                <option value="15">15 min</option>
-                <option value="30">30 min</option>
-                <option value="60" selected>60 min</option>
-            </select>
-            <button id="toggle-time-direction">Time Render: 12AM at Bottom</button>
-            <select id="day-select">
-                <option value="0">Monday</option>
-                <option value="1">Tuesday</option>
-                <option value="2">Wednesday</option>
-                <option value="3">Thursday</option>
-                <option value="4">Friday</option>
-                <option value="5">Saturday</option>
-                <option value="6">Sunday</option>
-            </select>
-        </div>
+    <h3>Day Operations</h3>
+    <select id="copy-day-select">
+        <option value="0">Monday</option>
+        <option value="1">Tuesday</option>
+        <option value="2">Wednesday</option>
+        <option value="3">Thursday</option>
+        <option value="4">Friday</option>
+        <option value="5">Saturday</option>
+        <option value="6">Sunday</option>
+    </select>
+    <button onclick="copyDay()">Copy Day</button>
+    <select id="mindset-select">
+        <option value="Joyful Engagement">Joyful Engagement</option>
+        <option value="Sweet Resistance">Sweet Resistance</option>
+        <option value="Painful Desire">Painful Desire</option>
+        <option value="Forced Suffering">Forced Suffering</option>
+        <option value="Peace, Groundedness">Peace, Groundedness</option>
+    </select>
+    <input type="text" id="dayTypeName" placeholder="Day Type Name">
+    <button onclick="saveDayType()">Save Day Type</button>
+    <select id="day-type-select">
+        <option value="">Select Day Type</option>
+    </select>
+    <button onclick="applyDayType()">Apply Day Type</button>
+    <button onclick="undoAction()">Undo</button>
+</div>
         <div class="control-module">
             <h3>Add Category</h3>
             <input type="text" id="catName" placeholder="Category Name">
