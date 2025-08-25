@@ -88,8 +88,8 @@ function downloadPDF() {
     // Collect data within this function
     const counts = {};
     const mindsetCounts = {};
-    const happinessTotals = {};
-    const willingnessTotals = {};
+    let happinessTotals = {}; // Explicitly define here
+    let willingnessTotals = {}; // Explicitly define here
     categories.forEach(cat => {
         counts[cat.name] = 0;
         mindsetCounts[cat.name] = {};
