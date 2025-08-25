@@ -116,7 +116,9 @@ function downloadPDF() {
             avgHappiness: (happinessTotals[name] / (counts[name] || 1)).toFixed(2),
             avgWillingness: (willingnessTotals[name] / (counts[name] || 1)).toFixed(2)
         })),
-        gridData: JSON.parse(JSON.stringify(gridData)) // Include grid data for schedule
+        gridData: JSON.parse(JSON.stringify(gridData)), // Include grid data
+        categoriesList: JSON.parse(JSON.stringify(categories)), // Include categories
+        resolution: resolution // Include resolution
     };
 
     const reportWindow = window.open('report.html', '_blank');
