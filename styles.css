@@ -160,6 +160,29 @@ input[type="text"], input[type="color"], input[type="file"] {
     border: 2px solid #000;
 }
 
+#slot-tooltip {
+    z-index: 1000; /* Above other elements */
+    font-size: 12px;
+}
+
+.day {
+    display: flex;
+    flex-direction: var(--day-flex-direction);
+    height: 70vh;
+    position: relative;
+}
+
+.slot {
+    position: relative;
+    flex: 1;
+    border: 1px solid #ccc;
+    transition: background-color 0.2s; /* Smooth hover effect */
+}
+
+.slot:hover {
+    background-color: rgba(0, 255, 0, 0.2); /* Light green highlight on hover */
+}
+
 #legend span {
     color: #fff;
 }
