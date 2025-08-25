@@ -5,6 +5,18 @@ let currentDay = 0;
 let timeDirection = 'bottom';
 const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+// Add a tooltip element for hover feedback
+const tooltip = document.createElement('div');
+tooltip.id = 'slot-tooltip';
+tooltip.style.position = 'absolute';
+tooltip.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+tooltip.style.color = 'white';
+tooltip.style.padding = '5px';
+tooltip.style.borderRadius = '3px';
+tooltip.style.pointerEvents = 'none';
+tooltip.style.display = 'none';
+document.body.appendChild(tooltip);
+
 function initGrid() {
     resolution = 60; // Default resolution, can be changed via dropdown
     slotsPerDay = 24 * 60 / resolution;
@@ -54,7 +66,7 @@ function formatTime(slotIndex) {
     const endPeriod = endHours < 12 ? 'AM' : 'PM';
     const displayHours = hours % 12 === 0 ? 12 : hours % 12;
     const displayEndHours = endHours % 12 === 0 ? 12 : endHours % 12;
-    return `${displayHours}:${mins.toString().padStart(2, '0')} ${period}-${displayEndHours}:${endMins.toString().padStart(2, '0')} ${endPeriod}`;
+    return `${displayHours}:${mins.toString().padStart(2, '0')} ${period} - ${displayEndHours}:${endMins.toString().padStart(2, '0')} ${endPeriod}`;
 }
 
 function resetGrid() {
@@ -77,7 +89,17 @@ function resetGrid() {
         const slotDiv = document.createElement('div');
         slotDiv.className = 'slot';
         slotDiv.id = `slot-${i}`;
-        slotDiv.addEventListener('click', () => dropBlock(currentDay, i), { passive: true }); // Pass slot index
+        slotDiv.addEventListener('click', () => dropBlock(currentDay, i), { passive: true });
+        slotDiv.addEventListener('mouseover', (e) => {
+            const rect = slotDiv.getBoundingClientRect();
+            tooltip.textContent = formatTime(i);
+            tooltip.style.left = `${rect.left + window.scrollX + 5}px`;
+            tooltip.style.top = `${rect.top + window.scrollY + 5}px`;
+            tooltip.style.display = 'block';
+        });
+        slotDiv.addEventListener('mouseout', () => {
+            tooltip.style.display = 'none';
+        });
         dayDiv.appendChild(slotDiv);
     }
 
