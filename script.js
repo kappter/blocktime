@@ -8,7 +8,7 @@ let dayTypes = {};
 let undoStack = [];
 let timeDirection = 'bottom'; // 'bottom' for 12AM at bottom, 'top' for 12AM at top
 const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const mindsets = ['Contentment', 'Obligation', 'Energy', 'Neutral']; // Mindset options
+const mindsets = ['Contentment', 'Obligation', 'Energy', 'Neutral'];
 
 function initGrid() {
     const oldResolution = resolution;
@@ -19,7 +19,6 @@ function initGrid() {
     document.documentElement.style.setProperty('--day-flex-direction', timeDirection === 'bottom' ? 'column-reverse' : 'column');
     console.log(`Resolution changed from ${oldResolution} min to ${resolution} min, slotsPerDay: ${slotsPerDay}`);
 
-    // Handle block splitting if resolution decreases
     if (resolution < oldResolution && oldResolution > 0) {
         const resolutionRatio = oldResolution / resolution;
         gridData = gridData.map(day => {
@@ -29,26 +28,23 @@ function initGrid() {
                     newDay.push({ ...block });
                 }
             });
-            return newDay.slice(0, slotsPerDay); // Truncate to new slotsPerDay
+            return newDay.slice(0, slotsPerDay);
         });
     } else if (resolution > oldResolution) {
-        // Handle merging if resolution increases (simplify by keeping first block per old slot)
         gridData = gridData.map(day => {
             const newDay = [];
-            for (let i = 0; i < day.length; i += oldResolution / resolution) {
+            for (let i = 0; i < day.length; i += resolution / oldResolution) {
                 if (day[i]) newDay.push({ ...day[i] });
             }
-            return newDay.slice(0, slotsPerDay); // Truncate to new slotsPerDay
+            return newDay.slice(0, slotsPerDay);
         });
     } else {
-        // Same resolution, just truncate
         gridData = gridData.map(day => day.slice(0, slotsPerDay));
     }
 
-    undoStack = [];
     resetGrid();
     renderTimeMarkers();
-    renderWeekView(); // Ensure week view updates with new scale
+    renderWeekView();
 }
 
 function renderTimeMarkers() {
@@ -57,26 +53,24 @@ function renderTimeMarkers() {
     const hoursToShow = [0, 6, 12, 18];
     const slotsPerHour = 60 / resolution;
     const totalSlots = 24 * slotsPerHour;
-    const slotHeight = 70 / totalSlots; // Height per slot in vh, based on 70vh grid
-    const orderedHours = timeDirection === 'bottom' ? hoursToShow : hoursToShow.slice().reverse();
-    if (markersDiv) {
-        orderedHours.forEach((hour) => {
-            const slotIndex = hour * slotsPerHour;
-            const yPosition = timeDirection === 'bottom'
-                ? (totalSlots - 1 - slotIndex) * slotHeight
-                : slotIndex * slotHeight;
-            const marker = document.createElement('div');
-            marker.className = 'time-marker';
-            marker.textContent = hour % 12 === 0 ? '12' + (hour < 12 ? 'AM' : 'PM') : (hour % 12) + (hour < 12 ? 'AM' : 'PM');
-            marker.style.top = `${yPosition}vh`;
-            markersDiv.appendChild(marker);
-        });
-    }
+    const slotHeight = 70 / totalSlots;
+    hoursToShow.forEach((hour) => {
+        const slotIndex = hour * slotsPerHour;
+        const yPosition = timeDirection === 'bottom'
+            ? (totalSlots - slotIndex) * slotHeight
+            : slotIndex * slotHeight;
+        const marker = document.createElement('div');
+        marker.className = 'time-marker';
+        marker.textContent = hour % 12 === 0 ? '12' + (hour < 12 ? 'AM' : 'PM') : (hour % 12) + (hour < 12 ? 'AM' : 'PM');
+        marker.style.top = `${yPosition}vh`;
+        markersDiv.appendChild(marker);
+    });
 }
 
 function formatTime(minutes) {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
+    const totalMinutes = minutes % 1440;
+    const hours = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
     const period = hours < 12 ? 'AM' : 'PM';
     const displayHours = hours % 12 === 0 ? 12 : hours % 12;
     return `${displayHours}:${mins.toString().padStart(2, '0')} ${period}`;
@@ -142,12 +136,9 @@ function resetGrid() {
     if (grid) grid.appendChild(label);
 
     const totalSlots = 24 * (60 / resolution);
-    const blocks = [...gridData[currentDay]]; // Create a copy to avoid modifying original
-    if (timeDirection === 'bottom') {
-        blocks.reverse(); // Reverse for bottom-up rendering but maintain time slots
-    }
+    const blocks = [...gridData[currentDay]];
     blocks.forEach((block, index) => {
-        const timeIndex = timeDirection === 'bottom' ? (totalSlots - 1 - index) : index;
+        const timeIndex = index;
         const startMinutes = timeIndex * resolution;
         const endMinutes = (timeIndex + 1) * resolution;
         const blockDiv = document.createElement('div');
@@ -270,7 +261,7 @@ function undoAction() {
 
 function dropBlock(dayIndex) {
     if (selectedCat === null) return alert('Select a category first!');
-    if (gridData[dayIndex].length >= slotsPerDay) return alert('Day is full!');
+    if (gridData[dayIndex].length >= slotsPerDay) return alert('Day is full! Adjust resolution or reset.');
     pushUndoState();
     const cat = categories[selectedCat];
     const mindsetSelect = document.getElementById('mindset-select');
@@ -287,6 +278,7 @@ function dropBlock(dayIndex) {
 
 function saveSchedule() {
     const schedule = {
+        version: "1.0", // Added for future compatibility
         resolution: resolution,
         timeDirection: timeDirection,
         categories: categories,
@@ -312,24 +304,23 @@ function loadSchedule(event) {
         try {
             const data = JSON.parse(e.target.result);
             
+            if (!data.version || data.version !== "1.0") {
+                throw new Error('Unsupported schedule version');
+            }
             if (!data.categories || !Array.isArray(data.categories) ||
                 !data.gridData || !Array.isArray(data.gridData) ||
                 !data.dayTypes || typeof data.dayTypes !== 'object') {
                 throw new Error('Invalid schedule format');
             }
-
             if (!data.categories.every(cat => cat.name && cat.color)) {
                 throw new Error('Invalid category data');
             }
-
             if (data.gridData.length !== 7 || !data.gridData.every(day => Array.isArray(day))) {
                 throw new Error('Invalid grid data');
             }
-
             if (!Object.values(data.dayTypes).every(day => Array.isArray(day))) {
                 throw new Error('Invalid day types data');
             }
-
             const categoryNames = data.categories.map(cat => cat.name);
             const allValid = [
                 ...data.gridData.flat(),
@@ -338,11 +329,9 @@ function loadSchedule(event) {
             if (!allValid) {
                 throw new Error('Grid data or day types reference unknown categories or invalid mindsets');
             }
-
             if (data.resolution && ![15, 30, 60].includes(data.resolution)) {
                 throw new Error('Invalid resolution value');
             }
-
             if (data.timeDirection && !['bottom', 'top'].includes(data.timeDirection)) {
                 throw new Error('Invalid time direction value');
             }
@@ -377,8 +366,8 @@ function toggleTimeDirection() {
     document.documentElement.style.setProperty('--day-flex-direction', timeDirection === 'bottom' ? 'column-reverse' : 'column');
     console.log(`Toggled time direction to ${timeDirection}`);
     renderTimeMarkers();
-    resetGrid(); // Re-render grid with locked positions
-    renderWeekView(); // Update week view to match direction
+    resetGrid();
+    renderWeekView();
 }
 
 function generateReport() {
@@ -451,9 +440,8 @@ function renderWeekView() {
         canvas.width = 1200;
         canvas.height = 300;
     }
-
     const dayWidth = (canvas?.width - 60) / 7 || 0;
-    const blockHeight = canvas?.height / slotsPerDay || 0; // Scale height based on slotsPerDay
+    const blockHeight = canvas?.height / slotsPerDay || 0;
     const slotsPerHour = 60 / resolution;
 
     if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -471,16 +459,15 @@ function renderWeekView() {
         ctx.textAlign = 'right';
         ctx.textBaseline = 'middle';
         const hoursToShow = [0, 6, 12, 18];
-        const orderedHours = timeDirection === 'bottom' ? hoursToShow : hoursToShow.slice().reverse();
-        orderedHours.forEach((hour, i) => {
-            const slotIndex = Math.floor(hour * slotsPerHour);
+        hoursToShow.forEach((hour) => {
+            const slotIndex = hour * slotsPerHour;
             const y = timeDirection === 'bottom'
-                ? canvas.height - (slotIndex * blockHeight)
-                : slotIndex * blockHeight;
+                ? canvas.height - (slotIndex * blockHeight) - (blockHeight / 2)
+                : slotIndex * blockHeight + (blockHeight / 2);
             ctx.fillText(
                 hour % 12 === 0 ? '12' + (hour < 12 ? 'AM' : 'PM') : (hour % 12) + (hour < 12 ? 'AM' : 'PM'),
                 55,
-                y + blockHeight / 2
+                y
             );
         });
     }
@@ -496,13 +483,12 @@ function renderWeekView() {
             ctx.fillText(day, x + dayWidth / 2, timeDirection === 'bottom' ? canvas.height - 10 : 15);
         }
 
-        const blocks = [...gridData[dayIndex]]; // Copy to avoid modifying original
-        if (timeDirection === 'bottom') {
-            blocks.reverse(); // Reverse for rendering but maintain time slots
-        }
+        const blocks = [...gridData[dayIndex]];
         blocks.forEach((block, index) => {
-            const timeIndex = timeDirection === 'bottom' ? (slotsPerDay - 1 - index) : index;
-            const y = timeIndex * blockHeight; // Use blockHeight for consistent scaling
+            const timeIndex = index;
+            const y = timeDirection === 'bottom'
+                ? (slotsPerDay - 1 - index) * blockHeight
+                : index * blockHeight;
             if (ctx) {
                 ctx.fillStyle = block.color;
                 ctx.fillRect(x + 1, y, dayWidth - 2, blockHeight);
@@ -565,7 +551,7 @@ function downloadPDF() {
         doc.addImage(pieImgData, 'PNG', 20, doc.autoTable?.previous.finalY + 100 || 140, 100, 100);
     }
 
-    doc.save(`BlockTime_Report_${studentName || 'Student'}.pdf`);
+    doc.save(`BlockTime_Report_${studentName || 'Student'}.pdf');
 }
 
 function toggleTheme() {

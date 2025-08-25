@@ -48,7 +48,7 @@ body {
     letter-spacing: 2px;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-.top-controls, .bottom-features {
+.control-module {
     padding: 15px;
     background: rgba(255, 255, 255, 0.7);
     border-radius: 10px;
@@ -59,6 +59,13 @@ body {
     align-items: center;
     backdrop-filter: blur(5px);
     border: 1px solid var(--grid-border);
+}
+.control-module h3 {
+    width: 100%;
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--accent-color);
 }
 #resolution, #day-select, #copy-day-select, #day-type-select {
     padding: 8px;
@@ -297,7 +304,7 @@ button:hover {
     .container {
         padding: 10px;
     }
-    .top-controls, .bottom-features {
+    .control-module {
         flex-direction: column;
         padding: 10px;
     }
