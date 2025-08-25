@@ -84,7 +84,35 @@ function downloadPDF() {
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'landscape' });
+
+    // Collect data within this function
+    const counts = {};
+    const mindsetCounts = {};
+    const happinessTotals = {};
+    const willingnessTotals = {};
+    categories.forEach(cat => {
+        counts[cat.name] = 0;
+        mindsetCounts[cat.name] = {};
+        mindsets.forEach(m => mindsetCounts[cat.name][m] = 0);
+        happinessTotals[cat.name] = 0;
+        willingnessTotals[cat.name] = 0;
+    });
+    gridData.flat().forEach(block => {
+        if (block && block.name && block.mindset) {
+            counts[block.name]++;
+            mindsetCounts[block.name][block.mindset]++;
+            const { happiness, willingness } = getHappinessWillingness(block.mindset);
+            happinessTotals[block.name] += happiness;
+            willingnessTotals[block.name] += willingness;
+        }
+    });
+    const hoursPerBlock = resolution / 60;
+    const totalBlocks = gridData.reduce((sum, day) => sum + day.length, 0);
+    const totalHours = totalBlocks * hoursPerBlock;
+
     const studentName = document.getElementById('studentName')?.value.trim() || 'Student';
+    const maxHappinessCat = Object.keys(happinessTotals).reduce((a, b) => happinessTotals[a] / (counts[a] || 1) > happinessTotals[b] / (counts[b] || 1) ? a : b, categories[0]?.name || 'None');
+    const maxPainCat = Object.keys(happinessTotals).reduce((a, b) => happinessTotals[a] / (counts[a] || 1) < happinessTotals[b] / (counts[b] || 1) ? a : b, categories[0]?.name || 'None');
     const summaryText = document.getElementById('summaryText')?.textContent || '';
     const tableBody = document.querySelector('#summaryTable tbody');
     const rows = tableBody ? Array.from(tableBody.children).map(row => Array.from(row.children).map(cell => cell.textContent)) : [];
