@@ -55,9 +55,13 @@ function undoAction() {
     alert('Last action undone');
 }
 
-function dropBlock(dayIndex) {
+function dropBlock(dayIndex, slotIndex) {
     if (selectedCat === null) {
         alert('Please select a category from the "Add Category" section before adding a block.');
+        return;
+    }
+    if (gridData[dayIndex].some(block => block.slotIndex === slotIndex)) {
+        alert('This slot is already occupied!');
         return;
     }
     if (gridData[dayIndex].length >= slotsPerDay) {
@@ -69,11 +73,11 @@ function dropBlock(dayIndex) {
     const mindsetSelect = document.getElementById('mindset-select');
     const mindset = mindsetSelect.value;
     if (mindsets.includes(mindset)) {
-        gridData[dayIndex].push({ ...cat, mindset });
+        gridData[dayIndex].push({ ...cat, mindset, slotIndex });
         resetGrid();
     } else {
         alert('Invalid mindset selected! Defaulting to Peace, Groundedness.');
-        gridData[dayIndex].push({ ...cat, mindset: 'Peace, Groundedness' });
+        gridData[dayIndex].push({ ...cat, mindset: 'Peace, Groundedness', slotIndex });
         resetGrid();
     }
 }
