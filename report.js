@@ -89,15 +89,21 @@ function downloadPDF() {
     const tableBody = document.querySelector('#summaryTable tbody');
     const rows = tableBody ? Array.from(tableBody.children).map(row => Array.from(row.children).map(cell => cell.textContent)) : [];
 
+    // Add title and student name
     doc.setFontSize(16);
     doc.text('BlockTime Weekly Report', 20, 20);
     doc.setFontSize(12);
     doc.text(`Prepared by: ${studentName}`, 20, 30);
-    if (summaryText) doc.text(summaryText.split('\n').map(line => line.trim()), 20, 40, { maxWidth: 260 });
 
+    // Add summary text
+    if (summaryText) {
+        doc.text(summaryText.split('\n').map(line => line.trim()), 20, 40, { maxWidth: 260 });
+    }
+
+    // Add table data
     if (tableBody) {
         doc.autoTable({
-            startY: 60,
+            startY: summaryText ? 60 : 40,
             head: [['Category', 'Hours', 'Percentage', 'Happiness/Willingness']],
             body: rows,
             theme: 'striped',
@@ -106,21 +112,46 @@ function downloadPDF() {
         });
     }
 
+    // Add week view chart
     const weekCanvas = document.getElementById('weekChart');
     const weekImgData = weekCanvas ? weekCanvas.toDataURL('image/png') : '';
     if (weekImgData) {
-        doc.text('Weekly Schedule', 20, doc.autoTable?.previous.finalY + 10 || 60);
-        doc.addImage(weekImgData, 'PNG', 20, doc.autoTable?.previous.finalY + 20 || 70, 260, 60);
+        doc.text('Weekly Schedule', 20, doc.autoTable?.previous.finalY + 10 || 100);
+        doc.addImage(weekImgData, 'PNG', 20, doc.autoTable?.previous.finalY + 20 || 110, 260, 60);
     }
 
-    const pieCanvas = document.getElementById('pieChart');
-    const pieImgData = pieCanvas ? pieCanvas.toDataURL('image/png') : '';
-    if (pieImgData) {
-        doc.text('Weekly Time Allocation', 20, doc.autoTable?.previous.finalY + 90 || 130);
-        doc.addImage(pieImgData, 'PNG', 20, doc.autoTable?.previous.finalY + 100 || 140, 260, 60);
+    // Generate and add happiness/willingness pie chart
+    const happinessData = { labels: [], datasets: [{ data: [], backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'] }] };
+    Object.keys(happinessTotals).forEach(name => {
+        const totalBlocks = counts[name] || 1;
+        const avgHappiness = (happinessTotals[name] / totalBlocks).toFixed(2);
+        happinessData.labels.push(`${name} (Happiness: ${avgHappiness})`);
+        happinessData.datasets[0].data.push(avgHappiness * 100); // Scale to percentage for pie chart
+    });
+
+    const happinessCanvas = document.createElement('canvas');
+    happinessCanvas.width = 400;
+    happinessCanvas.height = 400;
+    const happinessCtx = happinessCanvas.getContext('2d');
+    new Chart(happinessCtx, {
+        type: 'pie',
+        data: happinessData,
+        options: { 
+            responsive: true, 
+            plugins: { 
+                legend: { position: 'top' }, 
+                title: { display: true, text: 'Happiness/Willingness Breakdown (%)' } 
+            } 
+        }
+    });
+    const happinessImgData = happinessCanvas.toDataURL('image/png');
+    if (happinessImgData) {
+        doc.text('Happiness/Willingness Breakdown', 20, doc.autoTable?.previous.finalY + 90 || 170);
+        doc.addImage(happinessImgData, 'PNG', 20, doc.autoTable?.previous.finalY + 100 || 180, 260, 60);
     }
 
-    doc.save(`BlockTime_Report_${studentName}_${new Date().toLocaleDateString()}.pdf`);
+    // Save the PDF
+    doc.save(`BlockTime_Report_${studentName}_${new Date().toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }).replace(/:/g, '-')}.pdf`);
 }
 
 function toggleTheme() {
