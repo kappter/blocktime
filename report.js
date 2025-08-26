@@ -119,7 +119,7 @@ function downloadPDF() {
         gridData: JSON.parse(JSON.stringify(gridData)),
         categoriesList: JSON.parse(JSON.stringify(categories)),
         resolution: resolution,
-        mindsets: mindsets // Add mindsets for completeness
+        mindsets: JSON.parse(JSON.stringify(mindsets)) // Add mindsets
     };
 
     const reportWindow = window.open('report.html', '_blank');
