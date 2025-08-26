@@ -119,7 +119,7 @@ function downloadPDF() {
         gridData: JSON.parse(JSON.stringify(gridData)),
         categoriesList: JSON.parse(JSON.stringify(categories)),
         resolution: resolution,
-        mindsets: JSON.parse(JSON.stringify(mindsets)) // Add mindsets
+        mindsets: JSON.parse(JSON.stringify(mindsets))
     };
 
     const reportWindow = window.open('report.html', '_blank');
@@ -129,6 +129,97 @@ function downloadPDF() {
         };
     } else {
         alert('Please allow popups to view the report.');
+    }
+}
+
+function generateComparison() {
+    if (!window.comparisonGridData || !window.comparisonCategories) {
+        alert('Please load a comparison schedule first!');
+        return;
+    }
+
+    const userCounts = {};
+    const userMindsetCounts = {};
+    const userHappinessTotals = {};
+    const userWillingnessTotals = {};
+    categories.forEach(cat => {
+        userCounts[cat.name] = 0;
+        userMindsetCounts[cat.name] = {};
+        mindsets.forEach(m => userMindsetCounts[cat.name][m] = 0);
+        userHappinessTotals[cat.name] = 0;
+        userWillingnessTotals[cat.name] = 0;
+    });
+    gridData.flat().forEach(block => {
+        if (block && block.name && block.mindset) {
+            userCounts[block.name]++;
+            userMindsetCounts[block.name][block.mindset]++;
+            const { happiness, willingness } = getHappinessWillingness(block.mindset);
+            userHappinessTotals[block.name] += happiness;
+            userWillingnessTotals[block.name] += willingness;
+        }
+    });
+    const userHoursPerBlock = resolution / 60;
+    const userTotalHours = gridData.reduce((sum, day) => sum + day.length, 0) * userHoursPerBlock;
+
+    const compCounts = {};
+    const compMindsetCounts = {};
+    const compHappinessTotals = {};
+    const compWillingnessTotals = {};
+    window.comparisonCategories.forEach(cat => {
+        compCounts[cat.name] = 0;
+        compMindsetCounts[cat.name] = {};
+        mindsets.forEach(m => compMindsetCounts[cat.name][m] = 0);
+        compHappinessTotals[cat.name] = 0;
+        compWillingnessTotals[cat.name] = 0;
+    });
+    window.comparisonGridData.flat().forEach(block => {
+        if (block && block.name && block.mindset) {
+            compCounts[block.name] = (compCounts[block.name] || 0) + 1;
+            compMindsetCounts[block.name][block.mindset] = (compMindsetCounts[block.name][block.mindset] || 0) + 1;
+            const { happiness, willingness } = getHappinessWillingness(block.mindset);
+            compHappinessTotals[block.name] = (compHappinessTotals[block.name] || 0) + happiness;
+            compWillingnessTotals[block.name] = (compWillingnessTotals[block.name] || 0) + willingness;
+        }
+    });
+    const compHoursPerBlock = window.comparisonResolution / 60;
+    const compTotalHours = window.comparisonGridData.reduce((sum, day) => sum + day.length, 0) * compHoursPerBlock;
+
+    const userName = document.getElementById('studentName')?.value.trim() || 'User';
+    const compName = 'Comparison Partner'; // Placeholder; could be extracted from JSON if added
+
+    const comparisonData = {
+        userName,
+        userTotalHours: userTotalHours.toFixed(1),
+        userCategories: Object.keys(userCounts).map(name => ({
+            name,
+            hours: (userCounts[name] * userHoursPerBlock).toFixed(2),
+            pct: userTotalHours ? ((userCounts[name] * userHoursPerBlock) / 168 * 100).toFixed(1) : 0,
+            avgHappiness: (userHappinessTotals[name] / (userCounts[name] || 1)).toFixed(2),
+            avgWillingness: (userWillingnessTotals[name] / (userCounts[name] || 1)).toFixed(2)
+        })),
+        compName,
+        compTotalHours: compTotalHours.toFixed(1),
+        compCategories: Object.keys(compCounts).map(name => ({
+            name,
+            hours: (compCounts[name] * compHoursPerBlock).toFixed(2),
+            pct: compTotalHours ? ((compCounts[name] * compHoursPerBlock) / 168 * 100).toFixed(1) : 0,
+            avgHappiness: (compHappinessTotals[name] / (compCounts[name] || 1)).toFixed(2),
+            avgWillingness: (compWillingnessTotals[name] / (compCounts[name] || 1)).toFixed(2)
+        })),
+        resolution: resolution,
+        comparisonResolution: window.comparisonResolution,
+        categoriesList: categories,
+        comparisonCategoriesList: window.comparisonCategories,
+        mindsets: mindsets
+    };
+
+    const comparisonWindow = window.open('comparison.html', '_blank');
+    if (comparisonWindow) {
+        comparisonWindow.onload = () => {
+            comparisonWindow.postMessage({ type: 'comparisonData', data: comparisonData }, '*');
+        };
+    } else {
+        alert('Please allow popups to view the comparison.');
     }
 }
 
