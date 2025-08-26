@@ -1,9 +1,10 @@
-let gridData = Array(7).fill().map(() => []);
-let categories = [];
-let mindsets = ['Peace, Groundedness', 'Joyful Engagement', 'Sweet Resistance', 'Painful Desire', 'Forced Suffering'];
-let resolution = 60;
-let currentDay = 0;
-let selectedCat = null;
+// Remove the initial declarations
+// gridData = Array(7).fill().map(() => []); // Removed
+// categories = []; // Removed
+// mindsets = ['Peace, Groundedness', 'Joyful Engagement', 'Sweet Resistance', 'Painful Desire', 'Forced Suffering']; // Removed
+// resolution = 60; // Removed
+// currentDay = 0; // Removed
+// selectedCat = null; // Removed
 
 function addCategory() {
     const name = document.getElementById('cat-name').value.trim();
@@ -25,9 +26,9 @@ function loadSchedule() {
         const reader = new FileReader();
         reader.onload = function(e) {
             const data = JSON.parse(e.target.result);
-            gridData = data.gridData;
-            categories = data.categories;
-            resolution = data.resolution || 60;
+            gridData = data.gridData; // Assign, don’t declare
+            categories = data.categories; // Assign, don’t declare
+            resolution = data.resolution || 60; // Assign, don’t declare
             resetGrid();
             updateTotals();
             alert('Schedule loaded!');
@@ -43,9 +44,10 @@ function loadComparison() {
     if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            window.comparisonGridData = JSON.parse(e.target.result).gridData;
-            window.comparisonCategories = JSON.parse(e.target.result).categories;
-            window.comparisonResolution = JSON.parse(e.target.result).resolution || 60;
+            const data = JSON.parse(e.target.result);
+            window.comparisonGridData = data.gridData; // Assign to global
+            window.comparisonCategories = data.categories; // Assign to global
+            window.comparisonResolution = data.resolution || 60; // Assign to global
             alert('Comparison schedule loaded!');
         };
         reader.readAsText(file);
