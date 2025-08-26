@@ -3,118 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlockTime Scheduler</title>
+    <title>BlockTime</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" onerror="alert('Failed to load Chart.js. Please check your internet connection.')"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" onerror="alert('Failed to load jsPDF. Please check your internet connection.')"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" onerror="alert('Failed to load jsPDF autotable. Please check your internet connection.')"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1 class="app-title">BlockTime Scheduler</h1>
-        <div class="control-module">
-            <h3>Grid Settings</h3>
-            <select id="resolution">
-                <option value="15">15 min</option>
-                <option value="30">30 min</option>
-                <option value="60" selected>60 min</option>
-            </select>
-            <button id="toggle-time-direction">Time Render: 12AM at Bottom</button>
-            <select id="day-select">
-                <option value="0">Monday</option>
-                <option value="1">Tuesday</option>
-                <option value="2">Wednesday</option>
-                <option value="3">Thursday</option>
-                <option value="4">Friday</option>
-                <option value="5">Saturday</option>
-                <option value="6">Sunday</option>
-            </select>
+    <div id="app">
+        <h1>BlockTime</h1>
+        <input type="text" id="studentName" placeholder="Enter your name">
+        <div id="controls">
+            <div id="day-controls">
+                <select id="day-select">
+                    <option value="0">Monday</option>
+                    <option value="1">Tuesday</option>
+                    <option value="2">Wednesday</option>
+                    <option value="3">Thursday</option>
+                    <option value="4">Friday</option>
+                    <option value="5">Saturday</option>
+                    <option value="6">Sunday</option>
+                </select>
+                <button onclick="copyDay()">Copy Day</button>
+                <select id="copy-day-select">
+                    <option value="0">Monday</option>
+                    <option value="1">Tuesday</option>
+                    <option value="2">Wednesday</option>
+                    <option value="3">Thursday</option>
+                    <option value="4">Friday</option>
+                    <option value="5">Saturday</option>
+                    <option value="6">Sunday</option>
+                </select>
+                <button onclick="saveDayType()">Save Day Type</button>
+                <input type="text" id="dayTypeName" placeholder="Day Type Name">
+                <select id="day-type-select" onchange="applyDayType()">
+                    <option value="">Select Day Type</option>
+                </select>
+                <button onclick="undoAction()">Undo</button>
+                <button onclick="toggleTheme()">Toggle Theme</button>
+            </div>
+            <div id="category-controls">
+                <h2>Add Category</h2>
+                <input type="text" id="cat-name" placeholder="Category Name">
+                <input type="color" id="cat-color" value="#000000">
+                <select id="mindset-select">
+                    <option value="Peace, Groundedness">Peace, Groundedness</option>
+                    <option value="Joyful Engagement">Joyful Engagement</option>
+                    <option value="Sweet Resistance">Sweet Resistance</option>
+                    <option value="Painful Desire">Painful Desire</option>
+                    <option value="Forced Suffering">Forced Suffering</option>
+                </select>
+                <button onclick="addCategory()">Add Category</button>
+            </div>
+            <div id="schedule-controls">
+                <input type="file" id="schedule-file" accept=".json">
+                <button onclick="loadSchedule()">Load Schedule</button>
+                <button onclick="saveSchedule()">Save Schedule</button>
+                <div id="comparison-controls">
+                    <input type="file" id="comparison-file" accept=".json">
+                    <button onclick="loadComparison()">Load Comparison Schedule</button>
+                    <button onclick="generateComparison()">Generate Comparison</button>
+                </div>
+                <button onclick="generateReport()">Generate Report</button>
+                <button onclick="downloadPDF()">Download PDF</button>
+            </div>
         </div>
-        <div class="control-module">
-            <h3>Add Category</h3>
-            <input type="text" id="catName" placeholder="Category Name">
-            <input type="color" id="catColor" value="#ff0000">
-            <select id="mindset-select">
-                <option value="Joyful Engagement">Joyful Engagement</option>
-                <option value="Sweet Resistance">Sweet Resistance</option>
-                <option value="Painful Desire">Painful Desire</option>
-                <option value="Forced Suffering">Forced Suffering</option>
-                <option value="Peace, Groundedness" selected>Peace, Groundedness</option>
-            </select>
-            <button onclick="addCategory()">Add</button>
-        </div>
-        <div id="categories"></div>
-        <div id="legend"></div>
         <div id="grid"></div>
-        <div class="control-module">
-            <h3>Day Operations</h3>
-            <select id="copy-day-select">
-                <option value="0">Monday</option>
-                <option value="1">Tuesday</option>
-                <option value="2">Wednesday</option>
-                <option value="3">Thursday</option>
-                <option value="4">Friday</option>
-                <option value="5">Saturday</option>
-                <option value="6">Sunday</option>
-            </select>
-            <button onclick="copyDay()">Copy Day</button>
-            <input type="text" id="dayTypeName" placeholder="Day Type Name">
-            <button onclick="saveDayType()">Save Day Type</button>
-            <select id="day-type-select">
-                <option value="">Select Day Type</option>
-            </select>
-            <button onclick="applyDayType()">Apply Day Type</button>
-            <button onclick="undoAction()">Undo</button>
-        </div>
-        <div class="control-module">
-            <h3>Schedule</h3>
-            <input type="file" id="loadSchedule" accept=".json">
-            <button onclick="saveSchedule()">Save Schedule</button>
-        </div>
-        <div class="control-module">
-            <h3>Report</h3>
-            <input type="text" id="studentName" placeholder="Your Name">
-            <button onclick="generateReport()">Generate Report</button>
-            <button onclick="downloadPDF()">Download PDF</button>
-            <button onclick="toggleTheme()">Toggle Theme</button>
-        </div>
-        <div id="category-totals"></div>
-        <div id="attribute-summary"></div>
-        <div id="overall-total"></div>
         <div id="report" style="display: none;">
-            <h3>Summary</h3>
-            <div id="summaryText"></div>
+            <p id="summaryText"></p>
             <table id="summaryTable">
                 <thead><tr><th>Category</th><th>Hours</th><th>Percentage</th><th>Happiness/Willingness</th></tr></thead>
                 <tbody></tbody>
             </table>
             <canvas id="pieChart" width="400" height="400"></canvas>
+            <canvas id="weekChart" width="800" height="200"></canvas>
         </div>
-        <canvas id="weekChart" width="1200" height="300"></canvas>
     </div>
     <script src="grid.js"></script>
-    <script src="categories.js"></script>
     <script src="dayOperations.js"></script>
     <script src="schedule.js"></script>
     <script src="report.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const daySelect = document.getElementById('day-select');
-            if (daySelect) daySelect.addEventListener('change', () => {
-                currentDay = parseInt(daySelect.value);
-                resetGrid();
-            });
-            const loadScheduleInput = document.getElementById('loadSchedule');
-            if (loadScheduleInput) loadScheduleInput.addEventListener('change', loadSchedule);
-            const resolutionSelect = document.getElementById('resolution');
-            if (resolutionSelect) resolutionSelect.addEventListener('change', () => {
-                console.log('Resolution dropdown changed');
-                initGrid();
-            });
-            const toggleButton = document.getElementById('toggle-time-direction');
-            if (toggleButton) toggleButton.addEventListener('click', toggleTimeDirection);
-        });
-        window.addEventListener('load', initGrid);
-    </script>
+</body>
 </html>
