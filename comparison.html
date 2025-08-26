@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlockTime Comparison Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .chart-container { margin-top: 20px; text-align: center; display: inline-block; width: 45%; }
+        .no-print { display: none; }
+        @media print {
+            body { margin: 0; }
+            .no-print { display: none; }
+            .chart-container canvas { max-width: 100%; height: auto !important; }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>BlockTime Comparison Report</h1>
+        <p id="summary"></p>
+
+        <h2>Category Summary</h2>
+        <table id="comparison-table">
+            <thead><tr><th>Category</th><th>${userName} Hours</th><th>${compName} Hours</th><th>${userName} Happiness</th><th>${compName} Happiness</th></tr></thead>
+            <tbody></tbody>
+        </table>
+
+        <div class="chart-container">
+            <h2>${userName} Time Allocation</h2>
+            <canvas id="userPieChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <h2>${compName} Time Allocation</h2>
+            <canvas id="compPieChart"></canvas>
+        </div>
+
+        <button class="no-print" onclick="window.print()">Print or Save as PDF</button>
+    </div>
+
+    <script>
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'comparisonData') {
+                const data = event.data.data;
+                const userName = data.userName;
+                const compName = data.compName;
+
+                // Update table header with dynamic names
+                document.querySelector('#comparison-table thead tr').innerHTML = `
+                    <th>Category</th><th>${userName} Hours</th><th>${compName} Hours</th><th>${userName} Happiness</th><th>${compName} Happiness</th>
+                `;
+
+                // Populate category summary table
+                const tbody = document.querySelector('#comparison-table tbody');
+                tbody.innerHTML = '';
+                const allCategories = [...new Set([...data.userCategories.map(c => c.name), ...data.compCategories.map(c => c.name)])];
+                allCategories.forEach(catName => {
+                    const userCat = data.userCategories.find(c => c.name === catName) || { hours: '0.00', avgHappiness: '0.00' };
+                    const compCat = data.compCategories.find(c => c.name === catName) || { hours: '0.00', avgHappiness: '0.00' };
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${catName}</td>
+                            <td>${userCat.hours}</td>
+                            <td>${compCat.hours}</td>
+                            <td>${userCat.avgHappiness}</td>
+                            <td>${compCat.avgHappiness}</td>
+                        </tr>
+                    `;
+                });
+
+                // User Time Allocation Pie Chart
+                const userCtx = document.getElementById('userPieChart').getContext('2d');
+                new Chart(userCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: data.userCategories.map(c => c.name),
+                        datasets: [{
+                            data: data.userCategories.map(c => c.hours),
+                            backgroundColor: data.categoriesList.map(c => c.color)
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'top' },
+                            title: { display: true, text: `${userName} Time Allocation (Hours, ${data.resolution}-min slots)` }
+                        }
+                    }
+                });
+
+                // Comparison Time Allocation Pie Chart
+                const compCtx = document.getElementById('compPieChart').getContext('2d');
+                new Chart(compCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: data.compCategories.map(c => c.name),
+                        datasets: [{
+                            data: data.compCategories.map(c => c.hours),
+                            backgroundColor: data.comparisonCategoriesList.map(c => c.color)
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'top' },
+                            title: { display: true, text: `${compName} Time Allocation (Hours, ${data.comparisonResolution}-min slots)` }
+                        }
+                    }
+                });
+
+                // Summary text
+                document.getElementById('summary').innerHTML = `
+                    <strong>Comparison Overview:</strong> ${userName} planned ${data.userTotalHours} hours, while ${compName} planned ${data.compTotalHours} hours. Compare your schedules to find shared time or balance!
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
