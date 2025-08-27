@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BlockTime</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="favicon.ico" type="image/x-icon"> <!-- Optional: Add a dummy favicon -->
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
@@ -55,7 +55,12 @@
                     <option value="Forced Suffering">Forced Suffering</option>
                 </select>
                 <button onclick="addCategory()">Add Category</button>
-                <button onclick="addBlockToFirstSlot()" id="add-block-btn" style="display: none;">Add Block</button> <!-- Hidden by default, shown after adding category -->
+                <div id="block-placement">
+                    <select id="category-select" onchange="selectCategory(this.value)">
+                        <option value="-1">Select Category to Place</option>
+                    </select>
+                    <button onclick="placeBlock()" id="place-block-btn" disabled>Place Block</button>
+                </div>
             </div>
             <div id="schedule-controls">
                 <input type="file" id="schedule-file" accept=".json">
