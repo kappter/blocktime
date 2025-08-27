@@ -1,6 +1,3 @@
-let dayTypes = {};
-let undoStack = [];
-
 function copyDay() {
     const targetDay = parseInt(document.getElementById('copy-day-select').value);
     if (targetDay === currentDay) return alert('Cannot copy to the same day!');
@@ -76,10 +73,8 @@ function dropBlock(dayIndex, slotIndex) {
             alert('Cannot replace a block with the same category!');
             return;
         }
-        // Replace with new category, using selectedMindset or category's default
         gridData[dayIndex][existingBlockIndex] = { ...cat, mindset: selectedMindset || cat.mindset, slotIndex };
     } else {
-        // Add new block, using category's mindset as default
         const mindset = cat.mindset || selectedMindset || 'Peace, Groundedness';
         if (mindsets.includes(mindset)) {
             gridData[dayIndex].push({ ...cat, mindset, slotIndex });
@@ -90,3 +85,7 @@ function dropBlock(dayIndex, slotIndex) {
     }
     resetGrid();
 }
+
+let days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+let dayTypes = {};
+let undoStack = [];
