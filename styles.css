@@ -27,6 +27,16 @@ body {
     transition: all 0.3s ease;
 }
 
+/* Dark mode adjustments (if toggleTheme is used) */
+body.dark-mode .slot {
+    background-color: #333;
+    border-color: #555;
+}
+
+body.dark-mode .block-text {
+    color: #fff;
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -82,14 +92,16 @@ input[type="text"], input[type="color"], input[type="file"] {
     display: none; /* Removed markers, so hide this */
 }
 
+/* Ensure grid container has defined dimensions */
 #grid {
-    flex-grow: 1;
-    height: 70vh;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 days */
+    grid-template-rows: repeat(auto-fill, minmax(40px, auto)); /* Adjustable row height */
+    gap: 2px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
 }
-
 .day {
     display: flex;
     flex-direction: var(--day-flex-direction);
@@ -97,22 +109,32 @@ input[type="text"], input[type="color"], input[type="file"] {
     position: relative;
 }
 
+/* Increase slot size and ensure text fits */
 .slot {
+    min-height: 40px; /* Minimum height for readability */
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
     position: relative;
-    flex: 1;
-    border: 1px solid var(--border-color);
-    transition: background-color 0.2s;
+    overflow: hidden; /* Prevent overflow if text is too long */
+    font-size: 12px; /* Base font size */
 }
 
 .slot.hover-highlight {
     background-color: rgba(0, 255, 0, 0.3); /* Stronger highlight */
 }
 
+/* Style the block text */
 .block {
     position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    box-sizing: border-box;
 }
 
 .block-label {
@@ -123,6 +145,15 @@ input[type="text"], input[type="color"], input[type="file"] {
     overflow: hidden;
     text-overflow: ellipsis;
     padding: 2px;
+}
+
+.block-text {
+    font-size: 10px; /* Start small, adjust as needed */
+    line-height: 1.2;
+    text-align: center;
+    white-space: nowrap; /* Prevent wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Truncate with ellipsis if too long */
 }
 
 .day-label {
@@ -199,24 +230,12 @@ input[type="text"], input[type="color"], input[type="file"] {
     max-width: 100%;
 }
 
+/* Responsive adjustments */
 @media (max-width: 600px) {
-    .container {
-        padding: 10px;
+    .slot {
+        min-height: 30px;
     }
-    .control-module {
-        padding: 5px;
-    }
-    button, select, input {
-        width: 100%;
-        margin: 5px 0;
-    }
-    .grid-container {
-        width: 100%;
-    }
-    .time-marker {
-        font-size: 10px;
-    }
-    .block-label {
-        font-size: 6px;
+    .block-text {
+        font-size: 8px;
     }
 }
