@@ -53,8 +53,8 @@ function undoAction() {
 }
 
 function dropBlock(dayIndex, slotIndex) {
-    if (selectedCat === null) {
-        alert('Please select a category from the "Add Category" section before adding a block.');
+    if (selectedCat === null || selectedCat < 0 || selectedCat >= categories.length) {
+        alert('Please select a valid category!');
         return;
     }
     if (gridData[dayIndex].length >= slotsPerDay) {
