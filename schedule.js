@@ -68,4 +68,33 @@ function loadComparison() {
         const reader = new FileReader();
         reader.onload = function(e) {
             const data = JSON.parse(e.target.result);
-           
+            window.comparisonGridData = data.gridData;
+            window.comparisonCategories = data.categories;
+            window.comparisonResolution = data.resolution || 60;
+            alert('Comparison schedule loaded!');
+        };
+        reader.readAsText(file);
+        console.log(`Comparison file selected: ${file.name}`);
+    }
+}
+
+function saveSchedule() {
+    const data = {
+        version: "1.0",
+        resolution: resolution,
+        timeDirection: "top",
+        categories: categories,
+        gridData: gridData
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `BlockTime_Schedule_${new Date().toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }).replace(/:/g, '-')}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function updateTotals() {
+    console.log('Totals updated');
+}
