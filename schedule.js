@@ -6,9 +6,17 @@ function addCategory() {
         categories.push({ name, color, mindset });
         document.getElementById('cat-name').value = '';
         resetGrid();
+        document.getElementById('add-block-btn').style.display = 'inline-block'; // Show Add Block button
     } else {
         alert('Please enter a unique category name!');
     }
+}
+
+function addBlockToFirstSlot() {
+    const dayIndex = parseInt(document.getElementById('day-select').value);
+    const firstSlot = 0; // Add to the first slot
+    dropBlock(dayIndex, firstSlot); // Assumes dropBlock is in dayOperations.js
+    document.getElementById('add-block-btn').style.display = 'none'; // Hide after use
 }
 
 function loadSchedule() {
