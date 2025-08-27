@@ -26,8 +26,13 @@ function updateGrid() {
     gridData[currentDay].forEach(block => {
         const slot = document.querySelector(`.slot[data-index="${block.slotIndex}"]`);
         if (slot) {
-            slot.innerHTML = `<div class="block" style="background-color: ${block.color}" draggable="true">${block.name}<br>${block.mindset}</div>`;
-            slot.querySelector('.block').addEventListener('dragstart', dragStart);
+            const blockDiv = document.createElement('div');
+            blockDiv.className = 'block';
+            blockDiv.style.backgroundColor = block.color;
+            blockDiv.draggable = true;
+            blockDiv.innerHTML = `<span class="block-text">${block.name}<br>${block.mindset}</span>`; // Wrap text in span for styling
+            blockDiv.addEventListener('dragstart', dragStart);
+            slot.appendChild(blockDiv);
         }
     });
 }
@@ -44,12 +49,9 @@ function drop(e) {
 }
 
 function dragStart(e) {
-    const block = e.target;
+    const block = e.target.querySelector('.block-text');
     selectedCat = categories.findIndex(cat => cat.name === block.textContent.split('<br>')[0]);
     e.dataTransfer.setData('text/plain', '');
 }
 
 let slotsPerDay = Math.floor(24 * 60 / resolution); // Initialize based on resolution
-window.onload = function() {
-    resetGrid();
-};
