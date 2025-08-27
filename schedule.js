@@ -1,11 +1,3 @@
-// Remove the initial declarations
-// gridData = Array(7).fill().map(() => []); // Removed
-// categories = []; // Removed
-// mindsets = ['Peace, Groundedness', 'Joyful Engagement', 'Sweet Resistance', 'Painful Desire', 'Forced Suffering']; // Removed
-// resolution = 60; // Removed
-// currentDay = 0; // Removed
-// selectedCat = null; // Removed
-
 function addCategory() {
     const name = document.getElementById('cat-name').value.trim();
     const color = document.getElementById('cat-color').value;
@@ -26,9 +18,9 @@ function loadSchedule() {
         const reader = new FileReader();
         reader.onload = function(e) {
             const data = JSON.parse(e.target.result);
-            gridData = data.gridData; // Assign, don’t declare
-            categories = data.categories; // Assign, don’t declare
-            resolution = data.resolution || 60; // Assign, don’t declare
+            gridData = data.gridData;
+            categories = data.categories;
+            resolution = data.resolution || 60;
             resetGrid();
             updateTotals();
             alert('Schedule loaded!');
@@ -45,9 +37,9 @@ function loadComparison() {
         const reader = new FileReader();
         reader.onload = function(e) {
             const data = JSON.parse(e.target.result);
-            window.comparisonGridData = data.gridData; // Assign to global
-            window.comparisonCategories = data.categories; // Assign to global
-            window.comparisonResolution = data.resolution || 60; // Assign to global
+            window.comparisonGridData = data.gridData;
+            window.comparisonCategories = data.categories;
+            window.comparisonResolution = data.resolution || 60;
             alert('Comparison schedule loaded!');
         };
         reader.readAsText(file);
@@ -70,4 +62,9 @@ function saveSchedule() {
     a.download = `BlockTime_Schedule_${new Date().toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }).replace(/:/g, '-')}.json`;
     a.click();
     URL.revokeObjectURL(url);
+}
+
+function updateTotals() {
+    // Placeholder for updating totals if needed elsewhere
+    console.log('Totals updated');
 }
