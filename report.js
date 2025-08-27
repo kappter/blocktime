@@ -34,9 +34,9 @@ function generateReport() {
     const maxPainCat = Object.keys(happinessTotals).reduce((a, b) => happinessTotals[a] / (counts[a] || 1) < happinessTotals[b] / (counts[b] || 1) ? a : b, categories[0]?.name || 'None');
     const summaryText = document.getElementById('summaryText');
     if (summaryText) summaryText.innerHTML = `
-        <p><strong>Great job, ${studentName}! 🎉</strong> You've planned <strong>${totalHours.toFixed(1)}</strong> hours of your week! 
-        Your happiest activity is <strong>${maxHappinessCat}</strong> with an average happiness of ${(happinessTotals[maxHappinessCat] / (counts[maxHappinessCat] || 1)).toFixed(2)}. 
-        However, <strong>${maxPainCat}</strong> (average happiness ${(happinessTotals[maxPainCat] / (counts[maxPainCat] || 1)).toFixed(2)}) might be worth rethinking—consider reducing painful or resistant tasks for a happier routine!</p>
+        <p><strong>Great job, ${studentName}! 🎉</strong> You've planned <strong>${totalHours.toFixed(1)}</strong> hours! 
+        Happiest: <strong>${maxHappinessCat}</strong> (${(happinessTotals[maxHappinessCat] / (counts[maxHappinessCat] || 1)).toFixed(2)}), 
+        rethink: <strong>${maxPainCat}</strong> (${(happinessTotals[maxPainCat] / (counts[maxPainCat] || 1)).toFixed(2)}).</p>
     `;
 
     const tableBody = document.querySelector('#summaryTable tbody');
@@ -226,4 +226,28 @@ function generateComparison() {
 function toggleTheme() {
     document.body.classList.toggle('dark-mode');
     renderWeekView();
+}
+
+// Placeholder for getHappinessWillingness (assumed from context)
+function getHappinessWillingness(mindset) {
+    const happinessMap = {
+        'Peace, Groundedness': 0.80,
+        'Joyful Engagement': 0.90,
+        'Sweet Resistance': 0.50,
+        'Painful Desire': 0.30,
+        'Forced Suffering': 0.10
+    };
+    const willingnessMap = {
+        'Peace, Groundedness': 0.80,
+        'Joyful Engagement': 0.90,
+        'Sweet Resistance': 0.50,
+        'Painful Desire': 0.30,
+        'Forced Suffering': 0.10
+    };
+    return { happiness: happinessMap[mindset] || 0.5, willingness: willingnessMap[mindset] || 0.5 };
+}
+
+function renderWeekView() {
+    // Placeholder for week view rendering if needed
+    console.log('Week view rendered');
 }
