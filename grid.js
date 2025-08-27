@@ -50,3 +50,6 @@ function dragStart(e) {
 }
 
 let slotsPerDay = Math.floor(24 * 60 / resolution); // Initialize based on resolution
+window.onload = function() {
+    resetGrid();
+};
