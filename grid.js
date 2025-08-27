@@ -8,7 +8,7 @@ let selectedCat = null;
 function resetGrid() {
     const grid = document.getElementById('grid');
     grid.innerHTML = '';
-    const slotsPerDay = Math.floor(24 * 60 / resolution); // Calculate based on resolution
+    const slotsPerDay = Math.floor(24 * 60 / resolution);
     for (let i = 0; i < slotsPerDay; i++) {
         const div = document.createElement('div');
         div.className = 'slot';
@@ -30,7 +30,7 @@ function updateGrid() {
             blockDiv.className = 'block';
             blockDiv.style.backgroundColor = block.color;
             blockDiv.draggable = true;
-            blockDiv.innerHTML = `<span class="block-text">${block.name}<br>${block.mindset}</span>`; // Wrap text in span for styling
+            blockDiv.innerHTML = `<span class="block-text">${block.name}<br>${block.mindset}</span>`;
             blockDiv.addEventListener('dragstart', dragStart);
             slot.appendChild(blockDiv);
         }
@@ -54,4 +54,4 @@ function dragStart(e) {
     e.dataTransfer.setData('text/plain', '');
 }
 
-let slotsPerDay = Math.floor(24 * 60 / resolution); // Initialize based on resolution
+let slotsPerDay = Math.floor(24 * 60 / resolution);
