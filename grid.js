@@ -1,5 +1,5 @@
 let gridData = Array(7).fill().map(() => []);
-let categories = [];
+let categories = []; // Global array for categories
 let mindsets = ['Peace, Groundedness', 'Joyful Engagement', 'Sweet Resistance', 'Painful Desire', 'Forced Suffering'];
 let resolution = 60;
 let currentDay = 0;
@@ -31,6 +31,7 @@ function resetGrid() {
     }
     grid.appendChild(dayDiv);
     updateGrid();
+    console.log('Grid reset, categories available:', categories); // Debug
 }
 
 function updateGrid() {
@@ -63,6 +64,27 @@ function dragStart(e) {
     const block = e.target.querySelector('.block-label');
     selectedCat = categories.findIndex(cat => cat.name === block.textContent.split('<br>')[0]);
     e.dataTransfer.setData('text/plain', '');
+}
+
+function dropBlock(dayIndex, slotIndex) {
+    if (selectedCat === null || selectedCat < 0 || selectedCat >= categories.length) {
+        alert('Please select a category first!');
+        return;
+    }
+    if (gridData[dayIndex].length >= slotsPerDay) {
+        alert('Day is full! Adjust resolution or reset.');
+        return;
+    }
+    pushUndoState();
+    const cat = categories[selectedCat];
+    const mindset = document.getElementById('mindset-select').value || cat.mindset;
+    const existingBlockIndex = gridData[dayIndex].findIndex(block => block.slotIndex === slotIndex);
+    if (existingBlockIndex !== -1) {
+        gridData[dayIndex][existingBlockIndex] = { ...cat, mindset, slotIndex };
+    } else {
+        gridData[dayIndex].push({ ...cat, mindset, slotIndex });
+    }
+    resetGrid();
 }
 
 function toggleTimeDirection() {
