@@ -6,7 +6,7 @@ function addCategory() {
     if (name && !categories.some(cat => cat.name === name)) {
         categories.push({ name, color, mindset });
         document.getElementById('cat-name').value = '';
-        resetGrid(); // Ensure grid updates
+        resetGrid(); // Refresh grid with new category
         console.log('Categories after add:', categories); // Debug
     } else {
         alert('Please enter a unique category name!');
@@ -20,8 +20,8 @@ function loadSchedule() {
         const reader = new FileReader();
         reader.onload = function(e) {
             const data = JSON.parse(e.target.result);
-            gridData = data.gridData;
-            categories = data.categories;
+            gridData = data.gridData || gridData;
+            categories = data.categories || categories;
             resolution = data.resolution || 60;
             resetGrid();
             updateTotals();
