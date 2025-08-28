@@ -12,11 +12,6 @@ function resetGrid() {
     const slotsPerDay = Math.floor(24 * 60 / resolution);
     const dayDiv = document.createElement('div');
     dayDiv.className = 'day';
-    dayDiv.addEventListener('click', (e) => {
-        if (selectedCat !== null && e.target.className === 'slot') {
-            dropBlock(currentDay, parseInt(e.target.dataset.index));
-        }
-    });
     const label = document.createElement('div');
     label.className = 'day-label';
     label.textContent = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][currentDay];
@@ -25,12 +20,18 @@ function resetGrid() {
         const div = document.createElement('div');
         div.className = 'slot';
         div.dataset.index = i;
+        div.addEventListener('click', (e) => {
+            if (selectedCat !== null) {
+                dropBlock(currentDay, i);
+            }
+        });
         div.addEventListener('dragover', dragOver);
         div.addEventListener('drop', drop);
         dayDiv.appendChild(div);
     }
     grid.appendChild(dayDiv);
     updateGrid();
+    console.log('Grid reset, slots:', slotsPerDay); // Debug
 }
 
 function updateGrid() {
@@ -50,10 +51,12 @@ function updateGrid() {
 
 function dragOver(e) {
     e.preventDefault();
+    e.target.classList.add('hover-highlight');
 }
 
 function drop(e) {
     e.preventDefault();
+    e.target.classList.remove('hover-highlight');
     const dayIndex = parseInt(document.getElementById('day-select').value);
     const slotIndex = parseInt(e.target.dataset.index);
     dropBlock(dayIndex, slotIndex);
@@ -66,10 +69,12 @@ function dragStart(e) {
 }
 
 function dropBlock(dayIndex, slotIndex) {
+    console.log('Dropping block at', dayIndex, slotIndex, 'with selectedCat:', selectedCat); // Debug
     if (selectedCat === null || selectedCat < 0 || selectedCat >= categories.length) {
         alert('Please select a category first!');
         return;
     }
+    const slotsPerDay = Math.floor(24 * 60 / resolution);
     if (gridData[dayIndex].length >= slotsPerDay) {
         alert('Day is full! Adjust resolution or reset.');
         return;
@@ -84,6 +89,7 @@ function dropBlock(dayIndex, slotIndex) {
         gridData[dayIndex].push({ ...cat, mindset, slotIndex });
     }
     resetGrid();
+    selectedCat = null; // Reset selection after drop
 }
 
 function toggleTimeDirection() {
