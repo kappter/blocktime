@@ -1,5 +1,5 @@
 let gridData = Array(7).fill().map(() => []);
-let categories = []; // Global array for categories
+let categories = [];
 let mindsets = ['Peace, Groundedness', 'Joyful Engagement', 'Sweet Resistance', 'Painful Desire', 'Forced Suffering'];
 let resolution = 60;
 let currentDay = 0;
@@ -31,7 +31,6 @@ function resetGrid() {
     }
     grid.appendChild(dayDiv);
     updateGrid();
-    console.log('Grid reset, categories available:', categories); // Debug
 }
 
 function updateGrid() {
