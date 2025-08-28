@@ -1,253 +1,56 @@
 function generateReport() {
-    if (typeof Chart === 'undefined') {
-        console.error('Chart.js failed to load. Please check your internet connection or CDN availability.');
-        alert('Cannot generate report: Chart.js library failed to load. Please check your internet connection and try again.');
-        return;
-    }
-
     const counts = {};
-    const mindsetCounts = {};
-    const happinessTotals = {};
-    const willingnessTotals = {};
-    categories.forEach(cat => {
-        counts[cat.name] = 0;
-        mindsetCounts[cat.name] = {};
-        mindsets.forEach(m => mindsetCounts[cat.name][m] = 0);
-        happinessTotals[cat.name] = 0;
-        willingnessTotals[cat.name] = 0;
-    });
-    gridData.flat().forEach(block => {
-        if (block && block.name && block.mindset) {
-            counts[block.name]++;
-            mindsetCounts[block.name][block.mindset]++;
-            const { happiness, willingness } = getHappinessWillingness(block.mindset);
-            happinessTotals[block.name] += happiness;
-            willingnessTotals[block.name] += willingness;
-        }
-    });
+    categories.forEach(cat => counts[cat.name] = 0);
+    gridData.flat().forEach(block => counts[block.name]++);
     const hoursPerBlock = resolution / 60;
-    const totalBlocks = gridData.reduce((sum, day) => sum + day.length, 0);
-    const totalHours = totalBlocks * hoursPerBlock;
+    const totalHours = gridData.reduce((sum, day) => sum + day.length, 0) * hoursPerBlock;
 
-    const studentName = document.getElementById('studentName')?.value.trim() || 'Student';
-    const maxHappinessCat = Object.keys(happinessTotals).reduce((a, b) => happinessTotals[a] / (counts[a] || 1) > happinessTotals[b] / (counts[b] || 1) ? a : b, categories[0]?.name || 'None');
-    const maxPainCat = Object.keys(happinessTotals).reduce((a, b) => happinessTotals[a] / (counts[a] || 1) < happinessTotals[b] / (counts[b] || 1) ? a : b, categories[0]?.name || 'None');
     const summaryText = document.getElementById('summaryText');
-    if (summaryText) summaryText.innerHTML = `
-        <p><strong>Great job, ${studentName}! 🎉</strong> You've planned <strong>${totalHours.toFixed(1)}</strong> hours! 
-        Happiest: <strong>${maxHappinessCat}</strong> (${(happinessTotals[maxHappinessCat] / (counts[maxHappinessCat] || 1)).toFixed(2)}), 
-        rethink: <strong>${maxPainCat}</strong> (${(happinessTotals[maxPainCat] / (counts[maxPainCat] || 1)).toFixed(2)}).</p>
-    `;
+    summaryText.innerHTML = `<p>Great job! You've planned ${totalHours.toFixed(1)} hours. Check your categories below!</p>`;
 
     const tableBody = document.querySelector('#summaryTable tbody');
-    if (tableBody) tableBody.innerHTML = '';
-    const pieData = { labels: [], datasets: [{ data: [], backgroundColor: [] }] };
+    tableBody.innerHTML = '';
     Object.keys(counts).forEach(name => {
-        const totalBlocks = counts[name] || 1;
         const hours = counts[name] * hoursPerBlock;
-        const pct = totalHours ? (hours / 168 * 100).toFixed(1) : 0;
-        const avgHappiness = (happinessTotals[name] / totalBlocks).toFixed(2);
-        const avgWillingness = (willingnessTotals[name] / totalBlocks).toFixed(2);
-        const row = `<tr><td>${name}</td><td>${hours.toFixed(2)}</td><td>${pct}%</td><td>Happiness: ${avgHappiness}, Willingness: ${avgWillingness}</td></tr>`;
-        if (tableBody) tableBody.innerHTML += row;
-        pieData.labels.push(name);
-        pieData.datasets[0].data.push(hours);
-        pieData.datasets[0].backgroundColor.push(categories.find(c => c.name === name).color);
+        const pct = totalHours ? (hours / totalHours * 100).toFixed(1) : 0;
+        tableBody.innerHTML += `<tr><td>${name}</td><td>${hours.toFixed(2)}</td><td>${pct}%</td><td>${mindsets.map(m => `${m}: ${gridData.flat().filter(b => b.name === name && b.mindset === m).length * hoursPerBlock}hrs`).join(', ')}</td></tr>`;
     });
 
     const reportDiv = document.getElementById('report');
-    if (reportDiv) reportDiv.style.display = 'block';
+    reportDiv.style.display = 'block';
 
-    renderWeekView();
-
-    const ctx = document.getElementById('pieChart')?.getContext('2d');
-    if (ctx && window.myPieChart) window.myPieChart.destroy();
-    if (ctx) window.myPieChart = new Chart(ctx, {
+    const ctx = document.getElementById('pieChart').getContext('2d');
+    if (window.myPieChart) window.myPieChart.destroy();
+    window.myPieChart = new Chart(ctx, {
         type: 'pie',
-        data: pieData,
-        options: { 
-            responsive: true,
-            plugins: { 
-                legend: { position: 'top' },
-                title: { display: true, text: `Weekly Time Allocation (Hours, ${resolution}-min slots)` }
-            }
-        }
+        data: {
+            labels: Object.keys(counts),
+            datasets: [{
+                data: Object.values(counts).map(c => c * hoursPerBlock),
+                backgroundColor: categories.map(c => c.color)
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'top' } } }
     });
 }
 
 function downloadPDF() {
-    const studentName = document.getElementById('studentName')?.value.trim() || 'Student';
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.text('Weekly Summary', 10, 10);
+    const tableData = [];
     const counts = {};
-    const mindsetCounts = {};
-    const happinessTotals = {};
-    const willingnessTotals = {};
-    categories.forEach(cat => {
-        counts[cat.name] = 0;
-        mindsetCounts[cat.name] = {};
-        mindsets.forEach(m => mindsetCounts[cat.name][m] = 0);
-        happinessTotals[cat.name] = 0;
-        willingnessTotals[cat.name] = 0;
-    });
-    gridData.flat().forEach(block => {
-        if (block && block.name && block.mindset) {
-            counts[block.name]++;
-            mindsetCounts[block.name][block.mindset]++;
-            const { happiness, willingness } = getHappinessWillingness(block.mindset);
-            happinessTotals[block.name] += happiness;
-            willingnessTotals[block.name] += willingness;
-        }
-    });
+    categories.forEach(cat => counts[cat.name] = 0);
+    gridData.flat().forEach(block => counts[block.name]++);
     const hoursPerBlock = resolution / 60;
-    const totalHours = gridData.reduce((sum, day) => sum + day.length, 0) * hoursPerBlock;
-    const maxHappinessCat = Object.keys(happinessTotals).reduce((a, b) => happinessTotals[a] / (counts[a] || 1) > happinessTotals[b] / (counts[b] || 1) ? a : b, categories[0]?.name || 'None');
-    const maxPainCat = Object.keys(happinessTotals).reduce((a, b) => happinessTotals[a] / (counts[a] || 1) < happinessTotals[b] / (counts[b] || 1) ? a : b, categories[0]?.name || 'None');
-
-    const reportData = {
-        studentName,
-        totalHours: totalHours.toFixed(1),
-        maxHappinessCat,
-        maxHappinessAvg: (happinessTotals[maxHappinessCat] / (counts[maxHappinessCat] || 1)).toFixed(2),
-        maxPainCat,
-        maxPainAvg: (happinessTotals[maxPainCat] / (counts[maxPainCat] || 1)).toFixed(2),
-        categories: Object.keys(counts).map(name => ({
-            name,
-            hours: (counts[name] * hoursPerBlock).toFixed(2),
-            pct: totalHours ? ((counts[name] * hoursPerBlock) / 168 * 100).toFixed(1) : 0,
-            avgHappiness: (happinessTotals[name] / (counts[name] || 1)).toFixed(2),
-            avgWillingness: (willingnessTotals[name] / (counts[name] || 1)).toFixed(2)
-        })),
-        gridData: JSON.parse(JSON.stringify(gridData)),
-        categoriesList: JSON.parse(JSON.stringify(categories)),
-        resolution: resolution,
-        mindsets: JSON.parse(JSON.stringify(mindsets))
-    };
-
-    const reportWindow = window.open('report.html', '_blank');
-    if (reportWindow) {
-        reportWindow.onload = () => {
-            reportWindow.postMessage({ type: 'reportData', data: reportData }, '*');
-        };
-    } else {
-        alert('Please allow popups to view the report.');
-    }
-}
-
-function generateComparison() {
-    if (!window.comparisonGridData || !window.comparisonCategories) {
-        alert('Please load a comparison schedule first!');
-        return;
-    }
-
-    const userCounts = {};
-    const userMindsetCounts = {};
-    const userHappinessTotals = {};
-    const userWillingnessTotals = {};
-    categories.forEach(cat => {
-        userCounts[cat.name] = 0;
-        userMindsetCounts[cat.name] = {};
-        mindsets.forEach(m => userMindsetCounts[cat.name][m] = 0);
-        userHappinessTotals[cat.name] = 0;
-        userWillingnessTotals[cat.name] = 0;
+    Object.keys(counts).forEach(name => {
+        const hours = counts[name] * hoursPerBlock;
+        const pct = (hours / (168) * 100).toFixed(1);
+        tableData.push([name, hours.toFixed(2), `${pct}%`, mindsets.map(m => `${m}: ${gridData.flat().filter(b => b.name === name && b.mindset === m).length * hoursPerBlock}hrs`).join(', ')]);
     });
-    gridData.flat().forEach(block => {
-        if (block && block.name && block.mindset) {
-            userCounts[block.name]++;
-            userMindsetCounts[block.name][block.mindset]++;
-            const { happiness, willingness } = getHappinessWillingness(block.mindset);
-            userHappinessTotals[block.name] += happiness;
-            userWillingnessTotals[block.name] += willingness;
-        }
+    doc.autoTable({
+        head: [['Category', 'Hours', 'Percentage', 'Happiness/Willingness']],
+        body: tableData
     });
-    const userHoursPerBlock = resolution / 60;
-    const userTotalHours = gridData.reduce((sum, day) => sum + day.length, 0) * userHoursPerBlock;
-
-    const compCounts = {};
-    const compMindsetCounts = {};
-    const compHappinessTotals = {};
-    const compWillingnessTotals = {};
-    window.comparisonCategories.forEach(cat => {
-        compCounts[cat.name] = 0;
-        compMindsetCounts[cat.name] = {};
-        mindsets.forEach(m => compMindsetCounts[cat.name][m] = 0);
-        compHappinessTotals[cat.name] = 0;
-        compWillingnessTotals[cat.name] = 0;
-    });
-    window.comparisonGridData.flat().forEach(block => {
-        if (block && block.name && block.mindset) {
-            compCounts[block.name] = (compCounts[block.name] || 0) + 1;
-            compMindsetCounts[block.name][block.mindset] = (compMindsetCounts[block.name][block.mindset] || 0) + 1;
-            const { happiness, willingness } = getHappinessWillingness(block.mindset);
-            compHappinessTotals[block.name] = (compHappinessTotals[block.name] || 0) + happiness;
-            compWillingnessTotals[block.name] = (compWillingnessTotals[block.name] || 0) + willingness;
-        }
-    });
-    const compHoursPerBlock = window.comparisonResolution / 60;
-    const compTotalHours = window.comparisonGridData.reduce((sum, day) => sum + day.length, 0) * compHoursPerBlock;
-
-    const userName = document.getElementById('studentName')?.value.trim() || 'User';
-    const compName = 'Comparison Partner'; // Placeholder; could be extracted from JSON if added
-
-    const comparisonData = {
-        userName,
-        userTotalHours: userTotalHours.toFixed(1),
-        userCategories: Object.keys(userCounts).map(name => ({
-            name,
-            hours: (userCounts[name] * userHoursPerBlock).toFixed(2),
-            pct: userTotalHours ? ((userCounts[name] * userHoursPerBlock) / 168 * 100).toFixed(1) : 0,
-            avgHappiness: (userHappinessTotals[name] / (userCounts[name] || 1)).toFixed(2),
-            avgWillingness: (userWillingnessTotals[name] / (userCounts[name] || 1)).toFixed(2)
-        })),
-        compName,
-        compTotalHours: compTotalHours.toFixed(1),
-        compCategories: Object.keys(compCounts).map(name => ({
-            name,
-            hours: (compCounts[name] * compHoursPerBlock).toFixed(2),
-            pct: compTotalHours ? ((compCounts[name] * compHoursPerBlock) / 168 * 100).toFixed(1) : 0,
-            avgHappiness: (compHappinessTotals[name] / (compCounts[name] || 1)).toFixed(2),
-            avgWillingness: (compWillingnessTotals[name] / (compCounts[name] || 1)).toFixed(2)
-        })),
-        resolution: resolution,
-        comparisonResolution: window.comparisonResolution,
-        categoriesList: categories,
-        comparisonCategoriesList: window.comparisonCategories,
-        mindsets: mindsets
-    };
-
-    const comparisonWindow = window.open('comparison.html', '_blank');
-    if (comparisonWindow) {
-        comparisonWindow.onload = () => {
-            comparisonWindow.postMessage({ type: 'comparisonData', data: comparisonData }, '*');
-        };
-    } else {
-        alert('Please allow popups to view the comparison.');
-    }
-}
-
-function toggleTheme() {
-    document.body.classList.toggle('dark-mode');
-    renderWeekView();
-}
-
-// Placeholder for getHappinessWillingness (assumed from context)
-function getHappinessWillingness(mindset) {
-    const happinessMap = {
-        'Peace, Groundedness': 0.80,
-        'Joyful Engagement': 0.90,
-        'Sweet Resistance': 0.50,
-        'Painful Desire': 0.30,
-        'Forced Suffering': 0.10
-    };
-    const willingnessMap = {
-        'Peace, Groundedness': 0.80,
-        'Joyful Engagement': 0.90,
-        'Sweet Resistance': 0.50,
-        'Painful Desire': 0.30,
-        'Forced Suffering': 0.10
-    };
-    return { happiness: happinessMap[mindset] || 0.5, willingness: willingnessMap[mindset] || 0.5 };
-}
-
-function renderWeekView() {
-    // Placeholder for week view rendering if needed
-    console.log('Week view rendered');
+    doc.save('BlockTime_Report.pdf');
 }
