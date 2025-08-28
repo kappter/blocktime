@@ -2,10 +2,12 @@ function addCategory() {
     const name = document.getElementById('cat-name').value.trim();
     const color = document.getElementById('cat-color').value;
     const mindset = document.getElementById('mindset-select').value;
+    console.log('Adding category:', { name, color, mindset }); // Debug
     if (name && !categories.some(cat => cat.name === name)) {
         categories.push({ name, color, mindset });
         document.getElementById('cat-name').value = '';
-        resetGrid();
+        resetGrid(); // Ensure grid updates
+        console.log('Categories after add:', categories); // Debug
     } else {
         alert('Please enter a unique category name!');
     }
@@ -24,6 +26,7 @@ function loadSchedule() {
             resetGrid();
             updateTotals();
             alert('Schedule loaded!');
+            console.log('Loaded categories:', categories); // Debug
         };
         reader.readAsText(file);
     }
@@ -68,11 +71,9 @@ function generateComparison() {
         alert('Please load a comparison schedule first!');
         return;
     }
-    // Placeholder for comparison logic (to be expanded)
     alert('Comparison feature coming soon!');
 }
 
 function updateTotals() {
-    // Placeholder for updating totals if needed elsewhere
     console.log('Totals updated');
 }
