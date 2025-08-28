@@ -104,4 +104,39 @@ function dropBlock(dayIndex, slotIndex) {
     selectedCat = null; // Reset selection
 }
 
-function moveBlock
+function moveBlock(dayIndex, oldIndex, newSlotIndex) {
+    pushUndoState();
+    const block = gridData[dayIndex][oldIndex];
+    block.slotIndex = newSlotIndex;
+    gridData[dayIndex] = gridData[dayIndex].filter((_, i) => i !== oldIndex);
+    const existingIndex = gridData[dayIndex].findIndex(b => b.slotIndex === newSlotIndex);
+    if (existingIndex !== -1) {
+        gridData[dayIndex][existingIndex] = block;
+    } else {
+        gridData[dayIndex].push(block);
+    }
+    resetGrid();
+}
+
+function deleteBlock(dayIndex, slotIndex) {
+    pushUndoState();
+    gridData[dayIndex] = gridData[dayIndex].filter(block => block.slotIndex !== slotIndex);
+    resetGrid();
+    alert('Block deleted!');
+}
+
+function toggleTimeDirection() {
+    timeDirection = timeDirection === 'bottom' ? 'column' : 'column-reverse';
+    document.documentElement.style.setProperty('--day-flex-direction', timeDirection);
+    resetGrid();
+}
+
+document.getElementById('toggle-time-direction').addEventListener('click', toggleTimeDirection);
+document.getElementById('resolution').addEventListener('change', () => {
+    resolution = parseInt(document.getElementById('resolution').value);
+    resetGrid();
+});
+document.getElementById('day-select').addEventListener('change', () => {
+    currentDay = parseInt(document.getElementById('day-select').value);
+    resetGrid();
+});
