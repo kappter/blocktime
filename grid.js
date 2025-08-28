@@ -4,19 +4,32 @@ let mindsets = ['Peace, Groundedness', 'Joyful Engagement', 'Sweet Resistance', 
 let resolution = 60;
 let currentDay = 0;
 let selectedCat = null;
+let timeDirection = 'bottom';
 
 function resetGrid() {
     const grid = document.getElementById('grid');
     grid.innerHTML = '';
     const slotsPerDay = Math.floor(24 * 60 / resolution);
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'day';
+    dayDiv.addEventListener('click', (e) => {
+        if (selectedCat !== null && e.target.className === 'slot') {
+            dropBlock(currentDay, parseInt(e.target.dataset.index));
+        }
+    });
+    const label = document.createElement('div');
+    label.className = 'day-label';
+    label.textContent = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][currentDay];
+    grid.appendChild(label);
     for (let i = 0; i < slotsPerDay; i++) {
         const div = document.createElement('div');
         div.className = 'slot';
         div.dataset.index = i;
         div.addEventListener('dragover', dragOver);
         div.addEventListener('drop', drop);
-        grid.appendChild(div);
+        dayDiv.appendChild(div);
     }
+    grid.appendChild(dayDiv);
     updateGrid();
 }
 
@@ -29,9 +42,7 @@ function updateGrid() {
             const blockDiv = document.createElement('div');
             blockDiv.className = 'block';
             blockDiv.style.backgroundColor = block.color;
-            blockDiv.draggable = true;
-            blockDiv.innerHTML = `<span class="block-text">${block.name}<br>${block.mindset}</span>`;
-            blockDiv.addEventListener('dragstart', dragStart);
+            blockDiv.innerHTML = `<span class="block-label">${block.name}<br>${block.mindset}</span>`;
             slot.appendChild(blockDiv);
         }
     });
@@ -49,9 +60,23 @@ function drop(e) {
 }
 
 function dragStart(e) {
-    const block = e.target.querySelector('.block-text');
+    const block = e.target.querySelector('.block-label');
     selectedCat = categories.findIndex(cat => cat.name === block.textContent.split('<br>')[0]);
     e.dataTransfer.setData('text/plain', '');
 }
 
-let slotsPerDay = Math.floor(24 * 60 / resolution);
+function toggleTimeDirection() {
+    timeDirection = timeDirection === 'bottom' ? 'column' : 'column-reverse';
+    document.documentElement.style.setProperty('--day-flex-direction', timeDirection);
+    resetGrid();
+}
+
+document.getElementById('toggle-time-direction').addEventListener('click', toggleTimeDirection);
+document.getElementById('resolution').addEventListener('change', () => {
+    resolution = parseInt(document.getElementById('resolution').value);
+    resetGrid();
+});
+document.getElementById('day-select').addEventListener('change', () => {
+    currentDay = parseInt(document.getElementById('day-select').value);
+    resetGrid();
+});
