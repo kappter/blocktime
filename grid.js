@@ -4,7 +4,7 @@ let categories = [];
 let mindsets = ['Peace, Groundedness', 'Joyful Engagement', 'Sweet Resistance', 'Painful Desire', 'Forced Suffering'];
 let currentDay = 0;
 let selectedCat = null;
-let timeDirection = 'column-reverse'; // Default to reverse
+let timeDirection = 'column-reverse'; // Default direction, no toggle
 
 // Make variables globally accessible
 window.gridData = gridData;
@@ -40,7 +40,7 @@ function resetGrid() {
         });
         dayDiv.appendChild(div);
     });
-    dayDiv.style.flexDirection = timeDirection; // Apply direction here
+    dayDiv.style.flexDirection = timeDirection; // Fixed direction
     grid.appendChild(dayDiv);
     updateGrid();
     updateCategories();
@@ -110,33 +110,6 @@ document.addEventListener('DOMContentLoaded', () => {
         resetGrid();
         console.log('Switched to day:', window.currentDay);
     });
-
-    try {
-        const toggleButton = document.getElementById('toggle-time-direction');
-        if (toggleButton) {
-            console.log('Toggle button found, attaching listener');
-            toggleButton.addEventListener('click', () => {
-                console.log('Toggle button clicked, current direction:', timeDirection);
-                timeDirection = timeDirection === 'column-reverse' ? 'column' : 'column-reverse';
-                document.documentElement.style.setProperty('--day-flex-direction', timeDirection);
-                console.log('Setting direction to:', timeDirection);
-                const originalData = [...window.gridData[window.currentDay]];
-                const newGridData = Array(24).fill(null);
-                const indices = timeDirection === 'column-reverse' ? [...Array(24)].map((_, i) => 23 - i) : [...Array(24)].keys();
-                indices.forEach((newIndex, oldIndex) => {
-                    newGridData[newIndex] = originalData[oldIndex];
-                });
-                window.gridData[window.currentDay] = newGridData;
-                console.log('New grid data:', newGridData);
-                resetGrid();
-                console.log('Grid reset after toggle, direction:', timeDirection);
-            });
-        } else {
-            console.warn('Toggle button not found. Verify ID "toggle-time-direction" in index.html. Toggle functionality disabled.');
-        }
-    } catch (error) {
-        console.error('Error attaching toggle listener:', error);
-    }
 
     document.getElementById('resolution')?.addEventListener('change', () => {
         console.log('Resolution change not supported yet');
