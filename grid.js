@@ -34,7 +34,7 @@ function resetGrid() {
         div.innerHTML = `<span class="slot-time">${div.dataset.time}</span>`;
         div.addEventListener('click', (e) => {
             if (selectedCat !== null && !e.target.classList.contains('block')) {
-                dropBlock(window.currentDay, i); // Use global currentDay
+                dropBlock(window.currentDay, i);
                 console.log('Clicked slot', i, 'with selectedCat', selectedCat);
             }
         });
@@ -121,13 +121,13 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Toggled time direction to:', timeDirection);
         });
     } else {
-        console.warn('Toggle button not found. Verify ID "toggle-time-direction" in index.html');
+        console.warn('Toggle button not found. Verify ID "toggle-time-direction" in index.html. Functionality will proceed without toggle.');
     }
 
     document.getElementById('resolution')?.addEventListener('change', () => {
         console.log('Resolution change not supported yet');
     });
 
-    // Initial grid setup
+    // Ensure empty grid with times on load
     resetGrid();
 });
