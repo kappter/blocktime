@@ -1,4 +1,4 @@
-let gridData = Array(7).fill().map(() => []);
+let gridData = Array(7).fill().map(() => Array(24).fill(null));
 let categories = [];
 let mindsets = ['Peace, Groundedness', 'Joyful Engagement', 'Sweet Resistance', 'Painful Desire', 'Forced Suffering'];
 let resolution = 60;
@@ -9,7 +9,7 @@ let timeDirection = 'bottom';
 function resetGrid() {
     const grid = document.getElementById('grid');
     grid.innerHTML = '';
-    const slotsPerDay = Math.floor(24 * 60 / resolution);
+    const slotsPerDay = 24; // Fixed to 24 hours
     const dayDiv = document.createElement('div');
     dayDiv.className = 'day';
     const label = document.createElement('div');
@@ -20,6 +20,7 @@ function resetGrid() {
         const div = document.createElement('div');
         div.className = 'slot';
         div.dataset.index = i;
+        div.dataset.time = `${(i % 12 || 12)}${i < 12 ? 'AM' : 'PM'}`;
         div.addEventListener('click', (e) => {
             if (selectedCat !== null && !e.target.classList.contains('block')) {
                 dropBlock(currentDay, i);
@@ -31,6 +32,7 @@ function resetGrid() {
     }
     grid.appendChild(dayDiv);
     updateGrid();
+    updateCategories();
     console.log('Grid reset, slots:', slotsPerDay); // Debug
 }
 
@@ -38,17 +40,35 @@ function updateGrid() {
     const slots = document.querySelectorAll('.slot');
     slots.forEach(slot => {
         slot.innerHTML = '';
-        const block = gridData[currentDay].find(b => b.slotIndex === parseInt(slot.dataset.index));
+        const block = gridData[currentDay][parseInt(slot.dataset.index)];
         if (block) {
             const blockDiv = document.createElement('div');
             blockDiv.className = 'block';
             blockDiv.style.backgroundColor = block.color;
             blockDiv.draggable = true;
             blockDiv.addEventListener('dragstart', dragStart);
-            blockDiv.addEventListener('dblclick', () => deleteBlock(currentDay, parseInt(slot.dataset.index))); // Delete on double-click
+            blockDiv.addEventListener('dblclick', () => deleteBlock(currentDay, parseInt(slot.dataset.index))); // Delete
             blockDiv.innerHTML = `<span class="block-label">${block.name}<br>${block.mindset}</span>`;
             slot.appendChild(blockDiv);
         }
+        slot.title = slot.dataset.time; // Show time on hover
+    });
+}
+
+function updateCategories() {
+    const catDiv = document.getElementById('categories');
+    catDiv.innerHTML = '';
+    categories.forEach((cat, index) => {
+        const catElement = document.createElement('div');
+        catElement.className = 'category' + (selectedCat === index ? ' selected' : '');
+        catElement.textContent = cat.name;
+        catElement.style.backgroundColor = cat.color;
+        catElement.addEventListener('click', () => {
+            selectedCat = index;
+            updateCategories();
+            console.log('Selected category:', cat.name); // Debug
+        });
+        catDiv.appendChild(catElement);
     });
 }
 
@@ -65,7 +85,7 @@ function drop(e) {
     if (e.target.classList.contains('slot')) {
         const dayIndex = parseInt(document.getElementById('day-select').value);
         const slotIndex = parseInt(e.target.dataset.index);
-        const draggedBlockIndex = gridData[currentDay].findIndex(b => b.slotIndex === parseInt(e.target.dataset.index));
+        const draggedBlockIndex = gridData[currentDay].findIndex((b, i) => i === slotIndex && b !== null);
         if (draggedBlockIndex !== -1 && selectedCat === null) {
             moveBlock(dayIndex, draggedBlockIndex, slotIndex);
         } else if (selectedCat !== null) {
@@ -76,7 +96,7 @@ function drop(e) {
 
 function dragStart(e) {
     const block = e.target.querySelector('.block-label');
-    selectedCat = gridData[currentDay].findIndex(cat => cat.name === block.textContent.split('<br>')[0]);
+    selectedCat = categories.findIndex(cat => cat.name === block.textContent.split('<br>')[0]);
     e.dataTransfer.setData('text/plain', e.target.parentElement.dataset.index);
 }
 
@@ -86,19 +106,13 @@ function dropBlock(dayIndex, slotIndex) {
         alert('Please select a category first!');
         return;
     }
-    const slotsPerDay = Math.floor(24 * 60 / resolution);
-    if (gridData[dayIndex].length >= slotsPerDay) {
-        alert('Day is full! Adjust resolution or reset.');
-        return;
-    }
     pushUndoState();
     const cat = categories[selectedCat];
     const mindset = document.getElementById('mindset-select').value || cat.mindset;
-    const existingBlockIndex = gridData[dayIndex].findIndex(block => block.slotIndex === slotIndex);
-    if (existingBlockIndex !== -1) {
-        gridData[dayIndex][existingBlockIndex] = { ...cat, mindset, slotIndex };
+    if (gridData[dayIndex][slotIndex] === null) {
+        gridData[dayIndex][slotIndex] = { ...cat, mindset, slotIndex };
     } else {
-        gridData[dayIndex].push({ ...cat, mindset, slotIndex });
+        alert('Slot is occupied! Move or delete the existing block first.');
     }
     resetGrid();
     selectedCat = null; // Reset selection
@@ -107,20 +121,18 @@ function dropBlock(dayIndex, slotIndex) {
 function moveBlock(dayIndex, oldIndex, newSlotIndex) {
     pushUndoState();
     const block = gridData[dayIndex][oldIndex];
-    block.slotIndex = newSlotIndex;
-    gridData[dayIndex] = gridData[dayIndex].filter((_, i) => i !== oldIndex);
-    const existingIndex = gridData[dayIndex].findIndex(b => b.slotIndex === newSlotIndex);
-    if (existingIndex !== -1) {
-        gridData[dayIndex][existingIndex] = block;
+    if (gridData[dayIndex][newSlotIndex] === null) {
+        gridData[dayIndex][newSlotIndex] = block;
+        gridData[dayIndex][oldIndex] = null;
+        resetGrid();
     } else {
-        gridData[dayIndex].push(block);
+        alert('Target slot is occupied!');
     }
-    resetGrid();
 }
 
 function deleteBlock(dayIndex, slotIndex) {
     pushUndoState();
-    gridData[dayIndex] = gridData[dayIndex].filter(block => block.slotIndex !== slotIndex);
+    gridData[dayIndex][slotIndex] = null;
     resetGrid();
     alert('Block deleted!');
 }
@@ -131,8 +143,8 @@ function toggleTimeDirection() {
     resetGrid();
 }
 
-document.getElementById('toggle-time-direction').addEventListener('click', toggleTimeDirection);
-document.getElementById('resolution').addEventListener('change', () => {
+document.getElementById('toggle-time-direction')?.addEventListener('click', toggleTimeDirection);
+document.getElementById('resolution')?.addEventListener('change', () => {
     resolution = parseInt(document.getElementById('resolution').value);
     resetGrid();
 });
