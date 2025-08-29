@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BlockTime Scheduler</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <!-- Remove or add a valid favicon to fix 404 -->
+    <!-- <link rel="icon" href="favicon.ico" type="image/x-icon"> -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
@@ -42,8 +43,9 @@
                     <option value="30">30 min</option>
                     <option value="60" selected>60 min</option>
                 </select>
-                <button id="toggle-time-direction">Time Render: 12AM at Bottom</button>
+                <button id="toggle-time-direction">Time Render: 12AM at Bottom</button> <!-- Ensure this ID matches -->
             </div>
+            <!-- Rest of options-panel unchanged -->
             <div class="control-module">
                 <h3>Day Operations</h3>
                 <select id="copy-day-select">
