@@ -2,12 +2,12 @@ function addCategory() {
     const name = document.getElementById('cat-name').value.trim();
     const color = document.getElementById('cat-color').value;
     const mindset = document.getElementById('mindset-select').value;
-    console.log('Adding category:', { name, color, mindset }); // Debug
-    if (name && !categories.some(cat => cat.name === name)) {
-        categories.push({ name, color, mindset });
+    console.log('Adding category:', { name, color, mindset });
+    if (name && !window.categories.some(cat => cat.name === name)) {
+        window.categories.push({ name, color, mindset });
         document.getElementById('cat-name').value = '';
-        resetGrid();
-        console.log('Categories after add:', categories); // Debug
+        resetGrid(); // Now accessible
+        console.log('Categories after add:', window.categories);
     } else {
         alert('Please enter a unique category name!');
     }
@@ -20,12 +20,12 @@ function loadSchedule() {
         const reader = new FileReader();
         reader.onload = function(e) {
             const data = JSON.parse(e.target.result);
-            gridData = data.gridData || Array(7).fill().map(() => Array(24).fill(null));
-            categories = data.categories || [];
+            window.gridData = data.gridData || Array(7).fill().map(() => Array(24).fill(null));
+            window.categories = data.categories || [];
             currentDay = data.currentDay || 0;
-            resetGrid();
+            resetGrid(); // Now accessible
             alert('Schedule loaded!');
-            console.log('Loaded categories:', categories); // Debug
+            console.log('Loaded categories:', window.categories);
         };
         reader.readAsText(file);
     }
@@ -34,8 +34,8 @@ function loadSchedule() {
 function saveSchedule() {
     const data = {
         version: "1.0",
-        categories: categories,
-        gridData: gridData,
+        categories: window.categories,
+        gridData: window.gridData,
         currentDay: currentDay
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -47,7 +47,7 @@ function saveSchedule() {
     URL.revokeObjectURL(url);
 }
 
-// Placeholder functions for restored modules
+// Placeholder functions
 function copyDay() { console.log('Copy Day not implemented yet'); }
 function saveDayType() { console.log('Save Day Type not implemented yet'); }
 function previewDayType() { console.log('Preview Day Type not implemented yet'); }
@@ -57,4 +57,4 @@ function loadComparison() { console.log('Load Comparison not implemented yet'); 
 function generateComparison() { console.log('Generate Comparison not implemented yet'); }
 function generateReport() { console.log('Generate Report not implemented yet'); }
 function downloadPDF() { console.log('Download PDF not implemented yet'); }
-function toggleTheme() { console.log('Toggle Theme not implemented yet'); }
+function toggleTheme() { document.body.classList.toggle('dark-mode'); }
