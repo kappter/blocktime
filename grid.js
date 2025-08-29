@@ -77,7 +77,7 @@ function dropBlock(dayIndex, slotIndex) {
     const mindset = document.getElementById('mindset-select').value || cat.mindset;
     gridData[dayIndex][slotIndex] = { ...cat, mindset, slotIndex };
     resetGrid();
-    // Do not reset selectedCat here—keep it active
+    // Keep selectedCat active
     console.log('Block placed at', slotIndex, 'for day', dayIndex, 'with selectedCat', selectedCat); // Debug
 }
 
@@ -85,4 +85,14 @@ document.getElementById('day-select').addEventListener('change', () => {
     currentDay = parseInt(document.getElementById('day-select').value);
     resetGrid();
     console.log('Switched to day:', currentDay); // Debug
+});
+
+document.getElementById('resolution')?.addEventListener('change', () => {
+    // Note: Resolution change not implemented yet, keeping 24-hour grid for now
+    console.log('Resolution change not supported yet');
+});
+
+document.getElementById('toggle-time-direction')?.addEventListener('click', () => {
+    // Time direction toggle not implemented yet
+    console.log('Time direction toggle not supported yet');
 });
