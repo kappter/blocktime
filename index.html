@@ -29,16 +29,11 @@
                 <button id="add-category-btn" onclick="addCategory()">Add</button>
             </div>
             <div id="grid"></div>
+            <div id="categories"></div>
         </div>
         <div id="options-panel">
             <div class="control-module">
-                <h3>Grid Settings</h3>
-                <select id="resolution">
-                    <option value="15">15 min</option>
-                    <option value="30">30 min</option>
-                    <option value="60" selected>60 min</option>
-                </select>
-                <button id="toggle-time-direction">Time Render: 12AM at Bottom</button>
+                <h3>Day Selection</h3>
                 <select id="day-select">
                     <option value="0">Monday</option>
                     <option value="1">Tuesday</option>
@@ -61,27 +56,22 @@
                     <option value="6">Sunday</option>
                 </select>
                 <button onclick="copyDay()">Copy Day</button>
-                <input type="text" id="dayTypeName" placeholder="Day Plan Name (e.g., School Day)">
-                <button onclick="saveDayType()">Save My Day Plan</button>
+                <input type="text" id="dayTypeName" placeholder="Day Plan Name">
+                <button onclick="saveDayType()">Save Day Plan</button>
                 <select id="day-type-select" onchange="previewDayType()">
                     <option value="">Select Day Plan</option>
                 </select>
                 <div id="day-type-preview"></div>
                 <h4>Apply to Days</h4>
                 <div id="day-checkboxes"></div>
-                <button onclick="applyDayTypeToSelected()">Apply to Selected Days</button>
+                <button onclick="applyDayTypeToSelected()">Apply</button>
                 <button onclick="undoAction()">Undo</button>
             </div>
             <div class="control-module">
                 <h3>Schedule</h3>
                 <input type="file" id="schedule-file" accept=".json">
-                <button onclick="loadSchedule()">Load Schedule</button>
-                <button onclick="saveSchedule()">Save Schedule</button>
-                <div id="comparison-controls">
-                    <input type="file" id="comparison-file" accept=".json">
-                    <button onclick="loadComparison()">Load Comparison Schedule</button>
-                    <button onclick="generateComparison()">Generate Comparison</button>
-                </div>
+                <button onclick="loadSchedule()">Load</button>
+                <button onclick="saveSchedule()">Save</button>
             </div>
             <div class="control-module">
                 <h3>Report</h3>
@@ -94,7 +84,7 @@
             <h2>Summary</h2>
             <p id="summaryText"></p>
             <table id="summaryTable">
-                <thead><tr><th>Category</th><th>Hours</th><th>Percentage</th><th>Happiness/Willingness</th></tr></thead>
+                <thead><tr><th>Category</th><th>Hours</th><th>Percentage</th><th>Mindset</th></tr></thead>
                 <tbody></tbody>
             </table>
             <canvas id="pieChart" width="400" height="400"></canvas>
