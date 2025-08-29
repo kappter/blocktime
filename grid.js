@@ -14,25 +14,21 @@ function resetGrid() {
     label.className = 'day-label';
     label.textContent = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][currentDay];
     grid.appendChild(label);
-    const slots = [];
-    for (let i = 0; i < 24; i++) {
+    const indices = timeDirection === 'column-reverse' ? [...Array(24)].map((_, i) => 23 - i) : [...Array(24)].keys();
+    indices.forEach(i => {
         const div = document.createElement('div');
         div.className = 'slot';
         div.dataset.index = i;
         div.dataset.time = `${(i % 12 || 12)}${i < 12 ? 'AM' : 'PM'}`;
+        div.innerHTML = `<span class="slot-time">${div.dataset.time}</span>`;
         div.addEventListener('click', (e) => {
             if (selectedCat !== null && !e.target.classList.contains('block')) {
                 dropBlock(currentDay, i);
                 console.log('Clicked slot', i, 'with selectedCat', selectedCat); // Debug
             }
         });
-        slots.push(div);
-    }
-    // Reorder slots based on timeDirection
-    const orderedSlots = timeDirection === 'column-reverse' 
-        ? slots.sort((a, b) => parseInt(b.dataset.index) - parseInt(a.dataset.index))
-        : slots.sort((a, b) => parseInt(a.dataset.index) - parseInt(b.dataset.index));
-    orderedSlots.forEach(div => dayDiv.appendChild(div));
+        dayDiv.appendChild(div);
+    });
     dayDiv.style.flexDirection = timeDirection;
     grid.appendChild(dayDiv);
     updateGrid();
@@ -42,16 +38,15 @@ function resetGrid() {
 function updateGrid() {
     const slots = document.querySelectorAll('.slot');
     slots.forEach(slot => {
-        slot.innerHTML = '';
+        slot.innerHTML = `<span class="slot-time">${slot.dataset.time}</span>`; // Ensure time is always visible
         const block = gridData[currentDay][parseInt(slot.dataset.index)];
         if (block) {
             const blockDiv = document.createElement('div');
             blockDiv.className = 'block';
             blockDiv.style.backgroundColor = block.color;
-            blockDiv.innerHTML = `<span class="block-label">${block.name} (${block.mindset}, ${slot.dataset.time})</span>`;
+            blockDiv.innerHTML = `<span class="block-label">${block.name} (${block.mindset})</span>`;
             slot.appendChild(blockDiv);
         }
-        slot.title = slot.dataset.time; // Show time on hover
     });
 }
 
@@ -61,7 +56,7 @@ function updateCategories() {
     categories.forEach((cat, index) => {
         const catElement = document.createElement('div');
         catElement.className = 'category' + (selectedCat === index ? ' selected' : '');
-        catElement.textContent = cat.name; // Fixed typo from textText to textContent
+        catElement.textContent = cat.name;
         catElement.style.backgroundColor = cat.color;
         catElement.addEventListener('click', () => {
             selectedCat = index;
