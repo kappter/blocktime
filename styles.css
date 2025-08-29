@@ -119,6 +119,7 @@ input[type="text"], input[type="color"], input[type="file"] {
     transition: background-color 0.2s;
     cursor: pointer;
     height: calc(100% / var(--slots-per-day));
+    min-width: 50px; /* Ensure minimum width to prevent overlap */
 }
 
 .slot.hover-highlight {
@@ -134,15 +135,17 @@ input[type="text"], input[type="color"], input[type="file"] {
 }
 
 .block-label {
-    font-size: 10px; /* Increased for readability */
-    color: #fff; /* Contrast with background */
+    font-size: 8px; /* Reduced for single line */
+    color: #fff;
     text-align: center;
-    white-space: normal; /* Allow wrapping */
+    white-space: nowrap; /* Force single line */
     overflow: hidden;
     text-overflow: ellipsis;
     padding: 2px;
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+    background-color: rgba(0, 0, 0, 0.6); /* Slightly darker for contrast */
     border-radius: 3px;
+    width: 100%; /* Ensure it spans the block */
+    box-sizing: border-box;
 }
 
 .day-label {
@@ -266,6 +269,6 @@ input[type="text"], input[type="color"], input[type="file"] {
         height: 50vh;
     }
     .block-label {
-        font-size: 8px;
+        font-size: 6px; /* Smaller on mobile */
     }
 }
