@@ -4,7 +4,7 @@ let categories = [];
 let mindsets = ['Peace, Groundedness', 'Joyful Engagement', 'Sweet Resistance', 'Painful Desire', 'Forced Suffering'];
 let currentDay = 0;
 let selectedCat = null;
-let timeDirection = 'column-reverse'; // Default direction, no toggle
+let timeDirection = 'column-reverse'; // Fixed direction, no toggle
 
 // Make variables globally accessible
 window.gridData = gridData;
