@@ -5,6 +5,10 @@ let currentDay = 0;
 let selectedCat = null;
 let timeDirection = 'column-reverse'; // Default to reverse
 
+// Make gridData and categories globally accessible
+window.gridData = gridData;
+window.categories = categories;
+
 function resetGrid() {
     const grid = document.getElementById('grid');
     grid.innerHTML = '';
@@ -94,6 +98,13 @@ if (toggleButton) {
     toggleButton.addEventListener('click', () => {
         timeDirection = timeDirection === 'column-reverse' ? 'column' : 'column-reverse';
         document.documentElement.style.setProperty('--day-flex-direction', timeDirection);
+        // Reorder gridData for the current day to match new direction
+        const newGridData = Array(24).fill(null);
+        const indices = timeDirection === 'column-reverse' ? [...Array(24)].map((_, i) => 23 - i) : [...Array(24)].keys();
+        indices.forEach((newIndex, oldIndex) => {
+            newGridData[newIndex] = gridData[currentDay][oldIndex];
+        });
+        gridData[currentDay] = newGridData;
         resetGrid();
         console.log('Toggled time direction to:', timeDirection); // Debug
     });
