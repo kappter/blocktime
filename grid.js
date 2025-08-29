@@ -111,27 +111,31 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Switched to day:', window.currentDay);
     });
 
-    const toggleButton = document.getElementById('toggle-time-direction');
-    if (toggleButton) {
-        console.log('Toggle button found, attaching listener');
-        toggleButton.addEventListener('click', () => {
-            console.log('Toggle button clicked, current direction:', timeDirection);
-            timeDirection = timeDirection === 'column-reverse' ? 'column' : 'column-reverse';
-            document.documentElement.style.setProperty('--day-flex-direction', timeDirection);
-            console.log('Setting direction to:', timeDirection);
-            const originalData = [...window.gridData[window.currentDay]];
-            const newGridData = Array(24).fill(null);
-            const indices = timeDirection === 'column-reverse' ? [...Array(24)].map((_, i) => 23 - i) : [...Array(24)].keys();
-            indices.forEach((newIndex, oldIndex) => {
-                newGridData[newIndex] = originalData[oldIndex];
+    try {
+        const toggleButton = document.getElementById('toggle-time-direction');
+        if (toggleButton) {
+            console.log('Toggle button found, attaching listener');
+            toggleButton.addEventListener('click', () => {
+                console.log('Toggle button clicked, current direction:', timeDirection);
+                timeDirection = timeDirection === 'column-reverse' ? 'column' : 'column-reverse';
+                document.documentElement.style.setProperty('--day-flex-direction', timeDirection);
+                console.log('Setting direction to:', timeDirection);
+                const originalData = [...window.gridData[window.currentDay]];
+                const newGridData = Array(24).fill(null);
+                const indices = timeDirection === 'column-reverse' ? [...Array(24)].map((_, i) => 23 - i) : [...Array(24)].keys();
+                indices.forEach((newIndex, oldIndex) => {
+                    newGridData[newIndex] = originalData[oldIndex];
+                });
+                window.gridData[window.currentDay] = newGridData;
+                console.log('New grid data:', newGridData);
+                resetGrid();
+                console.log('Grid reset after toggle, direction:', timeDirection);
             });
-            window.gridData[window.currentDay] = newGridData;
-            console.log('New grid data:', newGridData);
-            resetGrid();
-            console.log('Grid reset after toggle, direction:', timeDirection);
-        });
-    } else {
-        console.warn('Toggle button not found. Verify ID "toggle-time-direction" in index.html. Toggle functionality disabled.');
+        } else {
+            console.warn('Toggle button not found. Verify ID "toggle-time-direction" in index.html. Toggle functionality disabled.');
+        }
+    } catch (error) {
+        console.error('Error attaching toggle listener:', error);
     }
 
     document.getElementById('resolution')?.addEventListener('change', () => {
