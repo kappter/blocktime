@@ -20,9 +20,9 @@ function loadSchedule() {
         const reader = new FileReader();
         reader.onload = function(e) {
             const data = JSON.parse(e.target.result);
-            gridData = data.gridData || gridData;
-            categories = data.categories || categories;
-            resolution = data.resolution || 60;
+            gridData = data.gridData || Array(7).fill().map(() => Array(24).fill(null));
+            categories = data.categories || [];
+            currentDay = data.currentDay || 0;
             resetGrid();
             updateTotals();
             alert('Schedule loaded!');
@@ -39,8 +39,8 @@ function loadComparison() {
         const reader = new FileReader();
         reader.onload = function(e) {
             const data = JSON.parse(e.target.result);
-            window.comparisonGridData = data.gridData;
-            window.comparisonCategories = data.categories;
+            window.comparisonGridData = data.gridData || Array(7).fill().map(() => Array(24).fill(null));
+            window.comparisonCategories = data.categories || [];
             window.comparisonResolution = data.resolution || 60;
             alert('Comparison schedule loaded!');
         };
@@ -55,7 +55,7 @@ function saveSchedule() {
         timeDirection: timeDirection,
         categories: categories,
         gridData: gridData,
-        dayTypes: dayTypes
+        currentDay: currentDay
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
