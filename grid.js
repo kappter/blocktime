@@ -14,6 +14,7 @@ function resetGrid() {
     label.className = 'day-label';
     label.textContent = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][currentDay];
     grid.appendChild(label);
+    const slots = [];
     for (let i = 0; i < 24; i++) {
         const div = document.createElement('div');
         div.className = 'slot';
@@ -25,9 +26,12 @@ function resetGrid() {
                 console.log('Clicked slot', i, 'with selectedCat', selectedCat); // Debug
             }
         });
-        dayDiv.appendChild(div);
+        slots.push(div);
     }
-    dayDiv.style.flexDirection = timeDirection; // Apply time direction
+    // Sort slots based on timeDirection
+    const sortedSlots = timeDirection === 'column-reverse' ? slots.reverse() : slots;
+    sortedSlots.forEach(div => dayDiv.appendChild(div));
+    dayDiv.style.flexDirection = timeDirection;
     grid.appendChild(dayDiv);
     updateGrid();
     updateCategories();
@@ -55,7 +59,7 @@ function updateCategories() {
     categories.forEach((cat, index) => {
         const catElement = document.createElement('div');
         catElement.className = 'category' + (selectedCat === index ? ' selected' : '');
-        catElement.textContent = cat.name;
+        catElement.textText = cat.name;
         catElement.style.backgroundColor = cat.color;
         catElement.addEventListener('click', () => {
             selectedCat = index;
@@ -88,12 +92,17 @@ document.getElementById('day-select').addEventListener('change', () => {
     console.log('Switched to day:', currentDay); // Debug
 });
 
-document.getElementById('toggle-time-direction').addEventListener('click', () => {
-    timeDirection = timeDirection === 'column-reverse' ? 'column' : 'column-reverse';
-    document.documentElement.style.setProperty('--day-flex-direction', timeDirection);
-    resetGrid();
-    console.log('Toggled time direction to:', timeDirection); // Debug
-});
+const toggleButton = document.getElementById('toggle-time-direction');
+if (toggleButton) {
+    toggleButton.addEventListener('click', () => {
+        timeDirection = timeDirection === 'column-reverse' ? 'column' : 'column-reverse';
+        document.documentElement.style.setProperty('--day-flex-direction', timeDirection);
+        resetGrid();
+        console.log('Toggled time direction to:', timeDirection); // Debug
+    });
+} else {
+    console.error('Toggle button not found'); // Debug
+}
 
 document.getElementById('resolution')?.addEventListener('change', () => {
     console.log('Resolution change not supported yet');
