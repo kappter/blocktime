@@ -13,7 +13,10 @@
 <body>
     <div id="app">
         <h1>BlockTime Scheduler</h1>
-        <input type="text" id="studentName" placeholder="Enter your name">
+        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+            <input type="text" id="studentName" placeholder="Enter your name" style="flex-grow: 1;">
+            <button onclick="toggleTheme()">Toggle Theme</button>
+        </div>
         <div id="main-content">
             <div class="control-module">
                 <h3>Add Category</h3>
@@ -79,7 +82,6 @@
                 <h3>Report</h3>
                 <button onclick="generateReport()">Generate Report</button>
                 <button onclick="downloadPDF()">Download PDF</button>
-                <button onclick="toggleTheme()">Toggle Theme</button>
             </div>
         </div>
         <div id="report" style="display: none;">
