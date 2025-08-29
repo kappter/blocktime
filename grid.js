@@ -29,7 +29,7 @@ function resetGrid() {
     indices.forEach(i => {
         const div = document.createElement('div');
         div.className = 'slot';
-        div.dataset.index = i;
+        div.dataset.index = i; // Use the reordered index
         div.dataset.time = `${(i % 12 || 12)}${i < 12 ? 'AM' : 'PM'}`;
         div.innerHTML = `<span class="slot-time">${div.dataset.time}</span>`;
         div.addEventListener('click', (e) => {
@@ -40,7 +40,7 @@ function resetGrid() {
         });
         dayDiv.appendChild(div);
     });
-    dayDiv.style.flexDirection = timeDirection;
+    dayDiv.style.flexDirection = timeDirection; // Apply direction here
     grid.appendChild(dayDiv);
     updateGrid();
     updateCategories();
@@ -50,8 +50,9 @@ function resetGrid() {
 function updateGrid() {
     const slots = document.querySelectorAll('.slot');
     slots.forEach(slot => {
+        const originalIndex = parseInt(slot.dataset.index);
         slot.innerHTML = `<span class="slot-time">${slot.dataset.time}</span>`;
-        const block = window.gridData[window.currentDay][parseInt(slot.dataset.index)];
+        const block = window.gridData[window.currentDay][originalIndex]; // Use original index for data
         if (block) {
             const blockDiv = document.createElement('div');
             blockDiv.className = 'block';
@@ -118,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Reorder gridData to match visual order
             const originalData = [...window.gridData[window.currentDay]];
             const newGridData = Array(24).fill(null);
-            const indices = timeDirection === 'column-reverse' ? [...Array(23).keys()].reverse().concat(23) : [...Array(24).keys()];
+            const indices = timeDirection === 'column-reverse' ? [...Array(24)].map((_, i) => 23 - i) : [...Array(24)].keys();
             indices.forEach((newIndex, oldIndex) => {
                 newGridData[newIndex] = originalData[oldIndex];
             });
