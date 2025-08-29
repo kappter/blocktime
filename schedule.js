@@ -6,7 +6,7 @@ function addCategory() {
     if (name && !window.categories.some(cat => cat.name === name)) {
         window.categories.push({ name, color, mindset });
         document.getElementById('cat-name').value = '';
-        resetGrid(); // Now accessible
+        resetGrid();
         console.log('Categories after add:', window.categories);
     } else {
         alert('Please enter a unique category name!');
@@ -19,13 +19,18 @@ function loadSchedule() {
     if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            const data = JSON.parse(e.target.result);
-            window.gridData = data.gridData || Array(7).fill().map(() => Array(24).fill(null));
-            window.categories = data.categories || [];
-            currentDay = data.currentDay || 0;
-            resetGrid(); // Now accessible
-            alert('Schedule loaded!');
-            console.log('Loaded categories:', window.categories);
+            try {
+                const data = JSON.parse(e.target.result);
+                window.gridData = data.gridData || Array(7).fill().map(() => Array(24).fill(null));
+                window.categories = data.categories || [];
+                window.currentDay = data.currentDay || 0; // Ensure currentDay is global
+                resetGrid();
+                alert('Schedule loaded!');
+                console.log('Loaded categories:', window.categories);
+            } catch (error) {
+                console.error('Failed to parse schedule file:', error);
+                alert('Invalid schedule file format!');
+            }
         };
         reader.readAsText(file);
     }
@@ -36,7 +41,7 @@ function saveSchedule() {
         version: "1.0",
         categories: window.categories,
         gridData: window.gridData,
-        currentDay: currentDay
+        currentDay: window.currentDay
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
