@@ -119,11 +119,23 @@ input[type="text"], input[type="color"], input[type="file"] {
     transition: background-color 0.2s;
     cursor: pointer;
     height: calc(100% / var(--slots-per-day));
-    min-width: 50px; /* Ensure minimum width to prevent overlap */
+    min-width: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .slot.hover-highlight {
     background-color: rgba(0, 255, 0, 0.3);
+}
+
+.slot-time {
+    font-size: 10px;
+    color: var(--text-color);
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    z-index: 0;
 }
 
 .block {
@@ -135,16 +147,16 @@ input[type="text"], input[type="color"], input[type="file"] {
 }
 
 .block-label {
-    font-size: 8px; /* Reduced for single line */
+    font-size: 8px;
     color: #fff;
     text-align: center;
-    white-space: nowrap; /* Force single line */
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     padding: 2px;
-    background-color: rgba(0, 0, 0, 0.6); /* Slightly darker for contrast */
+    background-color: rgba(0, 0, 0, 0.6);
     border-radius: 3px;
-    width: 100%; /* Ensure it spans the block */
+    width: 100%;
     box-sizing: border-box;
 }
 
@@ -269,6 +281,6 @@ input[type="text"], input[type="color"], input[type="file"] {
         height: 50vh;
     }
     .block-label {
-        font-size: 6px; /* Smaller on mobile */
+        font-size: 6px;
     }
 }
