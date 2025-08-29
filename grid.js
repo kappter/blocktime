@@ -6,9 +6,10 @@ let currentDay = 0;
 let selectedCat = null;
 let timeDirection = 'column-reverse'; // Default to reverse
 
-// Make gridData and categories globally accessible
+// Make variables globally accessible
 window.gridData = gridData;
 window.categories = categories;
+window.currentDay = currentDay; // Ensure currentDay is global
 
 // Global functions
 function resetGrid() {
@@ -22,7 +23,7 @@ function resetGrid() {
     dayDiv.className = 'day';
     const label = document.createElement('div');
     label.className = 'day-label';
-    label.textContent = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][currentDay];
+    label.textContent = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][window.currentDay];
     grid.appendChild(label);
     const indices = timeDirection === 'column-reverse' ? [...Array(24)].map((_, i) => 23 - i) : [...Array(24)].keys();
     indices.forEach(i => {
@@ -33,7 +34,7 @@ function resetGrid() {
         div.innerHTML = `<span class="slot-time">${div.dataset.time}</span>`;
         div.addEventListener('click', (e) => {
             if (selectedCat !== null && !e.target.classList.contains('block')) {
-                dropBlock(currentDay, i);
+                dropBlock(window.currentDay, i); // Use global currentDay
                 console.log('Clicked slot', i, 'with selectedCat', selectedCat);
             }
         });
@@ -49,7 +50,7 @@ function updateGrid() {
     const slots = document.querySelectorAll('.slot');
     slots.forEach(slot => {
         slot.innerHTML = `<span class="slot-time">${slot.dataset.time}</span>`;
-        const block = gridData[currentDay][parseInt(slot.dataset.index)];
+        const block = window.gridData[window.currentDay][parseInt(slot.dataset.index)];
         if (block) {
             const blockDiv = document.createElement('div');
             blockDiv.className = 'block';
@@ -67,7 +68,7 @@ function updateCategories() {
         return;
     }
     catDiv.innerHTML = '';
-    categories.forEach((cat, index) => {
+    window.categories.forEach((cat, index) => {
         const catElement = document.createElement('div');
         catElement.className = 'category' + (selectedCat === index ? ' selected' : '');
         catElement.textContent = cat.name;
@@ -82,17 +83,17 @@ function updateCategories() {
 }
 
 function dropBlock(dayIndex, slotIndex) {
-    if (selectedCat === null || selectedCat < 0 || selectedCat >= categories.length) {
+    if (selectedCat === null || selectedCat < 0 || selectedCat >= window.categories.length) {
         alert('Please select a category first!');
         return;
     }
-    if (gridData[dayIndex][slotIndex] !== null) {
+    if (window.gridData[dayIndex][slotIndex] !== null) {
         alert('Slot is occupied! Remove the existing block first!');
         return;
     }
-    const cat = categories[selectedCat];
+    const cat = window.categories[selectedCat];
     const mindset = document.getElementById('mindset-select').value || cat.mindset;
-    gridData[dayIndex][slotIndex] = { ...cat, mindset, slotIndex };
+    window.gridData[dayIndex][slotIndex] = { ...cat, mindset, slotIndex };
     resetGrid();
     console.log('Block placed at', slotIndex, 'for day', dayIndex, 'with selectedCat', selectedCat);
 }
@@ -100,9 +101,9 @@ function dropBlock(dayIndex, slotIndex) {
 // Event listeners
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('day-select').addEventListener('change', () => {
-        currentDay = parseInt(document.getElementById('day-select').value);
+        window.currentDay = parseInt(document.getElementById('day-select').value);
         resetGrid();
-        console.log('Switched to day:', currentDay);
+        console.log('Switched to day:', window.currentDay);
     });
 
     const toggleButton = document.getElementById('toggle-time-direction');
@@ -113,14 +114,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const newGridData = Array(24).fill(null);
             const indices = timeDirection === 'column-reverse' ? [...Array(24)].map((_, i) => 23 - i) : [...Array(24)].keys();
             indices.forEach((newIndex, oldIndex) => {
-                newGridData[newIndex] = gridData[currentDay][oldIndex];
+                newGridData[newIndex] = window.gridData[window.currentDay][oldIndex];
             });
-            gridData[currentDay] = newGridData;
+            window.gridData[window.currentDay] = newGridData;
             resetGrid();
             console.log('Toggled time direction to:', timeDirection);
         });
     } else {
-        console.error('Toggle button not found. Check ID in index.html');
+        console.warn('Toggle button not found. Verify ID "toggle-time-direction" in index.html');
     }
 
     document.getElementById('resolution')?.addEventListener('change', () => {
