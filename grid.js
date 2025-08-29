@@ -28,9 +28,11 @@ function resetGrid() {
         });
         slots.push(div);
     }
-    // Sort slots based on timeDirection
-    const sortedSlots = timeDirection === 'column-reverse' ? slots.reverse() : slots;
-    sortedSlots.forEach(div => dayDiv.appendChild(div));
+    // Reorder slots based on timeDirection
+    const orderedSlots = timeDirection === 'column-reverse' 
+        ? slots.sort((a, b) => parseInt(b.dataset.index) - parseInt(a.dataset.index))
+        : slots.sort((a, b) => parseInt(a.dataset.index) - parseInt(b.dataset.index));
+    orderedSlots.forEach(div => dayDiv.appendChild(div));
     dayDiv.style.flexDirection = timeDirection;
     grid.appendChild(dayDiv);
     updateGrid();
@@ -59,7 +61,7 @@ function updateCategories() {
     categories.forEach((cat, index) => {
         const catElement = document.createElement('div');
         catElement.className = 'category' + (selectedCat === index ? ' selected' : '');
-        catElement.textText = cat.name;
+        catElement.textContent = cat.name; // Fixed typo from textText to textContent
         catElement.style.backgroundColor = cat.color;
         catElement.addEventListener('click', () => {
             selectedCat = index;
