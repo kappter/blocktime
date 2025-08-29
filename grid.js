@@ -77,8 +77,8 @@ function dropBlock(dayIndex, slotIndex) {
     const mindset = document.getElementById('mindset-select').value || cat.mindset;
     gridData[dayIndex][slotIndex] = { ...cat, mindset, slotIndex };
     resetGrid();
-    selectedCat = null; // Reset after placement
-    console.log('Block placed at', slotIndex, 'for day', dayIndex); // Debug
+    // Do not reset selectedCat here—keep it active
+    console.log('Block placed at', slotIndex, 'for day', dayIndex, 'with selectedCat', selectedCat); // Debug
 }
 
 document.getElementById('day-select').addEventListener('change', () => {
