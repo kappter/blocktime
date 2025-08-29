@@ -23,16 +23,18 @@ function loadSchedule() {
                 const data = JSON.parse(e.target.result);
                 window.gridData = data.gridData || Array(7).fill().map(() => Array(24).fill(null));
                 window.categories = data.categories || [];
-                window.currentDay = data.currentDay || 0; // Ensure currentDay is global
+                window.currentDay = data.currentDay !== undefined ? data.currentDay : 0;
                 resetGrid();
                 alert('Schedule loaded!');
-                console.log('Loaded categories:', window.categories);
+                console.log('Loaded data:', { gridData: window.gridData, categories: window.categories, currentDay: window.currentDay });
             } catch (error) {
                 console.error('Failed to parse schedule file:', error);
-                alert('Invalid schedule file format!');
+                alert('Invalid schedule file format! Check console for details.');
             }
         };
         reader.readAsText(file);
+    } else {
+        console.warn('No file selected for loading');
     }
 }
 
