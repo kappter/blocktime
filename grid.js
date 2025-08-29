@@ -87,7 +87,7 @@ function dropBlock(dayIndex, slotIndex) {
         return;
     }
     if (gridData[dayIndex][slotIndex] !== null) {
-        alert('Slot is occupied! Remove the existing block first.');
+        alert('Slot is occupied! Remove the existing block first!');
         return;
     }
     const cat = categories[selectedCat];
@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Toggled time direction to:', timeDirection);
         });
     } else {
-        console.error('Toggle button not found');
+        console.error('Toggle button not found. Check ID in index.html');
     }
 
     document.getElementById('resolution')?.addEventListener('change', () => {
