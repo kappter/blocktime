@@ -44,6 +44,7 @@ function resetGrid() {
     grid.appendChild(dayDiv);
     updateGrid();
     updateCategories();
+    console.log('Grid reset with times displayed');
 }
 
 function updateGrid() {
@@ -100,6 +101,9 @@ function dropBlock(dayIndex, slotIndex) {
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', () => {
+    // Ensure grid loads first
+    resetGrid();
+
     document.getElementById('day-select').addEventListener('change', () => {
         window.currentDay = parseInt(document.getElementById('day-select').value);
         resetGrid();
@@ -121,13 +125,10 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Toggled time direction to:', timeDirection);
         });
     } else {
-        console.warn('Toggle button not found. Verify ID "toggle-time-direction" in index.html. Functionality will proceed without toggle.');
+        console.warn('Toggle button not found. Verify ID "toggle-time-direction" in index.html. Toggle functionality disabled.');
     }
 
     document.getElementById('resolution')?.addEventListener('change', () => {
         console.log('Resolution change not supported yet');
     });
-
-    // Ensure empty grid with times on load
-    resetGrid();
 });
