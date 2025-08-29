@@ -1,56 +1,59 @@
 function generateReport() {
-    const counts = {};
-    categories.forEach(cat => counts[cat.name] = 0);
-    gridData.flat().forEach(block => counts[block.name]++);
-    const hoursPerBlock = resolution / 60;
-    const totalHours = gridData.reduce((sum, day) => sum + day.length, 0) * hoursPerBlock;
-
     const summaryText = document.getElementById('summaryText');
-    summaryText.innerHTML = `<p>Great job! You've planned ${totalHours.toFixed(1)} hours. Check your categories below!</p>`;
+    const summaryTable = document.getElementById('summaryTable').getElementsByTagName('tbody')[0];
+    const pieChart = document.getElementById('pieChart').getContext('2d');
+    summaryTable.innerHTML = '';
+    summaryText.textContent = 'Report Summary';
 
-    const tableBody = document.querySelector('#summaryTable tbody');
-    tableBody.innerHTML = '';
-    Object.keys(counts).forEach(name => {
-        const hours = counts[name] * hoursPerBlock;
-        const pct = totalHours ? (hours / totalHours * 100).toFixed(1) : 0;
-        tableBody.innerHTML += `<tr><td>${name}</td><td>${hours.toFixed(2)}</td><td>${pct}%</td><td>${mindsets.map(m => `${m}: ${gridData.flat().filter(b => b.name === name && b.mindset === m).length * hoursPerBlock}hrs`).join(', ')}</td></tr>`;
+    // Ensure categories and gridData are accessible
+    if (!window.categories || !window.gridData) {
+        alert('Categories or grid data not available!');
+        return;
+    }
+
+    const categoryTotals = {};
+    gridData.forEach(day => {
+        day.forEach((block, index) => {
+            if (block && block.name) {
+                categoryTotals[block.name] = (categoryTotals[block.name] || 0) + 1;
+            }
+        });
     });
 
-    const reportDiv = document.getElementById('report');
-    reportDiv.style.display = 'block';
+    let totalHours = 0;
+    Object.values(categoryTotals).forEach(count => totalHours += count);
 
-    const ctx = document.getElementById('pieChart').getContext('2d');
+    categories.forEach(cat => {
+        const hours = categoryTotals[cat.name] || 0;
+        const percentage = totalHours ? (hours / totalHours * 100).toFixed(1) : 0;
+        const row = summaryTable.insertRow();
+        row.insertCell(0).textContent = cat.name;
+        row.insertCell(1).textContent = hours;
+        row.insertCell(2).textContent = `${percentage}%`;
+        row.insertCell(3).textContent = cat.mindset;
+    });
+
+    // Placeholder for chart (requires Chart.js setup)
     if (window.myPieChart) window.myPieChart.destroy();
-    window.myPieChart = new Chart(ctx, {
+    window.myPieChart = new Chart(pieChart, {
         type: 'pie',
         data: {
-            labels: Object.keys(counts),
+            labels: Object.keys(categoryTotals),
             datasets: [{
-                data: Object.values(counts).map(c => c * hoursPerBlock),
+                data: Object.values(categoryTotals),
                 backgroundColor: categories.map(c => c.color)
             }]
-        },
-        options: { responsive: true, plugins: { legend: { position: 'top' } } }
+        }
     });
 }
 
 function downloadPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    doc.text('Weekly Summary', 10, 10);
-    const tableData = [];
-    const counts = {};
-    categories.forEach(cat => counts[cat.name] = 0);
-    gridData.flat().forEach(block => counts[block.name]++);
-    const hoursPerBlock = resolution / 60;
-    Object.keys(counts).forEach(name => {
-        const hours = counts[name] * hoursPerBlock;
-        const pct = (hours / (168) * 100).toFixed(1);
-        tableData.push([name, hours.toFixed(2), `${pct}%`, mindsets.map(m => `${m}: ${gridData.flat().filter(b => b.name === name && b.mindset === m).length * hoursPerBlock}hrs`).join(', ')]);
-    });
-    doc.autoTable({
-        head: [['Category', 'Hours', 'Percentage', 'Happiness/Willingness']],
-        body: tableData
-    });
+    doc.text('BlockTime Schedule Report', 10, 10);
     doc.save('BlockTime_Report.pdf');
+}
+
+function toggleTheme() {
+    document.body.classList.toggle('dark-mode');
 }
