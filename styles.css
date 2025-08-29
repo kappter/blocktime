@@ -9,22 +9,12 @@
     --border-color: #ccc;
 }
 
-body.dark-mode {
-    --bg-color: #333;
-    --text-color: #fff;
-    --button-bg: #66b0ff;
-    --button-text: #000;
-    --module-bg: #444;
-    --border-color: #555;
-}
-
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 20px;
     background-color: var(--bg-color);
     color: var(--text-color);
-    transition: all 0.3s ease;
 }
 
 #app {
@@ -41,14 +31,11 @@ h1 {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    align-items: flex-start;
 }
 
 #options-panel {
     flex: 1 1 30%;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    margin-top: 10px;
 }
 
 .control-module {
@@ -56,10 +43,9 @@ h1 {
     border: 1px solid var(--border-color);
     padding: 10px;
     border-radius: 5px;
-    flex: 1;
 }
 
-button, select, input[type="text"], input[type="color"], input[type="file"] {
+button, select, input[type="text"], input[type="color"] {
     margin: 5px;
     padding: 8px;
     border: 1px solid var(--border-color);
@@ -70,24 +56,18 @@ button, select, input[type="text"], input[type="color"], input[type="file"] {
     cursor: pointer;
 }
 
-button:hover, select:hover {
+button:hover {
     background-color: #0056b3;
-    color: #fff;
 }
 
-body.dark-mode button:hover, body.dark-mode select:hover {
-    background-color: #99c7ff;
-    color: #000;
-}
-
-input[type="text"], input[type="color"], input[type="file"] {
+input[type="text"], input[type="color"] {
     background-color: var(--module-bg);
     color: var(--text-color);
 }
 
 #grid {
     flex: 1 1 70%;
-    min-height: 70vh;
+    min-height: 50vh;
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -101,14 +81,12 @@ input[type="text"], input[type="color"], input[type="file"] {
     padding: 10px;
     border: 1px solid var(--border-color);
     border-radius: 5px;
-    margin-top: 10px;
 }
 
 .day {
     display: flex;
     flex-direction: var(--day-flex-direction);
     height: 100%;
-    position: relative;
     flex-grow: 1;
 }
 
@@ -116,9 +94,8 @@ input[type="text"], input[type="color"], input[type="file"] {
     position: relative;
     flex: 1;
     border: 1px solid var(--border-color);
-    transition: background-color 0.2s;
-    cursor: pointer;
     height: calc(100% / var(--slots-per-day));
+    cursor: pointer;
 }
 
 .slot.hover-highlight {
@@ -165,74 +142,12 @@ input[type="text"], input[type="color"], input[type="file"] {
     background-color: #0056b3;
 }
 
-#slot-tooltip {
-    z-index: 1000;
-    font-size: 12px;
-    background-color: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 5px;
-    border-radius: 3px;
-    position: absolute;
-    pointer-events: none;
-    display: none;
-}
-
-#report {
-    margin-top: 20px;
-    padding: 10px;
-    background-color: var(--module-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
-}
-
-#summaryTable {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
-
-#summaryTable th, #summaryTable td {
-    border: 1px solid var(--border-color);
-    padding: 8px;
-    text-align: left;
-    color: var(--text-color);
-}
-
-#weekChart, #pieChart {
-    margin-top: 10px;
-    max-width: 100%;
-}
-
-#day-type-preview {
-    margin: 10px 0;
-    padding: 5px;
-    border: 1px dashed var(--border-color);
-    min-height: 50px;
-}
-
-#day-checkboxes {
-    margin: 10px 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-}
-
-#day-checkboxes label {
-    margin-right: 10px;
-}
-
 @media (max-width: 900px) {
     #main-content, #options-panel {
         flex-direction: column;
     }
-    #grid, #categories, #options-panel {
+    #grid, #categories {
         width: 100%;
-    }
-    #grid {
-        margin-top: 10px;
-    }
-    #categories {
-        margin-top: 10px;
     }
 }
 
@@ -242,28 +157,8 @@ input[type="text"], input[type="color"], input[type="file"] {
     }
     #grid, #categories {
         width: 70%;
-        margin-right: 10px;
     }
     #options-panel {
         width: 30%;
-    }
-}
-
-@media (max-width: 600px) {
-    #app {
-        padding: 10px;
-    }
-    .control-module {
-        padding: 5px;
-    }
-    button, select, input {
-        width: 100%;
-        margin: 5px 0;
-    }
-    #grid {
-        height: 50vh;
-    }
-    .block-label {
-        font-size: 6px;
     }
 }
