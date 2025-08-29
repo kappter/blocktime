@@ -3,6 +3,7 @@ let categories = [];
 let mindsets = ['Peace, Groundedness', 'Joyful Engagement', 'Sweet Resistance', 'Painful Desire', 'Forced Suffering'];
 let currentDay = 0;
 let selectedCat = null;
+let timeDirection = 'column-reverse'; // Default to reverse
 
 function resetGrid() {
     const grid = document.getElementById('grid');
@@ -26,6 +27,7 @@ function resetGrid() {
         });
         dayDiv.appendChild(div);
     }
+    dayDiv.style.flexDirection = timeDirection; // Apply time direction
     grid.appendChild(dayDiv);
     updateGrid();
     updateCategories();
@@ -40,7 +42,7 @@ function updateGrid() {
             const blockDiv = document.createElement('div');
             blockDiv.className = 'block';
             blockDiv.style.backgroundColor = block.color;
-            blockDiv.innerHTML = `<span class="block-label">${block.name}<br>${block.mindset}</span>`;
+            blockDiv.innerHTML = `<span class="block-label">${block.name} (${block.mindset}, ${slot.dataset.time})</span>`;
             slot.appendChild(blockDiv);
         }
         slot.title = slot.dataset.time; // Show time on hover
@@ -77,7 +79,6 @@ function dropBlock(dayIndex, slotIndex) {
     const mindset = document.getElementById('mindset-select').value || cat.mindset;
     gridData[dayIndex][slotIndex] = { ...cat, mindset, slotIndex };
     resetGrid();
-    // Keep selectedCat active
     console.log('Block placed at', slotIndex, 'for day', dayIndex, 'with selectedCat', selectedCat); // Debug
 }
 
@@ -87,12 +88,13 @@ document.getElementById('day-select').addEventListener('change', () => {
     console.log('Switched to day:', currentDay); // Debug
 });
 
-document.getElementById('resolution')?.addEventListener('change', () => {
-    // Note: Resolution change not implemented yet, keeping 24-hour grid for now
-    console.log('Resolution change not supported yet');
+document.getElementById('toggle-time-direction').addEventListener('click', () => {
+    timeDirection = timeDirection === 'column-reverse' ? 'column' : 'column-reverse';
+    document.documentElement.style.setProperty('--day-flex-direction', timeDirection);
+    resetGrid();
+    console.log('Toggled time direction to:', timeDirection); // Debug
 });
 
-document.getElementById('toggle-time-direction')?.addEventListener('click', () => {
-    // Time direction toggle not implemented yet
-    console.log('Time direction toggle not supported yet');
+document.getElementById('resolution')?.addEventListener('change', () => {
+    console.log('Resolution change not supported yet');
 });
