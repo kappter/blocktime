@@ -44,7 +44,7 @@ function resetGrid() {
     grid.appendChild(dayDiv);
     updateGrid();
     updateCategories();
-    console.log('Grid reset with times displayed');
+    console.log('Grid reset with times displayed, direction:', timeDirection);
 }
 
 function updateGrid() {
@@ -101,7 +101,7 @@ function dropBlock(dayIndex, slotIndex) {
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', () => {
-    // Ensure grid loads first
+    // Ensure empty grid with times on load
     resetGrid();
 
     document.getElementById('day-select').addEventListener('change', () => {
@@ -115,14 +115,16 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleButton.addEventListener('click', () => {
             timeDirection = timeDirection === 'column-reverse' ? 'column' : 'column-reverse';
             document.documentElement.style.setProperty('--day-flex-direction', timeDirection);
+            // Reorder gridData to match visual order
+            const originalData = [...window.gridData[window.currentDay]];
             const newGridData = Array(24).fill(null);
-            const indices = timeDirection === 'column-reverse' ? [...Array(24)].map((_, i) => 23 - i) : [...Array(24)].keys();
+            const indices = timeDirection === 'column-reverse' ? [...Array(23).keys()].reverse().concat(23) : [...Array(24).keys()];
             indices.forEach((newIndex, oldIndex) => {
-                newGridData[newIndex] = window.gridData[window.currentDay][oldIndex];
+                newGridData[newIndex] = originalData[oldIndex];
             });
             window.gridData[window.currentDay] = newGridData;
             resetGrid();
-            console.log('Toggled time direction to:', timeDirection);
+            console.log('Toggled time direction to:', timeDirection, 'with new grid data:', newGridData);
         });
     } else {
         console.warn('Toggle button not found. Verify ID "toggle-time-direction" in index.html. Toggle functionality disabled.');
