@@ -6,9 +6,6 @@
     <title>BlockTime Scheduler</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
     <div id="app">
@@ -28,8 +25,8 @@
                 </select>
                 <button id="add-category-btn" onclick="addCategory()">Add</button>
             </div>
-            <div id="grid"></div>
             <div id="categories"></div>
+            <div id="grid"></div>
         </div>
         <div id="options-panel">
             <div class="control-module">
@@ -44,55 +41,9 @@
                     <option value="6">Sunday</option>
                 </select>
             </div>
-            <div class="control-module">
-                <h3>Day Operations</h3>
-                <select id="copy-day-select">
-                    <option value="0">Monday</option>
-                    <option value="1">Tuesday</option>
-                    <option value="2">Wednesday</option>
-                    <option value="3">Thursday</option>
-                    <option value="4">Friday</option>
-                    <option value="5">Saturday</option>
-                    <option value="6">Sunday</option>
-                </select>
-                <button onclick="copyDay()">Copy Day</button>
-                <input type="text" id="dayTypeName" placeholder="Day Plan Name">
-                <button onclick="saveDayType()">Save Day Plan</button>
-                <select id="day-type-select" onchange="previewDayType()">
-                    <option value="">Select Day Plan</option>
-                </select>
-                <div id="day-type-preview"></div>
-                <h4>Apply to Days</h4>
-                <div id="day-checkboxes"></div>
-                <button onclick="applyDayTypeToSelected()">Apply</button>
-                <button onclick="undoAction()">Undo</button>
-            </div>
-            <div class="control-module">
-                <h3>Schedule</h3>
-                <input type="file" id="schedule-file" accept=".json">
-                <button onclick="loadSchedule()">Load</button>
-                <button onclick="saveSchedule()">Save</button>
-            </div>
-            <div class="control-module">
-                <h3>Report</h3>
-                <button onclick="generateReport()">Generate Report</button>
-                <button onclick="downloadPDF()">Download PDF</button>
-                <button onclick="toggleTheme()">Toggle Theme</button>
-            </div>
-        </div>
-        <div id="report" style="display: none;">
-            <h2>Summary</h2>
-            <p id="summaryText"></p>
-            <table id="summaryTable">
-                <thead><tr><th>Category</th><th>Hours</th><th>Percentage</th><th>Mindset</th></tr></thead>
-                <tbody></tbody>
-            </table>
-            <canvas id="pieChart" width="400" height="400"></canvas>
         </div>
     </div>
     <script src="grid.js"></script>
-    <script src="dayOperations.js"></script>
     <script src="schedule.js"></script>
-    <script src="report.js"></script>
 </body>
 </html>
