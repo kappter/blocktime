@@ -2,17 +2,16 @@ function generateReport() {
     const summaryText = document.getElementById('summaryText');
     const summaryTable = document.getElementById('summaryTable').getElementsByTagName('tbody')[0];
     const pieChart = document.getElementById('pieChart').getContext('2d');
-    summaryTable.innerHTML = '';
-    summaryText.textContent = 'Report Summary';
-
-    // Ensure categories and gridData are accessible
     if (!window.categories || !window.gridData) {
         alert('Categories or grid data not available!');
         return;
     }
 
+    summaryTable.innerHTML = '';
+    summaryText.textContent = 'Report Summary';
+
     const categoryTotals = {};
-    gridData.forEach(day => {
+    window.gridData.forEach(day => {
         day.forEach((block, index) => {
             if (block && block.name) {
                 categoryTotals[block.name] = (categoryTotals[block.name] || 0) + 1;
@@ -23,7 +22,7 @@ function generateReport() {
     let totalHours = 0;
     Object.values(categoryTotals).forEach(count => totalHours += count);
 
-    categories.forEach(cat => {
+    window.categories.forEach(cat => {
         const hours = categoryTotals[cat.name] || 0;
         const percentage = totalHours ? (hours / totalHours * 100).toFixed(1) : 0;
         const row = summaryTable.insertRow();
@@ -41,16 +40,19 @@ function generateReport() {
             labels: Object.keys(categoryTotals),
             datasets: [{
                 data: Object.values(categoryTotals),
-                backgroundColor: categories.map(c => c.color)
+                backgroundColor: window.categories.map(c => c.color || '#000000')
             }]
         }
     });
+    document.getElementById('report').style.display = 'block'; // Show report
 }
 
 function downloadPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
+    const summaryTable = document.getElementById('summaryTable');
     doc.text('BlockTime Schedule Report', 10, 10);
+    doc.autoTable({ html: summaryTable });
     doc.save('BlockTime_Report.pdf');
 }
 
