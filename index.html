@@ -49,4 +49,83 @@
                 <select id="mindset-select">
                     <option value="Peace, Groundedness">Calm & Relaxed</option>
                     <option value="Joyful Engagement">Fun & Easy</option>
-                    <option value="Sweet Resistance">Ch
+                    <option value="Sweet Resistance">Challenging but Okay</option>
+                    <option value="Painful Desire">Tough but Want to Do</option>
+                    <option value="Forced Suffering">Really Hard</option>
+                </select>
+                <button id="add-category-btn" onclick="addCategory()">Add</button>
+            </div>
+            <div class="control-module">
+                <h3>Day Selection</h3>
+                <select id="day-select">
+                    <option value="0">Monday</option>
+                    <option value="1">Tuesday</option>
+                    <option value="2">Wednesday</option>
+                    <option value="3">Thursday</option>
+                    <option value="4">Friday</option>
+                    <option value="5">Saturday</option>
+                    <option value="6">Sunday</option>
+                </select>
+            </div>
+        </div>
+        <div id="main-content">
+            <div id="categories"></div>
+            <div id="grid"></div>
+        </div>
+        <div class="control-panel" style="margin-top: 20px;">
+            <div class="control-module">
+                <h3>Day Operations</h3>
+                <select id="copy-day-select">
+                    <option value="0">Monday</option>
+                    <option value="1">Tuesday</option>
+                    <option value="2">Wednesday</option>
+                    <option value="3">Thursday</option>
+                    <option value="4">Friday</option>
+                    <option value="5">Saturday</option>
+                    <option value="6">Sunday</option>
+                </select>
+                <button onclick="copyDay()">Copy Day</button>
+                <input type="text" id="dayTypeName" placeholder="Day Plan Name (e.g., School Day)">
+                <button onclick="saveDayType()">Save My Day Plan</button>
+                <select id="day-type-select" onchange="previewDayType()">
+                    <option value="">Select Day Plan</option>
+                </select>
+                <div id="day-type-preview"></div>
+                <h4>Apply to Days</h4>
+                <div id="day-checkboxes"></div>
+                <button onclick="applyDayTypeToSelected()">Apply to Selected Days</button>
+                <button onclick="undoAction()">Undo</button>
+            </div>
+            <div class="control-module">
+                <h3>Schedule</h3>
+                <input type="file" id="schedule-file" accept=".json">
+                <button onclick="loadSchedule()">Load Schedule</button>
+                <button onclick="saveSchedule()">Save Schedule</button>
+                <div id="comparison-controls">
+                    <input type="file" id="comparison-file" accept=".json">
+                    <button onclick="loadComparison()">Load Comparison Schedule</button>
+                    <button onclick="generateComparison()">Generate Comparison</button>
+                </div>
+            </div>
+            <div class="control-module">
+                <h3>Report</h3>
+                <button onclick="generateReport()">Generate Report</button>
+                <button onclick="downloadPDF()">Download PDF</button>
+            </div>
+        </div>
+        <div id="report" style="display: none;">
+            <h2>Summary</h2>
+            <p id="summaryText"></p>
+            <table id="summaryTable">
+                <thead><tr><th>Category</th><th>Hours</th><th>Percentage</th><th>Mindset</th></tr></thead>
+                <tbody></tbody>
+            </table>
+            <canvas id="pieChart" width="400" height="400"></canvas>
+        </div>
+    </div>
+    <script src="grid.js"></script>
+    <script src="dayOperations.js"></script>
+    <script src="schedule.js"></script>
+    <script src="report.js"></script>
+</body>
+</html>
