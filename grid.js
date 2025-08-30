@@ -1,5 +1,5 @@
 // Global variables
-let gridData = Array(7).fill().map(() => Array(24).fill(null)); // Base 60-minute slots
+let gridData = Array(7).fill().map(() => Array(24 * 2).fill(null)); // Support up to 30-minute resolution (48 slots)
 let categories = [];
 let mindsets = ['Peace, Groundedness', 'Joyful Engagement', 'Sweet Resistance', 'Painful Desire', 'Forced Suffering'];
 let currentDay = 0;
@@ -59,9 +59,8 @@ function updateGrid() {
         const originalIndex = parseInt(slot.dataset.index);
         slot.innerHTML = `<span class="slot-time">${slot.dataset.time}</span>`;
         const slotsPerHour = 60 / resolution;
-        const hour = Math.floor(originalIndex / slotsPerHour);
-        const blockIndex = hour * slotsPerHour; // Map to nearest hour boundary
-        const block = window.gridData[window.currentDay][blockIndex]; // Use hour-based index
+        const slotIndex = Math.floor(originalIndex / slotsPerHour) * slotsPerHour; // Map to resolution boundary
+        const block = window.gridData[window.currentDay][slotIndex]; // Use resolution-based index
         if (block) {
             const blockDiv = document.createElement('div');
             blockDiv.className = 'block';
@@ -99,20 +98,20 @@ function dropBlock(dayIndex, slotIndex) {
         return;
     }
     const slotsPerHour = 60 / resolution;
-    const hourIndex = Math.floor(slotIndex / slotsPerHour) * slotsPerHour;
-    if (window.gridData[dayIndex][hourIndex] !== null) {
+    const slotIndexAdjusted = Math.floor(slotIndex / slotsPerHour) * slotsPerHour; // Adjust to resolution boundary
+    if (window.gridData[dayIndex][slotIndexAdjusted] !== null) {
         alert('Slot is occupied! Remove the existing block first!');
         return;
     }
     const cat = window.categories[selectedCat];
     const mindset = document.getElementById('mindset-select').value || cat.mindset;
-    window.gridData[dayIndex][hourIndex] = { ...cat, mindset, slotIndex: hourIndex };
+    window.gridData[dayIndex][slotIndexAdjusted] = { ...cat, mindset, slotIndex: slotIndexAdjusted };
     if (!hasBlock) { // Only set on first block
         hasBlock = true;
         disableResolution();
     }
     resetGrid();
-    console.log('Block placed at', hourIndex, 'for day', dayIndex, 'with selectedCat', selectedCat);
+    console.log('Block placed at', slotIndexAdjusted, 'for day', dayIndex, 'with selectedCat', selectedCat);
 }
 
 function disableResolution() {
