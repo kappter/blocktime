@@ -10,6 +10,21 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        #app { display: flex; flex-direction: column; max-width: 1200px; margin: 0 auto; }
+        .control-panel { display: flex; gap: 20px; }
+        .control-module { border: 1px solid #ccc; padding: 10px; border-radius: 5px; flex: 1; }
+        #main-content { display: flex; gap: 20px; }
+        #grid { flex: 3; border: 1px solid #ccc; padding: 10px; min-height: 400px; }
+        .day { display: flex; flex-direction: column-reverse; }
+        .slot { border: 1px solid #ddd; padding: 5px; text-align: center; }
+        .block { border: 1px solid #000; padding: 5px; margin: 2px; }
+        .category { padding: 5px; margin: 2px; cursor: pointer; }
+        .category.selected { border: 2px solid #000; }
+        select:disabled { background-color: #f0f0f0; cursor: not-allowed; }
+        #report { margin-top: 20px; }
+    </style>
 </head>
 <body>
     <div id="app">
@@ -18,24 +33,7 @@
             <input type="text" id="studentName" placeholder="Enter your name" style="flex-grow: 1;">
             <button onclick="toggleTheme()">Toggle Theme</button>
         </div>
-        <div id="main-content">
-            <div class="control-module">
-                <h3>Add Category</h3>
-                <input type="text" id="cat-name" placeholder="Category Name">
-                <input type="color" id="cat-color" value="#000000">
-                <select id="mindset-select">
-                    <option value="Peace, Groundedness">Calm & Relaxed</option>
-                    <option value="Joyful Engagement">Fun & Easy</option>
-                    <option value="Sweet Resistance">Challenging but Okay</option>
-                    <option value="Painful Desire">Tough but Want to Do</option>
-                    <option value="Forced Suffering">Really Hard</option>
-                </select>
-                <button id="add-category-btn" onclick="addCategory()">Add</button>
-            </div>
-            <div id="categories"></div>
-            <div id="grid"></div>
-        </div>
-        <div id="options-panel">
+        <div class="control-panel">
             <div class="control-module">
                 <h3>Grid Settings</h3>
                 <select id="resolution">
@@ -43,61 +41,12 @@
                     <option value="30">30 min</option>
                     <option value="60" selected>60 min</option>
                 </select>
-                <!-- Removed the toggle-time-direction button -->
             </div>
             <div class="control-module">
-                <h3>Day Operations</h3>
-                <select id="copy-day-select">
-                    <option value="0">Monday</option>
-                    <option value="1">Tuesday</option>
-                    <option value="2">Wednesday</option>
-                    <option value="3">Thursday</option>
-                    <option value="4">Friday</option>
-                    <option value="5">Saturday</option>
-                    <option value="6">Sunday</option>
-                </select>
-                <button onclick="copyDay()">Copy Day</button>
-                <input type="text" id="dayTypeName" placeholder="Day Plan Name (e.g., School Day)">
-                <button onclick="saveDayType()">Save My Day Plan</button>
-                <select id="day-type-select" onchange="previewDayType()">
-                    <option value="">Select Day Plan</option>
-                </select>
-                <div id="day-type-preview"></div>
-                <h4>Apply to Days</h4>
-                <div id="day-checkboxes"></div>
-                <button onclick="applyDayTypeToSelected()">Apply to Selected Days</button>
-                <button onclick="undoAction()">Undo</button>
-            </div>
-            <div class="control-module">
-                <h3>Schedule</h3>
-                <input type="file" id="schedule-file" accept=".json">
-                <button onclick="loadSchedule()">Load Schedule</button>
-                <button onclick="saveSchedule()">Save Schedule</button>
-                <div id="comparison-controls">
-                    <input type="file" id="comparison-file" accept=".json">
-                    <button onclick="loadComparison()">Load Comparison Schedule</button>
-                    <button onclick="generateComparison()">Generate Comparison</button>
-                </div>
-            </div>
-            <div class="control-module">
-                <h3>Report</h3>
-                <button onclick="generateReport()">Generate Report</button>
-                <button onclick="downloadPDF()">Download PDF</button>
-            </div>
-        </div>
-        <div id="report" style="display: none;">
-            <h2>Summary</h2>
-            <p id="summaryText"></p>
-            <table id="summaryTable">
-                <thead><tr><th>Category</th><th>Hours</th><th>Percentage</th><th>Mindset</th></tr></thead>
-                <tbody></tbody>
-            </table>
-            <canvas id="pieChart" width="400" height="400"></canvas>
-        </div>
-    </div>
-    <script src="grid.js"></script>
-    <script src="dayOperations.js"></script>
-    <script src="schedule.js"></script>
-    <script src="report.js"></script>
-</body>
-</html>
+                <h3>Add Category</h3>
+                <input type="text" id="cat-name" placeholder="Category Name">
+                <input type="color" id="cat-color" value="#000000">
+                <select id="mindset-select">
+                    <option value="Peace, Groundedness">Calm & Relaxed</option>
+                    <option value="Joyful Engagement">Fun & Easy</option>
+                    <option value="Sweet Resistance">Ch
