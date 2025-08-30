@@ -119,7 +119,7 @@ function disableResolution() {
     const resolutionSelect = document.getElementById('resolution');
     if (resolutionSelect) {
         resolutionSelect.disabled = true;
-        alert('Resolution is locked after placing the first block. Create a new schedule for a different resolution!');
+        resolutionSelect.title = 'Resolution is locked after placing the first block. Create a new schedule for a different resolution.';
     }
 }
 
@@ -142,8 +142,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 resetGrid();
                 console.log('Resolution changed to:', resolution);
             } else {
-                resolutionSelect.value = resolution; // Reset to current resolution
+                resolutionSelect.value = resolution.toString(); // Reset to current resolution
             }
         });
+    } else {
+        console.error('Resolution select element not found. Verify ID "resolution" in index.html.');
     }
 });
