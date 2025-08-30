@@ -107,19 +107,19 @@ function dropBlock(dayIndex, slotIndex) {
     const cat = window.categories[selectedCat];
     const mindset = document.getElementById('mindset-select').value || cat.mindset;
     window.gridData[dayIndex][hourIndex] = { ...cat, mindset, slotIndex: hourIndex };
-    hasBlock = true; // Set flag when first block is placed
-    disableResolution();
+    if (!hasBlock) { // Only set on first block
+        hasBlock = true;
+        disableResolution();
+    }
     resetGrid();
     console.log('Block placed at', hourIndex, 'for day', dayIndex, 'with selectedCat', selectedCat);
 }
 
 function disableResolution() {
-    if (hasBlock) {
-        const resolutionSelect = document.getElementById('resolution');
-        if (resolutionSelect) {
-            resolutionSelect.disabled = true;
-            alert('Resolution is locked after placing a block. Create a new schedule for a different resolution!');
-        }
+    const resolutionSelect = document.getElementById('resolution');
+    if (resolutionSelect) {
+        resolutionSelect.disabled = true;
+        alert('Resolution is locked after placing the first block. Create a new schedule for a different resolution!');
     }
 }
 
@@ -142,13 +142,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 resetGrid();
                 console.log('Resolution changed to:', resolution);
             } else {
-                alert('Resolution is locked after placing a block. Create a new schedule for a different resolution!');
                 resolutionSelect.value = resolution; // Reset to current resolution
             }
         });
     }
-
-    document.getElementById('resolution')?.addEventListener('change', () => {
-        console.log('Resolution change not supported yet');
-    });
 });
