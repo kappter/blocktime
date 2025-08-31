@@ -50,6 +50,7 @@ function resetGrid() {
     grid.appendChild(dayDiv);
     updateGrid();
     updateCategories();
+    updateLegend();
     console.log('Grid reset with times displayed, direction:', timeDirection, 'resolution:', resolution);
 }
 
@@ -62,10 +63,20 @@ function updateGrid() {
         const slotIndex = Math.floor(originalIndex / slotsPerHour) * slotsPerHour; // Map to resolution boundary
         const block = window.gridData[window.currentDay][slotIndex]; // Use resolution-based index
         if (block) {
+            const slotsPerHour = 60 / resolution;
+            const startHour = Math.floor(slotIndex / slotsPerHour);
+            const startMinute = (slotIndex % slotsPerHour) * resolution;
+            const endIndex = slotIndex; // For now, assume single slot (grouping handled in export)
+            const endHour = Math.floor(endIndex / slotsPerHour);
+            const endMinute = ((endIndex % slotsPerHour) + 1) * resolution % 60;
+            const endPeriod = endHour >= 12 ? 'PM' : 'AM';
+            const startPeriod = startHour >= 12 ? 'PM' : 'AM';
+            const startTime = `${startHour % 12 || 12}:${startMinute.toString().padStart(2, '0')} ${startPeriod}`;
+            const endTime = `${endHour % 12 || 12}:${endMinute.toString().padStart(2, '0')} ${endPeriod}`;
             const blockDiv = document.createElement('div');
             blockDiv.className = 'block';
             blockDiv.style.backgroundColor = block.color;
-            blockDiv.innerHTML = `<span class="block-label">${block.name} (${block.mindset})</span>`;
+            blockDiv.innerHTML = `<span class="block-label">${block.name} (${block.mindset})<br>${startTime} - ${endTime}</span>`;
             slot.appendChild(blockDiv);
         }
     });
@@ -90,6 +101,22 @@ function updateCategories() {
         });
         catDiv.appendChild(catElement);
     });
+}
+
+function updateLegend() {
+    const legendDiv = document.getElementById('legend');
+    if (legendDiv) {
+        legendDiv.innerHTML = '<h3>Legend</h3>';
+        window.categories.forEach(cat => {
+            const item = document.createElement('div');
+            item.className = 'legend-item';
+            const colorBox = document.createElement('span');
+            colorBox.style.backgroundColor = cat.color;
+            item.appendChild(colorBox);
+            item.appendChild(document.createTextNode(`${cat.name} (${cat.mindset})`));
+            legendDiv.appendChild(item);
+        });
+    }
 }
 
 function dropBlock(dayIndex, slotIndex) {
