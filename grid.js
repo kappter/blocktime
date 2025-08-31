@@ -31,8 +31,9 @@ function resetGrid() {
     const totalSlots = 24 * slotsPerHour;
     const indices = timeDirection === 'column-reverse' ? [...Array(totalSlots).keys()].reverse() : [...Array(totalSlots).keys()];
     indices.forEach(i => {
-        const hour = Math.floor(i / slotsPerHour);
-        const minute = (i % slotsPerHour) * resolution;
+        const totalMinutes = i * resolution;
+        const hour = Math.floor(totalMinutes / 60) % 24;
+        const minute = totalMinutes % 60;
         const div = document.createElement('div');
         div.className = 'slot';
         div.dataset.index = i; // Use the slot index
@@ -66,16 +67,18 @@ function updateGrid() {
             const slotsPerHour = 60 / resolution;
             const startHour = Math.floor(slotIndex / slotsPerHour);
             const startMinute = (slotIndex % slotsPerHour) * resolution;
-            const endIndex = slotIndex; // For now, assume single slot (grouping handled in export)
+            const endIndex = slotIndex; // For single slot display (grouping handled in export)
             const endHour = Math.floor(endIndex / slotsPerHour);
             const endMinute = ((endIndex % slotsPerHour) + 1) * resolution % 60;
             const endPeriod = endHour >= 12 ? 'PM' : 'AM';
             const startPeriod = startHour >= 12 ? 'PM' : 'AM';
             const startTime = `${startHour % 12 || 12}:${startMinute.toString().padStart(2, '0')} ${startPeriod}`;
             const endTime = `${endHour % 12 || 12}:${endMinute.toString().padStart(2, '0')} ${endPeriod}`;
+            slot.innerHTML = ''; // Clear slot to avoid overlap
             const blockDiv = document.createElement('div');
             blockDiv.className = 'block';
             blockDiv.style.backgroundColor = block.color;
+            blockDiv.style.height = `${100 / (24 * slotsPerHour)}%`; // Adjust height based on resolution
             blockDiv.innerHTML = `<span class="block-label">${block.name} (${block.mindset})<br>${startTime} - ${endTime}</span>`;
             slot.appendChild(blockDiv);
         }
