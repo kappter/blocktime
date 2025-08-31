@@ -10,25 +10,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-        #app { display: flex; flex-direction: column; max-width: 1200px; margin: 0 auto; }
-        .control-panel { display: flex; gap: 20px; margin-bottom: 10px; }
-        .control-module { border: 1px solid #ccc; padding: 10px; border-radius: 5px; flex: 1; }
-        #main-content { display: flex; flex-direction: column; gap: 20px; }
-        #categories { border: 1px solid #ccc; padding: 10px; border-radius: 5px; flex: 1; }
-        #grid { flex: 3; border: 1px solid #ccc; padding: 10px; min-height: 400px; position: relative; }
-        .day { display: flex; flex-direction: column-reverse; }
-        .slot { border: 1px solid #ddd; padding: 5px; text-align: center; min-width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; }
-        .block { border: 1px solid #000; padding: 5px; margin: 2px; min-height: 40px; overflow: auto; }
-        .category { padding: 5px; margin: 2px; cursor: pointer; }
-        .category.selected { border: 2px solid #000; }
-        select:disabled { background-color: #f0f0f0; cursor: not-allowed; }
-        #legend { margin-top: 10px; }
-        .legend-item { display: inline-block; margin-right: 10px; }
-        .legend-item span { display: inline-block; width: 15px; height: 15px; margin-right: 5px; }
-        #report { margin-top: 20px; }
-    </style>
 </head>
 <body>
     <div id="app">
@@ -73,9 +54,11 @@
             </div>
         </div>
         <div id="main-content">
+            <div id="mindset-thumbnail">
+                <img src="mindset-chart.png" alt="Mindset Chart Thumbnail" onclick="openMindsetModal()" style="cursor: pointer; width: 100px; height: 100px; margin-bottom: 10px;">
+            </div>
             <div id="categories"></div>
             <div id="grid"></div>
-            <div id="legend"></div>
         </div>
         <div class="control-panel" style="margin-top: 20px;">
             <div class="control-module">
@@ -126,10 +109,38 @@
                 <thead><tr><th>Category</th><th>Hours</th><th>Percentage</th><th>Mindset</th></tr></thead>
                 <tbody></tbody>
             </table>
-            <canvas id="pieChartActivity" width="400" height=400"></canvas>
+            <canvas id="pieChartActivity" width="400" height="400"></canvas>
             <canvas id="pieChartMindset" width="400" height="400"></canvas>
         </div>
     </div>
+
+    <!-- Spotlight Modal -->
+    <div id="mindset-modal" class="modal" style="display: none;">
+        <span class="close" onclick="closeMindsetModal()">&times;</span>
+        <img src="mindset-chart.png" alt="Mindset Chart" class="modal-image">
+        <p class="modal-caption">
+            <strong>The Mindset Spectrum</strong><br>
+            The two axes represent <strong>Happiness vs. Pain</strong> (vertical: how enjoyable an activity feels) and <strong>Resistance vs. Willingness</strong> (horizontal: how motivated you are to do it).<br>
+            <br>
+            <strong>Overlaps and Quadrants:</strong><br>
+            - <strong>Sweet Resistance</strong> (Top-Left): Happy but resistant—activities you enjoy but avoid (e.g., exercising).<br>
+            - <strong>Joyful Engagement</strong> (Top-Right): Happy and willing—easy and fun tasks (e.g., gaming).<br>
+            - <strong>Forced Suffering</strong> (Bottom-Left): Painful and resistant—hard tasks you dread (e.g., chores).<br>
+            - <strong>Painful Desire</strong> (Bottom-Right): Painful but willing—challenging tasks you push for (e.g., studying for a goal).<br>
+            <br>
+            <strong>Centered (Peace, Groundedness)</strong>: The ideal balance where activities feel calm and natural, without extreme emotion—aim to center your schedule here for long-term well-being.
+        </p>
+    </div>
+
+    <script>
+        function openMindsetModal() {
+            document.getElementById('mindset-modal').style.display = 'block';
+        }
+
+        function closeMindsetModal() {
+            document.getElementById('mindset-modal').style.display = 'none';
+        }
+    </script>
     <script src="grid.js"></script>
     <script src="dayOperations.js"></script>
     <script src="schedule.js"></script>
