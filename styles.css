@@ -137,6 +137,8 @@ input[type="text"], input[type="color"], input[type="file"] {
     z-index: 0;
 }
 
+/* ... (previous styles remain unchanged) ... */
+
 .block {
     position: absolute;
     width: 100%;
@@ -152,14 +154,15 @@ input[type="text"], input[type="color"], input[type="file"] {
     font-size: 8px;
     color: #fff;
     text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: nowrap; /* Force single line */
+    overflow: hidden; /* Hide overflow */
+    text-overflow: ellipsis; /* Add ellipsis for overflow */
     padding: 2px;
     background-color: rgba(0, 0, 0, 0.6);
     border-radius: 3px;
     width: 100%;
     box-sizing: border-box;
+    display: block; /* Ensure it takes full width */
 }
 
 .day-label {
