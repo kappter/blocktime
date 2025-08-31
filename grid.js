@@ -79,7 +79,7 @@ function updateGrid() {
             blockDiv.className = 'block';
             blockDiv.style.backgroundColor = block.color;
             blockDiv.style.height = `${100 / (24 * slotsPerHour)}%`; // Adjust height based on resolution
-            blockDiv.innerHTML = `<span class="block-label">${block.name} (${block.mindset})<br>${startTime} - ${endTime}</span>`;
+            blockDiv.innerHTML = `<span class="block-label">${block.name} (${block.mindset}) ${startTime} - ${endTime}</span>`;
             slot.appendChild(blockDiv);
         }
     });
