@@ -17,13 +17,16 @@
         .control-module { border: 1px solid #ccc; padding: 10px; border-radius: 5px; flex: 1; }
         #main-content { display: flex; flex-direction: column; gap: 20px; }
         #categories { border: 1px solid #ccc; padding: 10px; border-radius: 5px; flex: 1; }
-        #grid { flex: 3; border: 1px solid #ccc; padding: 10px; min-height: 400px; }
+        #grid { flex: 3; border: 1px solid #ccc; padding: 10px; min-height: 400px; position: relative; }
         .day { display: flex; flex-direction: column-reverse; }
-        .slot { border: 1px solid #ddd; padding: 5px; text-align: center; min-width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .block { border: 1px solid #000; padding: 5px; margin: 2px; }
+        .slot { border: 1px solid #ddd; padding: 5px; text-align: center; min-width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; }
+        .block { border: 1px solid #000; padding: 5px; margin: 2px; min-height: 40px; overflow: auto; }
         .category { padding: 5px; margin: 2px; cursor: pointer; }
         .category.selected { border: 2px solid #000; }
         select:disabled { background-color: #f0f0f0; cursor: not-allowed; }
+        #legend { margin-top: 10px; }
+        .legend-item { display: inline-block; margin-right: 10px; }
+        .legend-item span { display: inline-block; width: 15px; height: 15px; margin-right: 5px; }
         #report { margin-top: 20px; }
     </style>
 </head>
@@ -72,6 +75,7 @@
         <div id="main-content">
             <div id="categories"></div>
             <div id="grid"></div>
+            <div id="legend"></div>
         </div>
         <div class="control-panel" style="margin-top: 20px;">
             <div class="control-module">
@@ -122,7 +126,8 @@
                 <thead><tr><th>Category</th><th>Hours</th><th>Percentage</th><th>Mindset</th></tr></thead>
                 <tbody></tbody>
             </table>
-            <canvas id="pieChart" width="400" height="400"></canvas>
+            <canvas id="pieChartActivity" width="400" height=400"></canvas>
+            <canvas id="pieChartMindset" width="400" height="400"></canvas>
         </div>
     </div>
     <script src="grid.js"></script>
