@@ -1,61 +1,79 @@
+// Assume report.js exists and contains generateReport and downloadPDF functions
 function generateReport() {
     const summaryText = document.getElementById('summaryText');
     const summaryTable = document.getElementById('summaryTable').getElementsByTagName('tbody')[0];
-    const pieChart = document.getElementById('pieChart').getContext('2d');
-    if (!window.categories || !window.gridData) {
-        alert('Categories or grid data not available!');
-        return;
-    }
-
+    const pieChartActivity = document.getElementById('pieChartActivity').getContext('2d');
+    const pieChartMindset = document.getElementById('pieChartMindset').getContext('2d');
     summaryTable.innerHTML = '';
-    summaryText.textContent = 'Report Summary';
+    summaryText.innerHTML = 'Weekly Schedule Summary';
 
-    const categoryTotals = {};
-    window.gridData.forEach(day => {
-        day.forEach((block, index) => {
-            if (block && block.name) {
-                categoryTotals[block.name] = (categoryTotals[block.name] || 0) + 1;
+    // Calculate total hours and category data
+    let totalHours = 0;
+    const categoryData = {};
+    const mindsetData = {};
+    for (let day = 0; day < 7; day++) {
+        gridData[day].forEach(block => {
+            if (block) {
+                const duration = resolution / 60; // Convert minutes to hours
+                totalHours += duration;
+                categoryData[block.name] = (categoryData[block.name] || 0) + duration;
+                mindsetData[block.mindset] = (mindsetData[block.mindset] || 0) + duration;
             }
         });
-    });
+    }
 
-    let totalHours = 0;
-    Object.values(categoryTotals).forEach(count => totalHours += count);
-
-    window.categories.forEach(cat => {
-        const hours = categoryTotals[cat.name] || 0;
-        const percentage = totalHours ? (hours / totalHours * 100).toFixed(1) : 0;
+    // Populate table
+    Object.entries(categoryData).forEach(([name, hours]) => {
+        const percentage = ((hours / totalHours) * 100).toFixed(1);
         const row = summaryTable.insertRow();
-        row.insertCell(0).textContent = cat.name;
-        row.insertCell(1).textContent = hours;
-        row.insertCell(2).textContent = `${percentage}%`;
-        row.insertCell(3).textContent = cat.mindset;
+        row.insertCell(0).textContent = name;
+        row.insertCell(1).textContent = hours.toFixed(1);
+        row.insertCell(2).textContent = percentage + '%';
+        row.insertCell(3).textContent = Object.entries(mindsetData).find(([m, h]) => h === hours)[0] || '';
     });
 
-    // Placeholder for chart (requires Chart.js setup)
-    if (window.myPieChart) window.myPieChart.destroy();
-    window.myPieChart = new Chart(pieChart, {
+    // Activity Pie Chart
+    new Chart(pieChartActivity, {
         type: 'pie',
         data: {
-            labels: Object.keys(categoryTotals),
+            labels: Object.keys(categoryData),
             datasets: [{
-                data: Object.values(categoryTotals),
-                backgroundColor: window.categories.map(c => c.color || '#000000')
+                data: Object.values(categoryData),
+                backgroundColor: window.categories.map(c => c.color)
             }]
-        }
+        },
+        options: { title: { display: true, text: 'Percentage of Time by Activity' } }
     });
-    document.getElementById('report').style.display = 'block'; // Show report
+
+    // Mindset Pie Chart
+    new Chart(pieChartMindset, {
+        type: 'pie',
+        data: {
+            labels: Object.keys(mindsetData),
+            datasets: [{
+                data: Object.values(mindsetData),
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'] // Colors for mindsets
+            }]
+        },
+        options: { title: { display: true, text: 'Percentage of Time by Mindset' } }
+    });
+
+    document.getElementById('report').style.display = 'block';
 }
 
 function downloadPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    const summaryTable = document.getElementById('summaryTable');
-    doc.text('BlockTime Schedule Report', 10, 10);
-    doc.autoTable({ html: summaryTable });
-    doc.save('BlockTime_Report.pdf');
-}
-
-function toggleTheme() {
-    document.body.classList.toggle('dark-mode');
+    doc.text('Weekly Schedule Summary', 10, 10);
+    doc.autoTable({ html: '#summaryTable' });
+    doc.addPage();
+    doc.text('Activity Percentage', 10, 10);
+    // Add chart images (simplified, requires Chart.js to render to canvas first)
+    const activityCanvas = document.getElementById('pieChartActivity');
+    const mindsetCanvas = document.getElementById('pieChartMindset');
+    doc.addImage(activityCanvas.toDataURL('image/png'), 'PNG', 10, 20, 180, 180);
+    doc.addPage();
+    doc.text('Mindset Percentage', 10, 10);
+    doc.addImage(mindsetCanvas.toDataURL('image/png'), 'PNG', 10, 20, 180, 180);
+    doc.save('schedule_report.pdf');
 }
