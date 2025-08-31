@@ -122,6 +122,50 @@ function disableResolution() {
     }
 }
 
+function exportToCalendar() {
+    const startDate = new Date('2025-08-31'); // Start of week (Monday, August 31, 2025)
+    const icsContent = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//BlockTime Scheduler//EN'];
+    for (let day = 0; day < 7; day++) {
+        let currentIndex = 0;
+        while (currentIndex < gridData[day].length) {
+            if (gridData[day][currentIndex]) {
+                const startBlock = gridData[day][currentIndex];
+                let endIndex = currentIndex;
+                // Group consecutive blocks of the same category
+                while (endIndex + 1 < gridData[day].length && gridData[day][endIndex + 1] && 
+                       gridData[day][endIndex + 1].name === startBlock.name) {
+                    endIndex++;
+                }
+                const startTime = new Date(startDate);
+                startTime.setDate(startDate.getDate() + day);
+                const slotsPerHour = 60 / resolution;
+                const startHour = Math.floor(currentIndex / slotsPerHour);
+                const startMinute = (currentIndex % slotsPerHour) * resolution;
+                startTime.setHours(startHour, startMinute, 0, 0);
+                const endTime = new Date(startTime);
+                endTime.setMinutes(endTime.getMinutes() + (endIndex - currentIndex + 1) * resolution);
+                icsContent.push('BEGIN:VEVENT');
+                icsContent.push(`DTSTART:${startTime.toISOString().replace(/-|:|\.\d+/g, '')}`);
+                icsContent.push(`DTEND:${endTime.toISOString().replace(/-|:|\.\d+/g, '')}`);
+                icsContent.push(`SUMMARY:${startBlock.name} (${startBlock.mindset})`);
+                icsContent.push('END:VEVENT');
+                currentIndex = endIndex + 1;
+            } else {
+                currentIndex++;
+            }
+        }
+    }
+    icsContent.push('END:VCALENDAR');
+    const blob = new Blob([icsContent.join('\n')], { type: 'text/calendar' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'schedule.ics';
+    a.click();
+    URL.revokeObjectURL(url);
+    console.log('Exported to calendar as schedule.ics');
+}
+
 // Event listeners
 document.addEventListener('DOMContentLoaded', () => {
     // Ensure empty grid with times on load
