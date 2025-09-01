@@ -37,7 +37,7 @@ function resetGrid() {
         const div = document.createElement('div');
         div.className = 'slot';
         div.dataset.index = i; // Use the slot index
-        div.dataset.time = `${(hour % 12 || 12)}:${minute.toString().padStart(2, '0')}${hour < 12 ? 'AM' : 'PM'}`;
+        div.dataset.time = `${hour % 12 || 12}:${minute.toString().padStart(2, '0')}${hour < 12 ? 'AM' : 'PM'}`;
         div.innerHTML = `<span class="slot-time">${div.dataset.time}</span>`;
         div.addEventListener('click', (e) => {
             if (selectedCat !== null && !e.target.classList.contains('block')) {
@@ -64,21 +64,18 @@ function updateGrid() {
         const slotIndex = Math.floor(originalIndex / slotsPerHour) * slotsPerHour; // Map to resolution boundary
         const block = window.gridData[window.currentDay][slotIndex]; // Use resolution-based index
         if (block) {
-            const slotsPerHour = 60 / resolution;
-            const startHour = Math.floor(slotIndex / slotsPerHour);
-            const startMinute = (slotIndex % slotsPerHour) * resolution;
-            const endIndex = slotIndex; // For single slot display (grouping handled in export)
-            const endHour = Math.floor(endIndex / slotsPerHour);
-            const endMinute = ((endIndex % slotsPerHour) + 1) * resolution % 60;
-            const endPeriod = endHour >= 12 ? 'PM' : 'AM';
-            const startPeriod = startHour >= 12 ? 'PM' : 'AM';
-            const startTime = `${startHour % 12 || 12}:${startMinute.toString().padStart(2, '0')} ${startPeriod}`;
-            const endTime = `${endHour % 12 || 12}:${endMinute.toString().padStart(2, '0')} ${endPeriod}`;
             slot.innerHTML = ''; // Clear slot to avoid overlap
             const blockDiv = document.createElement('div');
             blockDiv.className = 'block';
             blockDiv.style.backgroundColor = block.color;
-            blockDiv.style.height = `${100 / (24 * slotsPerHour)}%`; // Adjust height based on resolution
+            const startHour = Math.floor(slotIndex / slotsPerHour);
+            const startMinute = (slotIndex % slotsPerHour) * resolution;
+            const endHour = Math.floor((slotIndex * resolution + resolution) / 60) % 24;
+            const endMinute = (slotIndex * resolution + resolution) % 60;
+            const startPeriod = startHour >= 12 ? 'PM' : 'AM';
+            const endPeriod = endHour >= 12 ? 'PM' : 'AM';
+            const startTime = `${startHour % 12 || 12}:${startMinute.toString().padStart(2, '0')} ${startPeriod}`;
+            const endTime = `${endHour % 12 || 12}:${endMinute.toString().padStart(2, '0')} ${endPeriod}`;
             blockDiv.innerHTML = `<span class="block-label">${block.name} (${block.mindset}) ${startTime} - ${endTime}</span>`;
             slot.appendChild(blockDiv);
         }
