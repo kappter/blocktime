@@ -1,4 +1,8 @@
-// Assume report.js exists and contains generateReport and downloadPDF functions
+// Global variables accessible from other scripts
+window.gridData = window.gridData || Array(7).fill().map(() => Array(24 * 2).fill(null));
+window.categories = window.categories || [];
+window.resolution = window.resolution || 60;
+
 function generateReport() {
     const summaryText = document.getElementById('summaryText');
     const summaryTable = document.getElementById('summaryTable').getElementsByTagName('tbody')[0];
@@ -7,7 +11,7 @@ function generateReport() {
     summaryTable.innerHTML = '';
     summaryText.innerHTML = 'Weekly Schedule Summary';
 
-    // Calculate total hours and category data
+    // Calculate total hours and category/mindset data across all days
     let totalHours = 0;
     const categoryData = {};
     const mindsetData = {};
@@ -22,14 +26,16 @@ function generateReport() {
         });
     }
 
-    // Populate table
+    // Populate table with activity totals
     Object.entries(categoryData).forEach(([name, hours]) => {
         const percentage = ((hours / totalHours) * 100).toFixed(1);
         const row = summaryTable.insertRow();
         row.insertCell(0).textContent = name;
         row.insertCell(1).textContent = hours.toFixed(1);
         row.insertCell(2).textContent = percentage + '%';
-        row.insertCell(3).textContent = Object.entries(mindsetData).find(([m, h]) => h === hours)[0] || '';
+        // Match mindset to the activity (simplified, may need refinement based on data)
+        const mindset = Object.keys(mindsetData).find(m => mindsetData[m] === hours) || '';
+        row.insertCell(3).textContent = mindset;
     });
 
     // Activity Pie Chart
@@ -39,10 +45,10 @@ function generateReport() {
             labels: Object.keys(categoryData),
             datasets: [{
                 data: Object.values(categoryData),
-                backgroundColor: window.categories.map(c => c.color)
+                backgroundColor: window.categories.map(c => c.color || '#000000') // Default to black if no color
             }]
         },
-        options: { title: { display: true, text: 'Percentage of Time by Activity' } }
+        options: { title: { display: true, text: 'Weekly Hours by Activity' } }
     });
 
     // Mindset Pie Chart
@@ -52,10 +58,10 @@ function generateReport() {
             labels: Object.keys(mindsetData),
             datasets: [{
                 data: Object.values(mindsetData),
-                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'] // Colors for mindsets
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
             }]
         },
-        options: { title: { display: true, text: 'Percentage of Time by Mindset' } }
+        options: { title: { display: true, text: 'Weekly Hours by State of Mind' } }
     });
 
     document.getElementById('report').style.display = 'block';
@@ -67,13 +73,19 @@ function downloadPDF() {
     doc.text('Weekly Schedule Summary', 10, 10);
     doc.autoTable({ html: '#summaryTable' });
     doc.addPage();
-    doc.text('Activity Percentage', 10, 10);
-    // Add chart images (simplified, requires Chart.js to render to canvas first)
+    doc.text('Activity Hours', 10, 10);
     const activityCanvas = document.getElementById('pieChartActivity');
-    const mindsetCanvas = document.getElementById('pieChartMindset');
     doc.addImage(activityCanvas.toDataURL('image/png'), 'PNG', 10, 20, 180, 180);
     doc.addPage();
-    doc.text('Mindset Percentage', 10, 10);
+    doc.text('State of Mind Hours', 10, 10);
+    const mindsetCanvas = document.getElementById('pieChartMindset');
     doc.addImage(mindsetCanvas.toDataURL('image/png'), 'PNG', 10, 20, 180, 180);
     doc.save('schedule_report.pdf');
 }
+
+// Ensure report generation on page load if data exists (optional)
+document.addEventListener('DOMContentLoaded', () => {
+    if (gridData.some(day => day.some(block => block))) {
+        generateReport();
+    }
+});
