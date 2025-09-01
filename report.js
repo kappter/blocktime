@@ -16,13 +16,11 @@ function generateReport() {
     const categoryData = {};
     const mindsetData = {};
     for (let day = 0; day < 7; day++) {
-        gridData[day].forEach(block => {
-            if (block) {
-                const duration = resolution / 60; // Convert minutes to hours
-                totalHours += duration;
-                categoryData[block.name] = (categoryData[block.name] || 0) + duration;
-                mindsetData[block.mindset] = (mindsetData[block.mindset] || 0) + duration;
-            }
+        gridData[day].filter(block => block).forEach(block => {
+            const duration = resolution / 60; // Convert minutes to hours
+            totalHours += duration;
+            categoryData[block.name] = (categoryData[block.name] || 0) + duration;
+            mindsetData[block.mindset] = (mindsetData[block.mindset] || 0) + duration;
         });
     }
 
@@ -33,9 +31,14 @@ function generateReport() {
         row.insertCell(0).textContent = name;
         row.insertCell(1).textContent = hours.toFixed(1);
         row.insertCell(2).textContent = percentage + '%';
-        // Match mindset to the activity (simplified, may need refinement based on data)
-        const mindset = Object.keys(mindsetData).find(m => mindsetData[m] === hours) || '';
-        row.insertCell(3).textContent = mindset;
+        // Find the most common mindset for this activity
+        const activityMindsets = gridData.flat().filter(b => b && b.name === name).map(b => b.mindset);
+        const mindsetCount = activityMindsets.reduce((acc, mindset) => {
+            acc[mindset] = (acc[mindset] || 0) + 1;
+            return acc;
+        }, {});
+        const mostCommonMindset = Object.keys(mindsetCount).reduce((a, b) => mindsetCount[a] > mindsetCount[b] ? a : b, '');
+        row.insertCell(3).textContent = mostCommonMindset || 'N/A';
     });
 
     // Activity Pie Chart
@@ -45,7 +48,7 @@ function generateReport() {
             labels: Object.keys(categoryData),
             datasets: [{
                 data: Object.values(categoryData),
-                backgroundColor: window.categories.map(c => c.color || '#000000') // Default to black if no color
+                backgroundColor: window.categories.map(c => c.color || '#000000')
             }]
         },
         options: { title: { display: true, text: 'Weekly Hours by Activity' } }
