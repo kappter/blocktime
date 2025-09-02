@@ -55,6 +55,8 @@ h1 {
     gap: 20px;
     margin-bottom: 10px;
     flex-wrap: wrap;
+    flex: 1;
+    min-width: 200px;
 }
 
 .control-module {
@@ -297,25 +299,29 @@ input[type="text"], input[type="color"], input[type="file"] {
 
 @media (min-width: 901px) {
     #main-content {
-        flex-direction: column;
-        align-items: stretch;
+        flex-direction: row;
+        align-items: flex-start;
     }
     #mindset-thumbnail {
         order: 1;
-        width: 100%;
-        text-align: center;
+        width: 100px;
+        margin-right: 10px;
+    }
+    .control-panel {
+        order: 2;
+        flex: 1;
+        flex-direction: column;
     }
     #categories {
-        order: 2;
+        order: 3;
         width: 100%;
         display: flex;
         flex-direction: column;
-        align-items: center;
+        align-items: flex-start;
     }
     #grid {
-        order: 3;
-        width: 100%;
-        flex: 1;
+        order: 4;
+        flex: 3;
         min-width: 0;
     }
 }
