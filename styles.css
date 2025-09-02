@@ -295,6 +295,31 @@ input[type="text"], input[type="color"], input[type="file"] {
     }
 }
 
+@media (min-width: 901px) {
+    #main-content {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    #mindset-thumbnail {
+        order: 1;
+        width: 100%;
+        text-align: center;
+    }
+    #categories {
+        order: 2;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    #grid {
+        order: 3;
+        width: 100%;
+        flex: 1;
+        min-width: 0;
+    }
+}
+
 @media (max-width: 600px) {
     #app {
         padding: 10px;
