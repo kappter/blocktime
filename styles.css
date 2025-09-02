@@ -310,7 +310,8 @@ input[type="text"], input[type="color"], input[type="file"] {
     .control-panel {
         order: 2;
         flex: 1;
-        flex-direction: column;
+        flex-direction: row; /* Restore horizontal layout for top controls */
+        align-items: flex-start;
     }
     #categories {
         order: 3;
@@ -323,23 +324,5 @@ input[type="text"], input[type="color"], input[type="file"] {
         order: 4;
         flex: 3;
         min-width: 0;
-    }
-}
-
-@media (max-width: 600px) {
-    #app {
-        padding: 10px;
-    }
-    .control-module {
-        padding: 5px;
-    }
-    button, select, input {
-        font-size: 12px;
-    }
-    .block-label {
-        font-size: 8px;
-    }
-    .slot-time {
-        font-size: 8px;
     }
 }
