@@ -88,12 +88,25 @@ input[type="text"], input[type="color"], input[type="file"] {
     color: var(--text-color);
 }
 
-.grid-and-categories {
+.content-layout {
     display: grid;
-    grid-template-columns: minmax(200px, 300px) 1fr; /* Left column for categories, right for grid */
+    grid-template-columns: minmax(200px, 300px) 1fr; /* Left for categories, right for grid */
     gap: 10px;
+    min-height: 400px; /* Ensure visibility */
+}
+
+.categories-container {
+    display: flex;
+    flex-direction: column;
     align-items: flex-start;
-    min-height: 400px; /* Ensure minimum height for visibility */
+    max-height: 100%;
+    overflow-y: auto; /* Scroll for many activities */
+}
+
+.grid-container {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
 }
 
 #mindset-thumbnail {
@@ -112,8 +125,6 @@ input[type="text"], input[type="color"], input[type="file"] {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    max-height: 100%; /* Allow full height with scroll */
-    overflow-y: auto; /* Scroll if too many activities */
 }
 
 #grid {
@@ -314,7 +325,7 @@ input[type="text"], input[type="color"], input[type="file"] {
     .control-module {
         min-width: 0;
     }
-    .grid-and-categories {
+    .content-layout {
         display: flex;
         flex-direction: column;
     }
@@ -328,28 +339,25 @@ input[type="text"], input[type="color"], input[type="file"] {
         flex-direction: row;
         align-items: flex-start;
     }
-    .grid-and-categories {
+    .content-layout {
         display: grid;
-        grid-template-columns: minmax(200px, 300px) 1fr; /* Fixed columns */
+        grid-template-columns: minmax(200px, 300px) 1fr;
         gap: 10px;
-        align-items: flex-start;
         min-height: 400px;
     }
     #mindset-thumbnail {
-        order: 1;
         width: 100px;
         margin-right: 10px;
     }
-    #categories {
-        order: 2;
+    .categories-container {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
         max-height: 100%;
         overflow-y: auto;
     }
-    #grid {
-        order: 3;
-        min-width: 0;
+    .grid-container {
+        display: flex;
+        flex-direction: column;
     }
 }
