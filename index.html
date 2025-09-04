@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BlockTime Scheduler</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- Optional: Add a favicon to avoid 404 -->
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
     <div id="app">
@@ -23,13 +25,7 @@
                     Add Category
                     <input type="text" id="newCategory" placeholder="Enter category">
                     <button id="addCategory">Add</button>
-                    <div id="categories">
-                        <span class="category">Calm & Relaxed</span>
-                        <span class="category">Fun & Easy</span>
-                        <span class="category">Challenging but Okay</span>
-                        <span class="category">Tough but Want to Do</span>
-                        <span class="category">Really Hard</span>
-                    </div>
+                    <!-- Dynamic categories will be populated here by grid.js -->
                 </div>
                 <div class="control-module" id="daySelection">
                     Day Selection
@@ -54,6 +50,50 @@
                 </div>
                 <div id="grid"></div>
             </div>
+            <div class="bottom-controls">
+                <div class="control-module" id="dayOperations">
+                    Day Operations
+                    <div id="day-checkboxes">
+                        <label><input type="checkbox" name="day" value="Monday"> Monday</label>
+                        <label><input type="checkbox" name="day" value="Tuesday"> Tuesday</label>
+                        <label><input type="checkbox" name="day" value="Wednesday"> Wednesday</label>
+                        <label><input type="checkbox" name="day" value="Thursday"> Thursday</label>
+                        <label><input type="checkbox" name="day" value="Friday"> Friday</label>
+                        <label><input type="checkbox" name="day" value="Saturday"> Saturday</label>
+                        <label><input type="checkbox" name="day" value="Sunday"> Sunday</label>
+                    </div>
+                    <button id="copyDay">Copy Day</button>
+                    <button id="saveDayPlan">Save My Day Plan</button>
+                    <button id="selectDayPlan">Select Day Plan</button>
+                    <div id="day-type-preview"></div>
+                    <button id="applyToDays">Apply to Selected Days</button>
+                    <button id="undo">Undo</button>
+                </div>
+                <div class="control-module" id="schedule">
+                    Schedule
+                    <button id="loadSchedule">Load Schedule</button>
+                    <button id="saveSchedule">Save Schedule</button>
+                    <div>
+                        <input type="file" id="comparisonSchedule" accept=".json">
+                        <button id="loadComparison">Load Comparison Schedule</button>
+                        <button id="generateComparison">Generate Comparison</button>
+                    </div>
+                    <button id="exportCalendar">Export to Calendar</button>
+                </div>
+                <div class="control-module" id="legend">
+                    Summary
+                    <p>The Mindset Spectrum</p>
+                    <p>The two axes represent Happiness vs. Pain (vertical: how enjoyable an activity feels) and Resistance vs. Willingness (horizontal: how motivated you are to do it).</p>
+                    <p>Overlaps and Quadrants:</p>
+                    <ul>
+                        <li>Sweet Resistance (Top-Left): Happy but resistant—activities you enjoy but avoid (e.g., exercising).</li>
+                        <li>Joyful Engagement (Top-Right): Happy and willing—easy and fun tasks (e.g., gaming).</li>
+                        <li>Forced Suffering (Bottom-Left): Painful and resistant—hard tasks you dread (e.g., chores).</li>
+                        <li>Painful Desire (Bottom-Right): Painful but willing—challenging tasks you push for (e.g., studying for a goal).</li>
+                    </ul>
+                    <p>Centered (Peace, Groundedness): The ideal balance where activities feel calm and natural, without extreme emotion—aim to center your schedule here for long-term well-being.</p>
+                </div>
+            </div>
             <div id="report">
                 Report
                 <button id="generateReport">Generate Report</button>
@@ -75,48 +115,6 @@
                 <div id="pieChartMindset"></div>
             </div>
             <div id="mindset-thumbnail"><img src="thumbnail.jpg" alt="Mindset"></div>
-            <div id="legend">
-                Summary
-                <p>The Mindset Spectrum</p>
-                <p>The two axes represent Happiness vs. Pain (vertical: how enjoyable an activity feels) and Resistance vs. Willingness (horizontal: how motivated you are to do it).</p>
-                <p>Overlaps and Quadrants:</p>
-                <ul>
-                    <li>Sweet Resistance (Top-Left): Happy but resistant—activities you enjoy but avoid (e.g., exercising).</li>
-                    <li>Joyful Engagement (Top-Right): Happy and willing—easy and fun tasks (e.g., gaming).</li>
-                    <li>Forced Suffering (Bottom-Left): Painful and resistant—hard tasks you dread (e.g., chores).</li>
-                    <li>Painful Desire (Bottom-Right): Painful but willing—challenging tasks you push for (e.g., studying for a goal).</li>
-                </ul>
-                <p>Centered (Peace, Groundedness): The ideal balance where activities feel calm and natural, without extreme emotion—aim to center your schedule here for long-term well-being.</p>
-            </div>
-            <div class="control-module" id="dayOperations">
-                Day Operations
-                <div id="day-checkboxes">
-                    <label><input type="checkbox" name="day" value="Monday"> Monday</label>
-                    <label><input type="checkbox" name="day" value="Tuesday"> Tuesday</label>
-                    <label><input type="checkbox" name="day" value="Wednesday"> Wednesday</label>
-                    <label><input type="checkbox" name="day" value="Thursday"> Thursday</label>
-                    <label><input type="checkbox" name="day" value="Friday"> Friday</label>
-                    <label><input type="checkbox" name="day" value="Saturday"> Saturday</label>
-                    <label><input type="checkbox" name="day" value="Sunday"> Sunday</label>
-                </div>
-                <button id="copyDay">Copy Day</button>
-                <button id="saveDayPlan">Save My Day Plan</button>
-                <button id="selectDayPlan">Select Day Plan</button>
-                <div id="day-type-preview"></div>
-                <button id="applyToDays">Apply to Selected Days</button>
-                <button id="undo">Undo</button>
-            </div>
-            <div class="control-module" id="schedule">
-                Schedule
-                <button id="loadSchedule">Load Schedule</button>
-                <button id="saveSchedule">Save Schedule</button>
-                <div>
-                    <input type="file" id="comparisonSchedule" accept=".json">
-                    <button id="loadComparison">Load Comparison Schedule</button>
-                    <button id="generateComparison">Generate Comparison</button>
-                </div>
-                <button id="exportCalendar">Export to Calendar</button>
-            </div>
         </div>
         <div id="modal" class="modal">
             <div class="modal-content">
