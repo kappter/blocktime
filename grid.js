@@ -194,6 +194,17 @@ function exportToCalendar() {
 }
 
 // Event listeners
+
+document.getElementById('addCategory').addEventListener('click', function() {
+    const newCategory = document.getElementById('newCategory').value.trim();
+    if (newCategory) {
+        const categorySpan = document.createElement('span');
+        categorySpan.className = 'category';
+        categorySpan.textContent = newCategory;
+        document.getElementById('categories').appendChild(categorySpan);
+        document.getElementById('newCategory').value = ''; // Clear input
+    }
+});
 document.addEventListener('DOMContentLoaded', () => {
     // Ensure empty grid with times on load
     resetGrid();
