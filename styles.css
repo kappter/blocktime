@@ -90,7 +90,6 @@ input[type="text"], input[type="color"], input[type="file"] {
 
 .grid-and-categories {
     display: flex;
-    flex: 1;
     gap: 10px;
     align-items: flex-start;
 }
@@ -110,14 +109,14 @@ input[type="text"], input[type="color"], input[type="file"] {
 #categories {
     flex: 1;
     min-width: 200px;
-    max-width: 300px; /* Limit width to prevent overexpansion */
+    max-width: 300px; /* Limit width to contain activities */
     display: flex;
     flex-direction: column;
     align-items: flex-start;
 }
 
 #grid {
-    flex: 3; /* Increased to claim more space */
+    flex: 1;
     border: 1px solid var(--border-color);
     border-radius: 5px;
     overflow: auto;
@@ -330,7 +329,7 @@ input[type="text"], input[type="color"], input[type="file"] {
     }
     .grid-and-categories {
         flex-direction: row;
-        flex: 1;
+        flex-wrap: nowrap; /* Prevent wrapping */
     }
     #mindset-thumbnail {
         order: 1;
@@ -341,14 +340,14 @@ input[type="text"], input[type="color"], input[type="file"] {
         order: 2;
         flex: 1;
         min-width: 200px;
-        max-width: 300px; /* Limit width to prevent overexpansion */
+        max-width: 300px; /* Limit width to contain activities */
         display: flex;
         flex-direction: column;
         align-items: flex-start;
     }
     #grid {
         order: 3;
-        flex: 3; /* Increased to claim more space */
+        flex: 1;
         min-width: 0;
     }
 }
