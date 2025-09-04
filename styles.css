@@ -51,6 +51,13 @@ h1 {
     min-width: 200px;
 }
 
+.bottom-controls {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    min-width: 200px;
+}
+
 .control-module {
     background-color: var(--module-bg);
     border: 1px solid var(--border-color);
@@ -307,7 +314,7 @@ input[type="text"], input[type="color"], input[type="file"] {
     #grid, #mindset-thumbnail {
         width: 100%;
     }
-    .control-panel {
+    .control-panel, .bottom-controls {
         flex-direction: column;
     }
     .control-module {
@@ -326,7 +333,7 @@ input[type="text"], input[type="color"], input[type="file"] {
     #main-content {
         flex-direction: column;
     }
-    .control-panel {
+    .control-panel, .bottom-controls {
         flex-direction: row;
         align-items: flex-start;
     }
