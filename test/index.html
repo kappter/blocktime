@@ -47,3 +47,33 @@
                     <span class="category">Tough but Want to Do</span>
                     <span class="category">Really Hard</span>
                 </div>
+                <div id="grid"></div>
+            </div>
+            <div class="bottom-controls">
+                <div class="control-module" id="dayOperations">
+                    Day Operations
+                    <div id="day-checkboxes">
+                        <label><input type="checkbox" name="day" value="Monday"> Monday</label>
+                        <label><input type="checkbox" name="day" value="Tuesday"> Tuesday</label>
+                        <label><input type="checkbox" name="day" value="Wednesday"> Wednesday</label>
+                        <label><input type="checkbox" name="day" value="Thursday"> Thursday</label>
+                        <label><input type="checkbox" name="day" value="Friday"> Friday</label>
+                        <label><input type="checkbox" name="day" value="Saturday"> Saturday</label>
+                        <label><input type="checkbox" name="day" value="Sunday"> Sunday</label>
+                    </div>
+                    <button id="copyDay">Copy Day</button>
+                    <button id="saveDayPlan">Save My Day Plan</button>
+                    <button id="selectDayPlan">Select Day Plan</button>
+                    <div id="day-type-preview"></div>
+                    <button id="applyToDays">Apply to Selected Days</button>
+                    <button id="undo">Undo</button>
+                </div>
+                <div class="control-module" id="schedule">
+                    Schedule
+                    <button id="loadSchedule">Load Schedule</button>
+                    <button id="saveSchedule">Save Schedule</button>
+                    <div>
+                        <input type="file" id="comparisonSchedule" accept=".json">
+                        <button id="loadComparison">Load Comparison Schedule</button>
+                        <button id="generateComparison">Generate Comparison</button>
+                    </div>
