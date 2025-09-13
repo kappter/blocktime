@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlockTime Scheduler</title>
+    <link rel="stylesheet" href="styles_enhanced.css">
+    <!-- Optional: Add a favicon to avoid 404 -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📅</text></svg>" type="image/svg+xml">
+</head>
+<body>
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode">
+        <span id="themeIcon">🌙</span>
+    </button>
+
+    <div id="app">
+        <h1>BlockTime Scheduler</h1>
+        <div id="main-content">
+            <div class="control-panel">
+                <div class="control-module" id="gridSettings">
+                    <span>Grid Settings</span>
+                    <select id="slotDuration">
+                        <option value="15">15 min</option>
+                        <option value="30">30 min</option>
+                        <option value="60" selected>60 min</option>
+                    </select>
+                    <button id="timeRender" class="secondary">Time Direction: 12AM Bottom</button>
+                    <select id="day-select">
+                        <option value="0">Monday</option>
+                        <option value="1">Tuesday</option>
+                        <option value="2">Wednesday</option>
+                        <option value="3">Thursday</option>
+                        <option value="4">Friday</option>
+                        <option value="5">Saturday</option>
+                        <option value="6">Sunday</option>
+                    </select>
+                </div>
+                <div class="control-module" id="categoryManagement">
+                    <span>Add Category</span>
+                    <input type="text" id="newCategory" placeholder="Enter category name">
+                    <input type="color" id="categoryColor" value="#3b82f6" title="Choose category color">
+                    <button id="addCategory">Add Category</button>
+                    <!-- Dynamic categories will be populated here by grid.js -->
+                </div>
+                <div class="control-module" id="daySelection">
+                    <span>Day Selection</span>
+                    <div id="day-checkboxes">
+                        <label><input type="checkbox" name="day" value="Monday"> Monday</label>
+                        <label><input type="checkbox" name="day" value="Tuesday"> Tuesday</label>
+                        <label><input type="checkbox" name="day" value="Wednesday"> Wednesday</label>
+                        <label><input type="checkbox" name="day" value="Thursday"> Thursday</label>
+                        <label><input type="checkbox" name="day" value="Friday"> Friday</label>
+                        <label><input type="checkbox" name="day" value="Saturday"> Saturday</label>
+                        <label><input type="checkbox" name="day" value="Sunday"> Sunday</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content-layout">
+                <div id="categories">
+                    <!-- Categories will be populated by JavaScript -->
+                </div>
+                <div id="grid"></div>
+                <div id="legend">
+                    <h3>Legend</h3>
+                    <div id="legend-items"></div>
+                </div>
+            </div>
+            
+            <div class="bottom-controls">
+                <div class="control-module" id="dayOperations">
+                    <span>Day Operations</span>
+                    <div id="day-checkboxes">
+                        <label><input type="checkbox" name="day" value="Monday"> Monday</label>
+                        <label><input type="checkbox" name="day" value="Tuesday"> Tuesday</label>
+                        <label><input type="checkbox" name="day" value="Wednesday"> Wednesday</label>
+                        <label><input type="checkbox" name="day" value="Thursday"> Thursday</label>
+                        <label><input type="checkbox" name="day" value="Friday"> Friday</label>
+                        <label><input type="checkbox" name="day" value="Saturday"> Saturday</label>
+                        <label><input type="checkbox" name="day" value="Sunday"> Sunday</label>
+                    </div>
+                    <button id="copyDay">Copy Day</button>
+                    <button id="saveDayPlan" class="secondary">Save My Day Plan</button>
+                    <button id="selectDayPlan" class="secondary">Select Day Plan</button>
+                    <div id="day-type-preview"></div>
+                    <button id="applyToDays">Apply to Selected Days</button>
+                    <button id="undo" class="secondary">Undo Last Action</button>
+                </div>
+                
+                <div class="control-module" id="schedule">
+                    <span>Schedule Management</span>
+                    <button id="loadSchedule" class="secondary">Load Schedule</button>
+                    <button id="saveSchedule">Save Schedule</button>
+                    <div style="margin-top: 15px;">
+                        <input type="file" id="comparisonSchedule" accept=".json">
+                        <button id="loadComparison" class="secondary">Load Comparison Schedule</button>
+                        <button id="generateComparison">Generate Comparison</button>
+                    </div>
+                    <button id="exportCalendar" class="secondary">Export to Calendar</button>
+                </div>
+                
+                <div class="control-module" id="reportSection">
+                    <span>Reports & Analytics</span>
+                    <input type="text" id="studentName" placeholder="Enter your name">
+                    <button id="generateReport">Generate Report</button>
+                    <button id="downloadPDF" class="secondary">Download PDF</button>
+                    <button id="reset" class="secondary" style="margin-top: 15px; background-color: var(--error);">Reset All Data</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Time Allocation Totals -->
+        <div class="control-module" style="margin-top: 20px;">
+            <span>Time Allocation Totals</span>
+            <div id="totals"></div>
+        </div>
+
+        <!-- Report Section -->
+        <div id="report" style="display: none;">
+            <h2>Weekly Schedule Report</h2>
+            <div id="reportContent">
+                <div id="summary"></div>
+                <table id="summaryTable">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Hours</th>
+                            <th>Percentage</th>
+                            <th>Mindset</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <div style="display: flex; gap: 20px; margin-top: 20px; flex-wrap: wrap;">
+                    <canvas id="pieChartActivity" width="400" height="400"></canvas>
+                    <canvas id="pieChartMindset" width="400" height="400"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for mindset image -->
+    <div id="mindsetModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <img class="modal-image" id="modalImage" src="" alt="Mindset Image">
+            <div class="modal-caption" id="modalCaption"></div>
+        </div>
+    </div>
+
+    <!-- Mindset thumbnail -->
+    <div id="mindset-thumbnail">
+        <img id="mindset-img" src="blocktime.png" alt="Mindset">
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" onerror="alert('Chart.js failed to load. Check your internet connection.')"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" onerror="alert('jsPDF failed to load. Check your internet connection.')"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" onerror="alert('jsPDF AutoTable failed to load. Check your internet connection.')"></script>
+    
+    <!-- Enhanced Theme Toggle Script -->
+    <script>
+        // Theme Management
+        class ThemeManager {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                // Check for saved theme preference or default to light mode
+                const savedTheme = localStorage.getItem('blocktime-theme');
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                
+                if (savedTheme) {
+                    this.setTheme(savedTheme);
+                } else if (prefersDark) {
+                    this.setTheme('dark');
+                } else {
+                    this.setTheme('light');
+                }
+
+                // Listen for system theme changes
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                    if (!localStorage.getItem('blocktime-theme')) {
+                        this.setTheme(e.matches ? 'dark' : 'light');
+                    }
+                });
+
+                // Add event listener to toggle button
+                document.getElementById('themeToggle').addEventListener('click', () => {
+                    this.toggleTheme();
+                });
+            }
+
+            setTheme(theme) {
+                const body = document.body;
+                const themeIcon = document.getElementById('themeIcon');
+                
+                if (theme === 'dark') {
+                    body.classList.add('dark-mode');
+                    themeIcon.textContent = '☀️';
+                    document.getElementById('themeToggle').title = 'Switch to Light Mode';
+                } else {
+                    body.classList.remove('dark-mode');
+                    themeIcon.textContent = '🌙';
+                    document.getElementById('themeToggle').title = 'Switch to Dark Mode';
+                }
+                
+                localStorage.setItem('blocktime-theme', theme);
+                this.currentTheme = theme;
+            }
+
+            toggleTheme() {
+                const newTheme = this.currentTheme === 'dark' ? 'light' : 'dark';
+                this.setTheme(newTheme);
+                
+                // Add a nice animation effect
+                document.body.style.transition = 'all 0.3s ease';
+                setTimeout(() => {
+                    document.body.style.transition = '';
+                }, 300);
+            }
+
+            getCurrentTheme() {
+                return this.currentTheme;
+            }
+        }
+
+        // Initialize enhanced features when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize theme manager
+            window.themeManager = new ThemeManager();
+            
+            // Enhanced add category functionality with color support
+            const addCategoryBtn = document.getElementById('addCategory');
+            const categoryInput = document.getElementById('newCategory');
+            const categoryColorInput = document.getElementById('categoryColor');
+
+            if (addCategoryBtn && categoryInput) {
+                addCategoryBtn.addEventListener('click', function() {
+                    const name = categoryInput.value.trim();
+                    const color = categoryColorInput ? categoryColorInput.value : '#3b82f6';
+                    
+                    if (name && !window.categories.includes(name)) {
+                        // Add to categories array
+                        window.categories.push(name);
+                        
+                        // Create category element
+                        const categorySpan = document.createElement('span');
+                        categorySpan.className = 'category';
+                        categorySpan.textContent = name;
+                        categorySpan.style.backgroundColor = color;
+                        categorySpan.addEventListener('click', function() {
+                            // Remove selected class from all categories
+                            document.querySelectorAll('.category').forEach(cat => cat.classList.remove('selected'));
+                            // Add selected class to clicked category
+                            categorySpan.classList.add('selected');
+                            window.selectedCat = name;
+                        });
+                        
+                        document.getElementById('categories').appendChild(categorySpan);
+                        categoryInput.value = '';
+                        
+                        // Visual feedback
+                        categoryInput.classList.add('success');
+                        setTimeout(() => categoryInput.classList.remove('success'), 2000);
+                    } else {
+                        categoryInput.classList.add('error');
+                        setTimeout(() => categoryInput.classList.remove('error'), 2000);
+                    }
+                });
+
+                // Allow Enter key to add category
+                categoryInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        addCategoryBtn.click();
+                    }
+                });
+            }
+
+            // Add some default categories if none exist
+            if (window.categories.length === 0) {
+                const defaultCategories = [
+                    { name: 'Work', color: '#3b82f6' },
+                    { name: 'Sleep', color: '#8b5cf6' },
+                    { name: 'Exercise', color: '#22c55e' },
+                    { name: 'Study', color: '#f59e0b' },
+                    { name: 'Leisure', color: '#ec4899' }
+                ];
+
+                defaultCategories.forEach(cat => {
+                    window.categories.push(cat.name);
+                    const categorySpan = document.createElement('span');
+                    categorySpan.className = 'category';
+                    categorySpan.textContent = cat.name;
+                    categorySpan.style.backgroundColor = cat.color;
+                    categorySpan.addEventListener('click', function() {
+                        document.querySelectorAll('.category').forEach(c => c.classList.remove('selected'));
+                        categorySpan.classList.add('selected');
+                        window.selectedCat = cat.name;
+                    });
+                    document.getElementById('categories').appendChild(categorySpan);
+                });
+            }
+
+            // Add animation classes to elements as they appear
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-slide-in');
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all control modules
+            document.querySelectorAll('.control-module').forEach(module => {
+                observer.observe(module);
+            });
+        });
+    </script>
+    
+    <!-- Original Scripts -->
+    <script src="categories.js"></script>
+    <script src="dayOperations.js"></script>
+    <script src="grid.js"></script>
+    <script src="schedule.js"></script>
+    <script src="report.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
