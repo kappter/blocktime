@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlockTime Scheduler</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📅</text></svg>" type="image/svg+xml">
+</head>
+<body>
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode">
+        <span id="themeIcon">🌙</span>
+    </button>
+
+    <div id="app">
+        <h1>BlockTime Scheduler</h1>
+        <div id="main-content">
+            <div class="control-panel">
+                <div class="control-module" id="gridSettings">
+                    <span>Grid Settings</span>
+                    <select id="slotDuration">
+                        <option value="15">15 min</option>
+                        <option value="30">30 min</option>
+                        <option value="60" selected>60 min</option>
+                    </select>
+                    <button id="timeRender" class="secondary">Time Direction: 12AM Bottom</button>
+                    <select id="day-select">
+                        <option value="0">Monday</option>
+                        <option value="1">Tuesday</option>
+                        <option value="2">Wednesday</option>
+                        <option value="3">Thursday</option>
+                        <option value="4">Friday</option>
+                        <option value="5">Saturday</option>
+                        <option value="6">Sunday</option>
+                    </select>
+                </div>
+                
+                <div class="control-module" id="sampleSchedules">
+                    <span>Sample Schedules</span>
+                    <button id="load15min" class="secondary">Load 15-min Sample</button>
+                    <button id="load30min" class="secondary">Load 30-min Sample</button>
+                    <button id="load60min" class="secondary">Load 60-min Sample</button>
+                    <button id="clearAll" style="background-color: var(--warning); margin-top: 10px;">Clear All</button>
+                </div>
+                
+                <div class="control-module" id="categoryManagement">
+                    <span>Add Category</span>
+                    <input type="text" id="newCategory" placeholder="Enter category name">
+                    <input type="color" id="categoryColor" value="#3b82f6" title="Choose category color">
+                    <button id="addCategory">Add Category</button>
+                </div>
+
+                <div class="control-module" id="daySelection">
+                    <span>Day Selection</span>
+                    <div id="day-checkboxes">
+                        <label><input type="checkbox" name="day" value="Monday" data-day="0"> <span class="day-indicator" style="background-color: var(--success);"></span> Monday</label>
+                        <label><input type="checkbox" name="day" value="Tuesday" data-day="1"> <span class="day-indicator" style="background-color: var(--info);"></span> Tuesday</label>
+                        <label><input type="checkbox" name="day" value="Wednesday" data-day="2"> <span class="day-indicator" style="background-color: var(--warning);"></span> Wednesday</label>
+                        <label><input type="checkbox" name="day" value="Thursday" data-day="3"> <span class="day-indicator" style="background-color: var(--error);"></span> Thursday</label>
+                        <label><input type="checkbox" name="day" value="Friday" data-day="4"> <span class="day-indicator" style="background-color: var(--primary);"></span> Friday</label>
+                        <label><input type="checkbox" name="day" value="Saturday" data-day="5"> <span class="day-indicator" style="background-color: var(--secondary);"></span> Saturday</label>
+                        <label><input type="checkbox" name="day" value="Sunday" data-day="6"> <span class="day-indicator" style="background-color: var(--accent);"></span> Sunday</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content-layout">
+                <div id="categories">
+                    <!-- Categories will be populated by JavaScript -->
+                </div>
+                <div id="grid">
+                    <!-- Grid will be populated by JavaScript -->
+                </div>
+                <div id="legend">
+                    <h3>Legend</h3>
+                    <div id="legend-items"></div>
+                </div>
+            </div>
+            
+            <div class="bottom-controls">
+                <div class="control-module" id="schedule">
+                    <span>Schedule Management</span>
+                    <button id="saveSchedule">Save Schedule</button>
+                    <button id="loadSchedule" class="secondary">Load Schedule</button>
+                    <input type="file" id="fileInput" accept=".json" style="display: none;">
+                </div>
+                
+                <div class="control-module" id="reportSection">
+                    <span>Reports & Analytics</span>
+                    <input type="text" id="studentName" placeholder="Enter your name">
+                    <button id="generateReport">Generate Report</button>
+                    <button id="reset" class="secondary" style="margin-top: 15px; background-color: var(--error);">Reset All Data</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Time Allocation Totals -->
+        <div class="control-module" style="margin-top: 20px;">
+            <span>Time Allocation Totals</span>
+            <div id="totals"></div>
+        </div>
+    </div>
+
+    <!-- Sample Schedules Data -->
+    <script src="sample_schedules.js"></script>
+    
+    <!-- Main Application Script -->
+    <script>
+        // Global variables
+        let gridData = Array(7).fill().map(() => []);
+        let categories = [];
+        let selectedCat = null;
+        let currentDay = 0;
+        let resolution = 60;
+        let timeDirection = 'bottom';
+
+        // Make variables globally accessible
+        window.gridData = gridData;
+        window.categories = categories;
+        window.selectedCat = selectedCat;
+        window.currentDay = currentDay;
+        window.resolution = resolution;
+
+        // Theme Management
+        class ThemeManager {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                const savedTheme = localStorage.getItem('blocktime-theme');
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                
+                if (savedTheme) {
+                    this.setTheme(savedTheme);
+                } else if (prefersDark) {
+                    this.setTheme('dark');
+                } else {
+                    this.setTheme('light');
+                }
+
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                    if (!localStorage.getItem('blocktime-theme')) {
+                        this.setTheme(e.matches ? 'dark' : 'light');
+                    }
+                });
+
+                document.getElementById('themeToggle').addEventListener('click', () => {
+                    this.toggleTheme();
+                });
+            }
+
+            setTheme(theme) {
+                const body = document.body;
+                const themeIcon = document.getElementById('themeIcon');
+                
+                if (theme === 'dark') {
+                    body.classList.add('dark-mode');
+                    themeIcon.textContent = '☀️';
+                    document.getElementById('themeToggle').title = 'Switch to Light Mode';
+                } else {
+                    body.classList.remove('dark-mode');
+                    themeIcon.textContent = '🌙';
+                    document.getElementById('themeToggle').title = 'Switch to Dark Mode';
+                }
+                
+                localStorage.setItem('blocktime-theme', theme);
+                this.currentTheme = theme;
+            }
+
+            toggleTheme() {
+                const newTheme = this.currentTheme === 'dark' ? 'light' : 'dark';
+                this.setTheme(newTheme);
+                
+                document.body.style.transition = 'all 0.3s ease';
+                setTimeout(() => {
+                    document.body.style.transition = '';
+                }, 300);
+            }
+        }
+
+        // Grid Management
+        function resetGrid() {
+            const grid = document.getElementById('grid');
+            if (!grid) return;
+            
+            grid.innerHTML = '';
+            
+            // Create day label
+            const dayLabel = document.createElement('div');
+            dayLabel.className = 'day-label';
+            dayLabel.textContent = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][currentDay];
+            grid.appendChild(dayLabel);
+            
+            // Create time slots
+            const slotsPerHour = 60 / resolution;
+            const totalSlots = 24 * slotsPerHour;
+            
+            for (let i = 0; i < totalSlots; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'time-slot';
+                slot.dataset.slot = i;
+                
+                // Calculate time
+                const totalMinutes = i * resolution;
+                const hour = Math.floor(totalMinutes / 60) % 24;
+                const minute = totalMinutes % 60;
+                const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                
+                slot.title = timeStr;
+                
+                // Add time label for hour boundaries
+                if (minute === 0) {
+                    const timeLabel = document.createElement('div');
+                    timeLabel.className = 'time-label';
+                    timeLabel.textContent = timeStr;
+                    slot.appendChild(timeLabel);
+                }
+                
+                // Add existing data if available
+                if (gridData[currentDay] && gridData[currentDay][i]) {
+                    slot.textContent = gridData[currentDay][i];
+                    slot.classList.add('filled');
+                    // Find category color
+                    const categoryIndex = categories.indexOf(gridData[currentDay][i]);
+                    if (categoryIndex >= 0) {
+                        const colors = ['#3b82f6', '#8b5cf6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#a855f7'];
+                        slot.style.backgroundColor = colors[categoryIndex % colors.length];
+                        slot.style.color = 'white';
+                    }
+                }
+                
+                // Add click handler
+                slot.addEventListener('click', function() {
+                    if (selectedCat) {
+                        // Ensure gridData array exists for current day
+                        if (!gridData[currentDay]) {
+                            gridData[currentDay] = [];
+                        }
+                        
+                        gridData[currentDay][i] = selectedCat;
+                        slot.textContent = selectedCat;
+                        slot.classList.add('filled');
+                        
+                        // Set color
+                        const categoryIndex = categories.indexOf(selectedCat);
+                        if (categoryIndex >= 0) {
+                            const colors = ['#3b82f6', '#8b5cf6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#a855f7'];
+                            slot.style.backgroundColor = colors[categoryIndex % colors.length];
+                            slot.style.color = 'white';
+                        }
+                        
+                        updateTotals();
+                    }
+                });
+                
+                // Add hover effect
+                slot.addEventListener('mouseenter', function() {
+                    if (selectedCat && !slot.classList.contains('filled')) {
+                        slot.style.backgroundColor = 'rgba(59, 130, 246, 0.3)';
+                        slot.textContent = selectedCat;
+                    }
+                });
+                
+                slot.addEventListener('mouseleave', function() {
+                    if (selectedCat && !slot.classList.contains('filled')) {
+                        slot.style.backgroundColor = '';
+                        slot.textContent = '';
+                    }
+                });
+                
+                grid.appendChild(slot);
+            }
+            
+            updateTotals();
+        }
+
+        function updateTotals() {
+            const totalsDiv = document.getElementById('totals');
+            if (!totalsDiv) return;
+            
+            const categoryTotals = {};
+            
+            // Calculate totals across all days
+            for (let day = 0; day < 7; day++) {
+                if (gridData[day]) {
+                    gridData[day].forEach(category => {
+                        if (category) {
+                            categoryTotals[category] = (categoryTotals[category] || 0) + resolution;
+                        }
+                    });
+                }
+            }
+            
+            // Display totals
+            totalsDiv.innerHTML = '';
+            Object.entries(categoryTotals).forEach(([category, minutes]) => {
+                const hours = (minutes / 60).toFixed(1);
+                const totalDiv = document.createElement('div');
+                totalDiv.className = 'total-item';
+                totalDiv.innerHTML = `<strong>${category}:</strong> ${hours}h (${minutes}min)`;
+                
+                // Add color indicator
+                const categoryIndex = categories.indexOf(category);
+                if (categoryIndex >= 0) {
+                    const colors = ['#3b82f6', '#8b5cf6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#a855f7'];
+                    totalDiv.style.borderLeft = `4px solid ${colors[categoryIndex % colors.length]}`;
+                    totalDiv.style.paddingLeft = '10px';
+                    totalDiv.style.margin = '5px 0';
+                }
+                
+                totalsDiv.appendChild(totalDiv);
+            });
+        }
+
+        // Category Management
+        function addCategory(name, color) {
+            if (name && !categories.includes(name)) {
+                categories.push(name);
+                
+                const categorySpan = document.createElement('span');
+                categorySpan.className = 'category';
+                categorySpan.textContent = name;
+                categorySpan.style.backgroundColor = color || '#3b82f6';
+                categorySpan.style.color = 'white';
+                categorySpan.style.padding = '8px 16px';
+                categorySpan.style.borderRadius = '20px';
+                categorySpan.style.margin = '5px';
+                categorySpan.style.cursor = 'pointer';
+                categorySpan.style.display = 'inline-block';
+                categorySpan.style.transition = 'all 0.3s ease';
+                
+                categorySpan.addEventListener('click', function() {
+                    document.querySelectorAll('.category').forEach(cat => cat.classList.remove('selected'));
+                    categorySpan.classList.add('selected');
+                    selectedCat = name;
+                    window.selectedCat = name;
+                    
+                    // Visual feedback
+                    categorySpan.style.transform = 'scale(1.1)';
+                    setTimeout(() => {
+                        categorySpan.style.transform = 'scale(1)';
+                    }, 200);
+                });
+                
+                categorySpan.addEventListener('mouseenter', function() {
+                    if (!categorySpan.classList.contains('selected')) {
+                        categorySpan.style.transform = 'scale(1.05)';
+                        categorySpan.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+                    }
+                });
+                
+                categorySpan.addEventListener('mouseleave', function() {
+                    if (!categorySpan.classList.contains('selected')) {
+                        categorySpan.style.transform = 'scale(1)';
+                        categorySpan.style.boxShadow = '';
+                    }
+                });
+                
+                document.getElementById('categories').appendChild(categorySpan);
+                return true;
+            }
+            return false;
+        }
+
+        // Schedule Management
+        function saveSchedule() {
+            const data = {
+                gridData: gridData,
+                categories: categories,
+                resolution: resolution,
+                timeDirection: timeDirection,
+                timestamp: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `blocktime_schedule_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            // Visual feedback
+            const saveBtn = document.getElementById('saveSchedule');
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = 'Saved ✓';
+            saveBtn.style.backgroundColor = 'var(--success)';
+            setTimeout(() => {
+                saveBtn.textContent = originalText;
+                saveBtn.style.backgroundColor = '';
+            }, 2000);
+        }
+
+        function loadSchedule() {
+            document.getElementById('fileInput').click();
+        }
+
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize theme manager
+            window.themeManager = new ThemeManager();
+            
+            // Sample Schedule Loading
+            document.getElementById('load15min').addEventListener('click', function() {
+                if (window.loadSampleSchedule) {
+                    const success = window.loadSampleSchedule(15);
+                    if (success) {
+                        this.style.backgroundColor = 'var(--success)';
+                        this.textContent = '15-min Loaded ✓';
+                        setTimeout(() => {
+                            this.style.backgroundColor = '';
+                            this.textContent = 'Load 15-min Sample';
+                        }, 2000);
+                        resetGrid();
+                    }
+                }
+            });
+
+            document.getElementById('load30min').addEventListener('click', function() {
+                if (window.loadSampleSchedule) {
+                    const success = window.loadSampleSchedule(30);
+                    if (success) {
+                        this.style.backgroundColor = 'var(--success)';
+                        this.textContent = '30-min Loaded ✓';
+                        setTimeout(() => {
+                            this.style.backgroundColor = '';
+                            this.textContent = 'Load 30-min Sample';
+                        }, 2000);
+                        resetGrid();
+                    }
+                }
+            });
+
+            document.getElementById('load60min').addEventListener('click', function() {
+                if (window.loadSampleSchedule) {
+                    const success = window.loadSampleSchedule(60);
+                    if (success) {
+                        this.style.backgroundColor = 'var(--success)';
+                        this.textContent = '60-min Loaded ✓';
+                        setTimeout(() => {
+                            this.style.backgroundColor = '';
+                            this.textContent = 'Load 60-min Sample';
+                        }, 2000);
+                        resetGrid();
+                    }
+                }
+            });
+
+            document.getElementById('clearAll').addEventListener('click', function() {
+                if (confirm('Are you sure you want to clear all schedule data? This cannot be undone.')) {
+                    if (window.clearSchedule) {
+                        const success = window.clearSchedule();
+                        if (success) {
+                            this.style.backgroundColor = 'var(--success)';
+                            this.textContent = 'Cleared ✓';
+                            setTimeout(() => {
+                                this.style.backgroundColor = 'var(--warning)';
+                                this.textContent = 'Clear All';
+                            }, 2000);
+                            resetGrid();
+                        }
+                    }
+                }
+            });
+            
+            // Add category functionality
+            const addCategoryBtn = document.getElementById('addCategory');
+            const categoryInput = document.getElementById('newCategory');
+            const categoryColorInput = document.getElementById('categoryColor');
+
+            addCategoryBtn.addEventListener('click', function() {
+                const name = categoryInput.value.trim();
+                const color = categoryColorInput.value;
+                
+                if (addCategory(name, color)) {
+                    categoryInput.value = '';
+                    categoryInput.style.backgroundColor = 'var(--success)';
+                    categoryInput.style.color = 'white';
+                    setTimeout(() => {
+                        categoryInput.style.backgroundColor = '';
+                        categoryInput.style.color = '';
+                    }, 1000);
+                } else {
+                    categoryInput.style.backgroundColor = 'var(--error)';
+                    categoryInput.style.color = 'white';
+                    setTimeout(() => {
+                        categoryInput.style.backgroundColor = '';
+                        categoryInput.style.color = '';
+                    }, 1000);
+                }
+            });
+
+            categoryInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addCategoryBtn.click();
+                }
+            });
+
+            // Day selection
+            document.getElementById('day-select').addEventListener('change', function() {
+                currentDay = parseInt(this.value);
+                window.currentDay = currentDay;
+                resetGrid();
+            });
+
+            // Resolution change
+            document.getElementById('slotDuration').addEventListener('change', function() {
+                resolution = parseInt(this.value);
+                window.resolution = resolution;
+                resetGrid();
+            });
+
+            // Schedule management
+            document.getElementById('saveSchedule').addEventListener('click', saveSchedule);
+            document.getElementById('loadSchedule').addEventListener('click', loadSchedule);
+            
+            document.getElementById('fileInput').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const data = JSON.parse(e.target.result);
+                            gridData = data.gridData || Array(7).fill().map(() => []);
+                            categories = data.categories || [];
+                            resolution = data.resolution || 60;
+                            timeDirection = data.timeDirection || 'bottom';
+                            
+                            // Update UI
+                            window.gridData = gridData;
+                            window.categories = categories;
+                            window.resolution = resolution;
+                            
+                            document.getElementById('slotDuration').value = resolution;
+                            
+                            // Rebuild categories
+                            document.getElementById('categories').innerHTML = '';
+                            categories.forEach((cat, index) => {
+                                const colors = ['#3b82f6', '#8b5cf6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#a855f7'];
+                                addCategory(cat, colors[index % colors.length]);
+                            });
+                            
+                            resetGrid();
+                            
+                            // Visual feedback
+                            const loadBtn = document.getElementById('loadSchedule');
+                            const originalText = loadBtn.textContent;
+                            loadBtn.textContent = 'Loaded ✓';
+                            loadBtn.style.backgroundColor = 'var(--success)';
+                            setTimeout(() => {
+                                loadBtn.textContent = originalText;
+                                loadBtn.style.backgroundColor = '';
+                            }, 2000);
+                        } catch (error) {
+                            alert('Error loading schedule: ' + error.message);
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            });
+
+            // Reset functionality
+            document.getElementById('reset').addEventListener('click', function() {
+                if (confirm('Are you sure you want to reset all data? This cannot be undone.')) {
+                    gridData = Array(7).fill().map(() => []);
+                    categories = [];
+                    selectedCat = null;
+                    window.gridData = gridData;
+                    window.categories = categories;
+                    window.selectedCat = selectedCat;
+                    
+                    document.getElementById('categories').innerHTML = '';
+                    resetGrid();
+                    
+                    // Visual feedback
+                    this.style.backgroundColor = 'var(--success)';
+                    this.textContent = 'Reset Complete ✓';
+                    setTimeout(() => {
+                        this.style.backgroundColor = 'var(--error)';
+                        this.textContent = 'Reset All Data';
+                    }, 2000);
+                }
+            });
+
+            // Add some default categories
+            const defaultCategories = [
+                { name: 'Sleep', color: '#8b5cf6' },
+                { name: 'Work', color: '#3b82f6' },
+                { name: 'Exercise', color: '#22c55e' },
+                { name: 'Meals', color: '#f59e0b' },
+                { name: 'Leisure', color: '#ec4899' }
+            ];
+
+            defaultCategories.forEach(cat => {
+                addCategory(cat.name, cat.color);
+            });
+
+            // Initialize grid
+            resetGrid();
+        });
+    </script>
+</body>
+</html>
