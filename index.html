@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -78,53 +77,3 @@
                         <button id="loadComparison">Load Comparison Schedule</button>
                         <button id="generateComparison">Generate Comparison</button>
                     </div>
-                    <button id="exportCalendar">Export to Calendar</button>
-                </div>
-                <div class="control-module" id="legend">
-                    Summary
-                    <p>The Mindset Spectrum</p>
-                    <p>The two axes represent Happiness vs. Pain (vertical: how enjoyable an activity feels) and Resistance vs. Willingness (horizontal: how motivated you are to do it).</p>
-                    <p>Overlaps and Quadrants:</p>
-                    <ul>
-                        <li>Sweet Resistance (Top-Left): Happy but resistant—activities you enjoy but avoid (e.g., exercising).</li>
-                        <li>Joyful Engagement (Top-Right): Happy and willing—easy and fun tasks (e.g., gaming).</li>
-                        <li>Forced Suffering (Bottom-Left): Painful and resistant—hard tasks you dread (e.g., chores).</li>
-                        <li>Painful Desire (Bottom-Right): Painful but willing—challenging tasks you push for (e.g., studying for a goal).</li>
-                    </ul>
-                    <p>Centered (Peace, Groundedness): The ideal balance where activities feel calm and natural, without extreme emotion—aim to center your schedule here for long-term well-being.</p>
-                </div>
-            </div>
-            <div id="report">
-                Report
-                <button id="generateReport">Generate Report</button>
-                <button id="downloadPDF">Download PDF</button>
-                <div id="summaryTable">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Category</th>
-                                <th>Hours</th>
-                                <th>Percentage</th>
-                                <th>Mindset</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-                <div id="pieChartActivity"></div>
-                <div id="pieChartMindset"></div>
-            </div>
-            <div id="mindset-thumbnail"><img src="thumbnail.jpg" alt="Mindset"></div>
-        </div>
-        <div id="modal" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <img id="modal-image" class="modal-image" alt="Modal Image">
-                <p id="modal-caption" class="modal-caption"></p>
-            </div>
-        </div>
-    </div>
-    <script src="grid.js"></script>
-    <script src="report.js"></script>
-</body>
-</html>
