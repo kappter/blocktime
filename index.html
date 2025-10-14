@@ -1,79 +1,492 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlockTime Scheduler</title>
-    <link rel="stylesheet" href="styles.css">
-    <!-- Optional: Add a favicon to avoid 404 -->
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <title>Daily Time Blocker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            color: #495057;
+            min-width: 120px;
+        }
+
+        select {
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .category {
+            padding: 12px 20px;
+            border-radius: 25px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            user-select: none;
+        }
+
+        .category:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .category.selected {
+            border-color: white;
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .grid-container {
+            padding: 30px;
+        }
+
+        .day-header {
+            text-align: center;
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+        }
+
+        .time-grid {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            gap: 2px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .time-label {
+            background: #495057;
+            color: white;
+            padding: 15px 10px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .time-slot {
+            background: #f8f9fa;
+            min-height: 50px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            position: relative;
+            border: 2px solid transparent;
+        }
+
+        .time-slot:hover {
+            background: #e3f2fd;
+            transform: scale(1.02);
+        }
+
+        .time-slot.filled {
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .time-slot.preview {
+            border: 2px dashed #4facfe;
+            background: rgba(79, 172, 254, 0.1);
+            color: #4facfe;
+            font-style: italic;
+        }
+
+        .instructions {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 30px;
+            text-align: center;
+        }
+
+        .instructions h3 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+
+        .instructions p {
+            color: #388e3c;
+            font-weight: 500;
+        }
+
+        .summary {
+            background: #f8f9fa;
+            padding: 30px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .summary h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .summary-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #4facfe;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .summary-item .category-name {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .summary-item .time-amount {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #4facfe;
+        }
+
+        @media (max-width: 768px) {
+            .control-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .categories {
+                justify-content: center;
+            }
+            
+            .time-grid {
+                grid-template-columns: 60px 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div id="app">
-        <h1>BlockTime Scheduler</h1>
-        <div id="main-content">
-            <div class="control-panel">
-                <div class="control-module" id="gridSettings">
-                    Grid Settings
-                    <select id="slotDuration">
-                        <option value="15">15 min</option>
-                        <option value="30">30 min</option>
-                        <option value="60">60 min</option>
-                    </select>
-                </div>
-                <div class="control-module" id="ad">
-                    Add Category
-                    <input type="text" id="newCategory" placeholder="Enter category">
-                    <button id="addCategory">Add</button>
-                    <!-- Dynamic categories will be populated here by grid.js -->
-                </div>
-                <div class="control-module" id="daySelection">
-                    Day Selection
-                    <div id="day-checkboxes">
-                        <label><input type="checkbox" name="day" value="Monday"> Monday</label>
-                        <label><input type="checkbox" name="day" value="Tuesday"> Tuesday</label>
-                        <label><input type="checkbox" name="day" value="Wednesday"> Wednesday</label>
-                        <label><input type="checkbox" name="day" value="Thursday"> Thursday</label>
-                        <label><input type="checkbox" name="day" value="Friday"> Friday</label>
-                        <label><input type="checkbox" name="day" value="Saturday"> Saturday</label>
-                        <label><input type="checkbox" name="day" value="Sunday"> Sunday</label>
-                    </div>
+    <div class="container">
+        <div class="header">
+            <h1>Daily Time Blocker</h1>
+            <p>Plan your day with colorful time blocks - like building with Legos!</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="resolution">Time Block Size:</label>
+                <select id="resolution">
+                    <option value="60">60 minutes (24 blocks)</option>
+                    <option value="30">30 minutes (48 blocks)</option>
+                    <option value="15">15 minutes (96 blocks)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Activity Categories:</label>
+                <div class="categories" id="categories">
+                    <!-- Categories will be populated by JavaScript -->
                 </div>
             </div>
-            <div class="content-layout">
-                <div id="categories">
-                    <span class="category">Calm & Relaxed</span>
-                    <span class="category">Fun & Easy</span>
-                    <span class="category">Challenging but Okay</span>
-                    <span class="category">Tough but Want to Do</span>
-                    <span class="category">Really Hard</span>
-                </div>
-                <div id="grid"></div>
+        </div>
+
+        <div class="instructions">
+            <h3>How to Use</h3>
+            <p>1. Choose your time block size above • 2. Click an activity category • 3. Click time slots to place blocks</p>
+        </div>
+
+        <div class="grid-container">
+            <div class="day-header">Today's Schedule</div>
+            <div class="time-grid" id="timeGrid">
+                <!-- Grid will be populated by JavaScript -->
             </div>
-            <div class="bottom-controls">
-                <div class="control-module" id="dayOperations">
-                    Day Operations
-                    <div id="day-checkboxes">
-                        <label><input type="checkbox" name="day" value="Monday"> Monday</label>
-                        <label><input type="checkbox" name="day" value="Tuesday"> Tuesday</label>
-                        <label><input type="checkbox" name="day" value="Wednesday"> Wednesday</label>
-                        <label><input type="checkbox" name="day" value="Thursday"> Thursday</label>
-                        <label><input type="checkbox" name="day" value="Friday"> Friday</label>
-                        <label><input type="checkbox" name="day" value="Saturday"> Saturday</label>
-                        <label><input type="checkbox" name="day" value="Sunday"> Sunday</label>
-                    </div>
-                    <button id="copyDay">Copy Day</button>
-                    <button id="saveDayPlan">Save My Day Plan</button>
-                    <button id="selectDayPlan">Select Day Plan</button>
-                    <div id="day-type-preview"></div>
-                    <button id="applyToDays">Apply to Selected Days</button>
-                    <button id="undo">Undo</button>
-                </div>
-                <div class="control-module" id="schedule">
-                    Schedule
-                    <button id="loadSchedule">Load Schedule</button>
-                    <button id="saveSchedule">Save Schedule</button>
-                    <div>
-                        <input type="file" id="comparisonSchedule" accept=".json">
-                        <button id="loadComparison">Load Comparison Schedule</button>
-                        <button id="generateComparison">Generate Comparison</button>
-                    </div>
+        </div>
+
+        <div class="summary">
+            <h3>Time Summary</h3>
+            <div class="summary-grid" id="summary">
+                <!-- Summary will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Core application state
+        let resolution = 60; // minutes per block
+        let selectedCategory = null;
+        let timeBlocks = {}; // stores category for each time slot
+        
+        // Default categories with colors
+        const categories = [
+            { name: 'Sleep', color: '#9c27b0' },
+            { name: 'Work', color: '#2196f3' },
+            { name: 'Exercise', color: '#4caf50' },
+            { name: 'Meals', color: '#ff9800' },
+            { name: 'Commute', color: '#607d8b' },
+            { name: 'Leisure', color: '#e91e63' },
+            { name: 'Study', color: '#673ab7' },
+            { name: 'Family', color: '#795548' }
+        ];
+
+        // Initialize the application
+        function init() {
+            createCategories();
+            createTimeGrid();
+            updateSummary();
+            
+            // Add event listeners
+            document.getElementById('resolution').addEventListener('change', function() {
+                resolution = parseInt(this.value);
+                timeBlocks = {}; // Clear existing blocks when changing resolution
+                createTimeGrid();
+                updateSummary();
+            });
+        }
+
+        // Create category buttons
+        function createCategories() {
+            const container = document.getElementById('categories');
+            container.innerHTML = '';
+            
+            categories.forEach(category => {
+                const button = document.createElement('div');
+                button.className = 'category';
+                button.textContent = category.name;
+                button.style.backgroundColor = category.color;
+                button.onclick = () => selectCategory(category);
+                container.appendChild(button);
+            });
+        }
+
+        // Select a category
+        function selectCategory(category) {
+            selectedCategory = category;
+            
+            // Update visual selection
+            document.querySelectorAll('.category').forEach(cat => {
+                cat.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+        }
+
+        // Create the time grid
+        function createTimeGrid() {
+            const container = document.getElementById('timeGrid');
+            container.innerHTML = '';
+            
+            const slotsPerHour = 60 / resolution;
+            const totalSlots = 24 * slotsPerHour;
+            
+            for (let hour = 0; hour < 24; hour++) {
+                for (let slot = 0; slot < slotsPerHour; slot++) {
+                    const slotIndex = hour * slotsPerHour + slot;
+                    const minutes = slot * resolution;
+                    
+                    // Create time label for first slot of each hour
+                    if (slot === 0) {
+                        const timeLabel = document.createElement('div');
+                        timeLabel.className = 'time-label';
+                        timeLabel.textContent = `${hour.toString().padStart(2, '0')}:00`;
+                        container.appendChild(timeLabel);
+                    } else {
+                        // Empty cell to maintain grid alignment
+                        const emptyLabel = document.createElement('div');
+                        emptyLabel.className = 'time-label';
+                        emptyLabel.style.background = 'transparent';
+                        container.appendChild(emptyLabel);
+                    }
+                    
+                    // Create time slot
+                    const timeSlot = document.createElement('div');
+                    timeSlot.className = 'time-slot';
+                    timeSlot.dataset.slot = slotIndex;
+                    
+                    // Show existing block if any
+                    if (timeBlocks[slotIndex]) {
+                        const category = categories.find(cat => cat.name === timeBlocks[slotIndex]);
+                        timeSlot.textContent = category.name;
+                        timeSlot.style.backgroundColor = category.color;
+                        timeSlot.classList.add('filled');
+                    }
+                    
+                    // Add event listeners
+                    timeSlot.addEventListener('click', () => placeBlock(slotIndex));
+                    timeSlot.addEventListener('mouseenter', () => showPreview(slotIndex));
+                    timeSlot.addEventListener('mouseleave', () => hidePreview(slotIndex));
+                    
+                    container.appendChild(timeSlot);
+                }
+            }
+        }
+
+        // Show preview when hovering
+        function showPreview(slotIndex) {
+            if (!selectedCategory || timeBlocks[slotIndex]) return;
+            
+            const slot = document.querySelector(`[data-slot="${slotIndex}"]`);
+            slot.classList.add('preview');
+            slot.textContent = selectedCategory.name;
+        }
+
+        // Hide preview when not hovering
+        function hidePreview(slotIndex) {
+            if (!selectedCategory || timeBlocks[slotIndex]) return;
+            
+            const slot = document.querySelector(`[data-slot="${slotIndex}"]`);
+            slot.classList.remove('preview');
+            slot.textContent = '';
+        }
+
+        // Place a time block
+        function placeBlock(slotIndex) {
+            if (!selectedCategory) {
+                alert('Please select an activity category first!');
+                return;
+            }
+            
+            const slot = document.querySelector(`[data-slot="${slotIndex}"]`);
+            
+            // Place the block
+            timeBlocks[slotIndex] = selectedCategory.name;
+            slot.textContent = selectedCategory.name;
+            slot.style.backgroundColor = selectedCategory.color;
+            slot.classList.add('filled');
+            slot.classList.remove('preview');
+            
+            // Add placement animation
+            slot.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                slot.style.transform = '';
+            }, 200);
+            
+            updateSummary();
+        }
+
+        // Update time summary
+        function updateSummary() {
+            const container = document.getElementById('summary');
+            container.innerHTML = '';
+            
+            // Calculate totals for each category
+            const totals = {};
+            Object.values(timeBlocks).forEach(categoryName => {
+                totals[categoryName] = (totals[categoryName] || 0) + resolution;
+            });
+            
+            // Create summary items
+            Object.entries(totals).forEach(([categoryName, minutes]) => {
+                const hours = (minutes / 60).toFixed(1);
+                const category = categories.find(cat => cat.name === categoryName);
+                
+                const item = document.createElement('div');
+                item.className = 'summary-item';
+                item.style.borderLeftColor = category.color;
+                item.innerHTML = `
+                    <div class="category-name">${categoryName}</div>
+                    <div class="time-amount">${hours} hours</div>
+                `;
+                container.appendChild(item);
+            });
+            
+            // Show message if no blocks placed
+            if (Object.keys(totals).length === 0) {
+                const item = document.createElement('div');
+                item.className = 'summary-item';
+                item.innerHTML = `
+                    <div class="category-name">No activities planned yet</div>
+                    <div class="time-amount">Start by selecting a category and clicking time slots!</div>
+                `;
+                container.appendChild(item);
+            }
+        }
+
+        // Start the application
+        init();
+    </script>
+</body>
+</html>
