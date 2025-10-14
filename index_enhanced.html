@@ -1,49 +1,807 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlockTime Scheduler</title>
-    <link rel="stylesheet" href="styles_enhanced.css">
-    <!-- Optional: Add a favicon to avoid 404 -->
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <title>Daily Time Blocker - Enhanced</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .control-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .control-group {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .control-group h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            color: #495057;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        select:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .add-category-form {
+            display: flex;
+            gap: 10px;
+            align-items: end;
+            margin-top: 10px;
+        }
+
+        .add-category-form input[type="text"] {
+            flex: 1;
+        }
+
+        .add-category-form input[type="color"] {
+            width: 50px;
+            height: 44px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            cursor: pointer;
+            background: none;
+        }
+
+        .add-category-form button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-category-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .category {
+            padding: 12px 20px;
+            border-radius: 25px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            user-select: none;
+            position: relative;
+        }
+
+        .category:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .category.selected {
+            border-color: white;
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .category.custom {
+            padding-right: 40px;
+        }
+
+        .category .delete-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.3);
+            border: none;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .category .delete-btn:hover {
+            background: rgba(255,255,255,0.5);
+        }
+
+        .import-export {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .import-export button {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #4facfe;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .export-btn {
+            background: #4facfe;
+            color: white;
+        }
+
+        .import-btn {
+            background: white;
+            color: #4facfe;
+        }
+
+        .import-export button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .hidden-file-input {
+            display: none;
+        }
+
+        .grid-container {
+            padding: 30px;
+        }
+
+        .day-header {
+            text-align: center;
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+        }
+
+        .time-grid {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            gap: 2px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .time-label {
+            background: #495057;
+            color: white;
+            padding: 15px 10px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .time-slot {
+            background: #f8f9fa;
+            min-height: 50px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            position: relative;
+            border: 2px solid transparent;
+        }
+
+        .time-slot:hover {
+            background: #e3f2fd;
+            transform: scale(1.02);
+        }
+
+        .time-slot.filled {
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .time-slot.preview {
+            border: 2px dashed #4facfe;
+            background: rgba(79, 172, 254, 0.1);
+            color: #4facfe;
+            font-style: italic;
+        }
+
+        .instructions {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 30px;
+            text-align: center;
+        }
+
+        .instructions h3 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+
+        .instructions p {
+            color: #388e3c;
+            font-weight: 500;
+        }
+
+        .summary {
+            background: #f8f9fa;
+            padding: 30px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .summary h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .summary-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #4facfe;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .summary-item .category-name {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .summary-item .time-amount {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #4facfe;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.success {
+            background: #4caf50;
+        }
+
+        .notification.error {
+            background: #f44336;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        @media (max-width: 768px) {
+            .control-row {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .add-category-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .add-category-form input[type="color"] {
+                width: 100%;
+            }
+            
+            .categories {
+                justify-content: center;
+            }
+            
+            .time-grid {
+                grid-template-columns: 60px 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- Theme Toggle Button -->
-    <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode">
-        <span id="themeIcon">🌙</span>
-    </button>
+    <div class="container">
+        <div class="header">
+            <h1>Daily Time Blocker</h1>
+            <p>Plan your day with colorful time blocks - now with custom categories and save/load!</p>
+        </div>
 
-    <div id="app">
-        <h1>BlockTime Scheduler</h1>
-        <div id="main-content">
-            <div class="control-panel">
-                <div class="control-module" id="gridSettings">
-                    <span>Grid Settings</span>
-                    <select id="slotDuration">
-                        <option value="15">15 min</option>
-                        <option value="30">30 min</option>
-                        <option value="60">60 min</option>
+        <div class="controls">
+            <div class="control-row">
+                <div class="control-group">
+                    <h3>⚙️ Time Settings</h3>
+                    <label for="resolution">Time Block Size:</label>
+                    <select id="resolution">
+                        <option value="60">60 minutes (24 blocks)</option>
+                        <option value="30">30 minutes (48 blocks)</option>
+                        <option value="15">15 minutes (96 blocks)</option>
                     </select>
-                    <button id="timeRender" class="secondary">Time Direction: 12AM Bottom</button>
                 </div>
-                <div class="control-module" id="categoryManagement">
-                    <span>Add Category</span>
-                    <input type="text" id="newCategory" placeholder="Enter category name">
-                    <input type="color" id="categoryColor" value="#3b82f6" title="Choose category color">
-                    <button id="addCategory">Add Category</button>
-                    <!-- Dynamic categories will be populated here by grid.js -->
-                </div>
-                <div class="control-module" id="daySelection">
-                    <span>Day Selection</span>
-                    <div id="day-checkboxes">
-                        <label><input type="checkbox" name="day" value="Monday"> Monday</label>
-                        <label><input type="checkbox" name="day" value="Tuesday"> Tuesday</label>
-                        <label><input type="checkbox" name="day" value="Wednesday"> Wednesday</label>
-                        <label><input type="checkbox" name="day" value="Thursday"> Thursday</label>
-                        <label><input type="checkbox" name="day" value="Friday"> Friday</label>
-                        <label><input type="checkbox" name="day" value="Saturday"> Saturday</label>
-                        <label><input type="checkbox" name="day" value="Sunday"> Sunday</label>
+
+                <div class="control-group">
+                    <h3>💾 Save & Load</h3>
+                    <div class="import-export">
+                        <button class="export-btn" onclick="exportDay()">📤 Export Day</button>
+                        <button class="import-btn" onclick="document.getElementById('importFile').click()">📥 Import Day</button>
                     </div>
+                    <input type="file" id="importFile" class="hidden-file-input" accept=".json" onchange="importDay(event)">
                 </div>
             </div>
+
+            <div class="control-group">
+                <h3>🏷️ Activity Categories</h3>
+                <div class="add-category-form">
+                    <input type="text" id="categoryName" placeholder="Enter category name" maxlength="20">
+                    <input type="color" id="categoryColor" value="#4facfe" title="Choose category color">
+                    <button onclick="addCustomCategory()">➕ Add</button>
+                </div>
+                <div class="categories" id="categories">
+                    <!-- Categories will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>How to Use</h3>
+            <p>1. Add custom categories or use defaults • 2. Choose time block size • 3. Click a category • 4. Click time slots to place blocks • 5. Export/import to save your schedule</p>
+        </div>
+
+        <div class="grid-container">
+            <div class="day-header">Today's Schedule</div>
+            <div class="time-grid" id="timeGrid">
+                <!-- Grid will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <div class="summary">
+            <h3>Time Summary</h3>
+            <div class="summary-grid" id="summary">
+                <!-- Summary will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Core application state
+        let resolution = 60; // minutes per block
+        let selectedCategory = null;
+        let timeBlocks = {}; // stores category for each time slot
+        
+        // Default categories with colors
+        let categories = [
+            { name: 'Sleep', color: '#9c27b0', isDefault: true },
+            { name: 'Work', color: '#2196f3', isDefault: true },
+            { name: 'Exercise', color: '#4caf50', isDefault: true },
+            { name: 'Meals', color: '#ff9800', isDefault: true },
+            { name: 'Commute', color: '#607d8b', isDefault: true },
+            { name: 'Leisure', color: '#e91e63', isDefault: true },
+            { name: 'Study', color: '#673ab7', isDefault: true },
+            { name: 'Family', color: '#795548', isDefault: true }
+        ];
+
+        // Initialize the application
+        function init() {
+            createCategories();
+            createTimeGrid();
+            updateSummary();
             
+            // Add event listeners
+            document.getElementById('resolution').addEventListener('change', function() {
+                resolution = parseInt(this.value);
+                timeBlocks = {}; // Clear existing blocks when changing resolution
+                createTimeGrid();
+                updateSummary();
+            });
+
+            // Add Enter key support for category input
+            document.getElementById('categoryName').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addCustomCategory();
+                }
+            });
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Add custom category
+        function addCustomCategory() {
+            const nameInput = document.getElementById('categoryName');
+            const colorInput = document.getElementById('categoryColor');
+            const name = nameInput.value.trim();
+            const color = colorInput.value;
+
+            if (!name) {
+                showNotification('Please enter a category name', 'error');
+                return;
+            }
+
+            if (categories.find(cat => cat.name.toLowerCase() === name.toLowerCase())) {
+                showNotification('Category already exists', 'error');
+                return;
+            }
+
+            categories.push({ name, color, isDefault: false });
+            nameInput.value = '';
+            colorInput.value = '#4facfe';
+            
+            createCategories();
+            showNotification(`Added category: ${name}`, 'success');
+        }
+
+        // Delete custom category
+        function deleteCategory(categoryName) {
+            if (confirm(`Delete category "${categoryName}"? This will also remove all time blocks using this category.`)) {
+                // Remove from categories array
+                categories = categories.filter(cat => cat.name !== categoryName);
+                
+                // Remove from time blocks
+                Object.keys(timeBlocks).forEach(slot => {
+                    if (timeBlocks[slot] === categoryName) {
+                        delete timeBlocks[slot];
+                    }
+                });
+                
+                // Clear selection if deleted category was selected
+                if (selectedCategory && selectedCategory.name === categoryName) {
+                    selectedCategory = null;
+                }
+                
+                createCategories();
+                createTimeGrid();
+                updateSummary();
+                showNotification(`Deleted category: ${categoryName}`, 'success');
+            }
+        }
+
+        // Create category buttons
+        function createCategories() {
+            const container = document.getElementById('categories');
+            container.innerHTML = '';
+            
+            categories.forEach(category => {
+                const button = document.createElement('div');
+                button.className = `category ${category.isDefault ? '' : 'custom'}`;
+                button.textContent = category.name;
+                button.style.backgroundColor = category.color;
+                button.onclick = () => selectCategory(category);
+                
+                // Add delete button for custom categories
+                if (!category.isDefault) {
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'delete-btn';
+                    deleteBtn.textContent = '×';
+                    deleteBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        deleteCategory(category.name);
+                    };
+                    button.appendChild(deleteBtn);
+                }
+                
+                container.appendChild(button);
+            });
+        }
+
+        // Select a category
+        function selectCategory(category) {
+            selectedCategory = category;
+            
+            // Update visual selection
+            document.querySelectorAll('.category').forEach(cat => {
+                cat.classList.remove('selected');
+            });
+            event.target.closest('.category').classList.add('selected');
+        }
+
+        // Export day data
+        function exportDay() {
+            const dayData = {
+                date: new Date().toISOString().split('T')[0],
+                resolution: resolution,
+                categories: categories,
+                timeBlocks: timeBlocks,
+                exportedAt: new Date().toISOString()
+            };
+
+            const dataStr = JSON.stringify(dayData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `daily-schedule-${dayData.date}.json`;
+            link.click();
+            
+            showNotification('Day exported successfully!', 'success');
+        }
+
+        // Import day data
+        function importDay(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const dayData = JSON.parse(e.target.result);
+                    
+                    // Validate data structure
+                    if (!dayData.resolution || !dayData.categories || !dayData.timeBlocks) {
+                        throw new Error('Invalid file format');
+                    }
+                    
+                    // Load data
+                    resolution = dayData.resolution;
+                    categories = dayData.categories;
+                    timeBlocks = dayData.timeBlocks;
+                    selectedCategory = null;
+                    
+                    // Update UI
+                    document.getElementById('resolution').value = resolution;
+                    createCategories();
+                    createTimeGrid();
+                    updateSummary();
+                    
+                    const importDate = dayData.date || 'Unknown date';
+                    showNotification(`Day imported successfully! (${importDate})`, 'success');
+                    
+                } catch (error) {
+                    showNotification('Error importing file: Invalid format', 'error');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Clear the input
+            event.target.value = '';
+        }
+
+        // Create the time grid
+        function createTimeGrid() {
+            const container = document.getElementById('timeGrid');
+            container.innerHTML = '';
+            
+            const slotsPerHour = 60 / resolution;
+            const totalSlots = 24 * slotsPerHour;
+            
+            for (let hour = 0; hour < 24; hour++) {
+                for (let slot = 0; slot < slotsPerHour; slot++) {
+                    const slotIndex = hour * slotsPerHour + slot;
+                    const minutes = slot * resolution;
+                    
+                    // Create time label for first slot of each hour
+                    if (slot === 0) {
+                        const timeLabel = document.createElement('div');
+                        timeLabel.className = 'time-label';
+                        timeLabel.textContent = `${hour.toString().padStart(2, '0')}:00`;
+                        container.appendChild(timeLabel);
+                    } else {
+                        // Empty cell to maintain grid alignment
+                        const emptyLabel = document.createElement('div');
+                        emptyLabel.className = 'time-label';
+                        emptyLabel.style.background = 'transparent';
+                        container.appendChild(emptyLabel);
+                    }
+                    
+                    // Create time slot
+                    const timeSlot = document.createElement('div');
+                    timeSlot.className = 'time-slot';
+                    timeSlot.dataset.slot = slotIndex;
+                    
+                    // Show existing block if any
+                    if (timeBlocks[slotIndex]) {
+                        const category = categories.find(cat => cat.name === timeBlocks[slotIndex]);
+                        if (category) {
+                            timeSlot.textContent = category.name;
+                            timeSlot.style.backgroundColor = category.color;
+                            timeSlot.classList.add('filled');
+                        }
+                    }
+                    
+                    // Add event listeners
+                    timeSlot.addEventListener('click', () => placeBlock(slotIndex));
+                    timeSlot.addEventListener('mouseenter', () => showPreview(slotIndex));
+                    timeSlot.addEventListener('mouseleave', () => hidePreview(slotIndex));
+                    
+                    container.appendChild(timeSlot);
+                }
+            }
+        }
+
+        // Show preview when hovering
+        function showPreview(slotIndex) {
+            if (!selectedCategory || timeBlocks[slotIndex]) return;
+            
+            const slot = document.querySelector(`[data-slot="${slotIndex}"]`);
+            slot.classList.add('preview');
+            slot.textContent = selectedCategory.name;
+        }
+
+        // Hide preview when not hovering
+        function hidePreview(slotIndex) {
+            if (!selectedCategory || timeBlocks[slotIndex]) return;
+            
+            const slot = document.querySelector(`[data-slot="${slotIndex}"]`);
+            slot.classList.remove('preview');
+            slot.textContent = '';
+        }
+
+        // Place a time block
+        function placeBlock(slotIndex) {
+            if (!selectedCategory) {
+                showNotification('Please select an activity category first!', 'error');
+                return;
+            }
+            
+            const slot = document.querySelector(`[data-slot="${slotIndex}"]`);
+            
+            // Place the block
+            timeBlocks[slotIndex] = selectedCategory.name;
+            slot.textContent = selectedCategory.name;
+            slot.style.backgroundColor = selectedCategory.color;
+            slot.classList.add('filled');
+            slot.classList.remove('preview');
+            
+            // Add placement animation
+            slot.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                slot.style.transform = '';
+            }, 200);
+            
+            updateSummary();
+        }
+
+        // Update time summary
+        function updateSummary() {
+            const container = document.getElementById('summary');
+            container.innerHTML = '';
+            
+            // Calculate totals for each category
+            const totals = {};
+            Object.values(timeBlocks).forEach(categoryName => {
+                totals[categoryName] = (totals[categoryName] || 0) + resolution;
+            });
+            
+            // Create summary items
+            Object.entries(totals).forEach(([categoryName, minutes]) => {
+                const hours = (minutes / 60).toFixed(1);
+                const category = categories.find(cat => cat.name === categoryName);
+                
+                const item = document.createElement('div');
+                item.className = 'summary-item';
+                if (category) {
+                    item.style.borderLeftColor = category.color;
+                }
+                item.innerHTML = `
+                    <div class="category-name">${categoryName}</div>
+                    <div class="time-amount">${hours} hours</div>
+                `;
+                container.appendChild(item);
+            });
+            
+            // Show message if no blocks placed
+            if (Object.keys(totals).length === 0) {
+                const item = document.createElement('div');
+                item.className = 'summary-item';
+                item.innerHTML = `
+                    <div class="category-name">No activities planned yet</div>
+                    <div class="time-amount">Start by selecting a category and clicking time slots!</div>
+                `;
+                container.appendChild(item);
+            }
+        }
+
+        // Start the application
+        init();
+    </script>
+</body>
+</html>
