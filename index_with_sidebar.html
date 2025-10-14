@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Time Blocker - Multi-View</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            min-height: 90vh;
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .sidebar {
+            background: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .sidebar-section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .week-view {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .week-day {
+            aspect-ratio: 1;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8em;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .week-day:hover {
+            border-color: #4facfe;
+            background: #e3f2fd;
+            transform: scale(1.05);
+        }
+
+        .week-day.today {
+            background: #4facfe;
+            color: white;
+            border-color: #4facfe;
+        }
+
+        .week-day.has-schedule {
+            background: linear-gradient(45deg, #4caf50, #8bc34a);
+            color: white;
+            border-color: #4caf50;
+        }
+
+        .week-day.selected {
+            border-color: #ff9800;
+            background: #fff3e0;
+            box-shadow: 0 0 0 2px #ff9800;
+        }
+
+        .week-day-name {
+            font-size: 0.7em;
+            margin-bottom: 2px;
+        }
+
+        .week-day-number {
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .calendar {
+            margin-bottom: 15px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .calendar-nav {
+            background: #4facfe;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-nav:hover {
+            background: #2196f3;
+            transform: scale(1.1);
+        }
+
+        .calendar-title {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+        }
+
+        .calendar-day-header {
+            background: #495057;
+            color: white;
+            padding: 8px 4px;
+            text-align: center;
+            font-size: 0.7em;
+            font-weight: 600;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8em;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            background: #e3f2fd;
+            border-color: #4facfe;
+        }
+
+        .calendar-day.today {
+            background: #4facfe;
+            color: white;
+        }
+
+        .calendar-day.other-month {
+            color: #adb5bd;
+            background: #f1f3f4;
+        }
+
+        .calendar-day.has-schedule {
+            background: linear-gradient(45deg, #4caf50, #8bc34a);
+            color: white;
+        }
+
+        .calendar-day.selected {
+            border: 2px solid #ff9800;
+            background: #fff3e0;
+        }
+
+        .apply-template {
+            margin-top: 15px;
+        }
+
+        .apply-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .apply-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .apply-btn:disabled {
+            background: #adb5bd;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .totals-section {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .totals-grid {
+            display: grid;
+            gap: 8px;
+        }
+
+        .total-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #4facfe;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .total-category {
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.9em;
+        }
+
+        .total-time {
+            font-weight: bold;
+            color: #4facfe;
+            font-size: 0.8em;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .control-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .control-group {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .control-group h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            color: #495057;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        select:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .add-category-form {
+            display: flex;
+            gap: 10px;
+            align-items: end;
+            margin-top: 10px;
+        }
+
+        .add-category-form input[type="text"] {
+            flex: 1;
+        }
+
+        .add-category-form input[type="color"] {
+            width: 50px;
+            height: 44px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            cursor: pointer;
+            background: none;
+        }
+
+        .add-category-form button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-category-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .category {
+            padding: 12px 20px;
+            border-radius: 25px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            user-select: none;
+            position: relative;
+        }
+
+        .category:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .category.selected {
+            border-color: white;
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .category.custom {
+            padding-right: 40px;
+        }
+
+        .category .delete-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.3);
+            border: none;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .category .delete-btn:hover {
+            background: rgba(255,255,255,0.5);
+        }
+
+        .import-export {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .import-export button {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #4facfe;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .export-btn {
+            background: #4facfe;
+            color: white;
+        }
+
+        .import-btn {
+            background: white;
+            color: #4facfe;
+        }
+
+        .import-export button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .hidden-file-input {
+            display: none;
+        }
+
+        .grid-container {
+            padding: 30px;
+            flex: 1;
+        }
+
+        .day-header {
+            text-align: center;
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+        }
+
+        .time-grid {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            gap: 2px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .time-label {
+            background: #495057;
+            color: white;
+            padding: 15px 10px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .time-slot {
+            background: #f8f9fa;
+            min-height: 50px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            position: relative;
+            border: 2px solid transparent;
+        }
+
+        .time-slot:hover {
+            background: #e3f2fd;
+            transform: scale(1.02);
+        }
+
+        .time-slot.filled {
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .time-slot.preview {
+            border: 2px dashed #4facfe;
+            background: rgba(79, 172, 254, 0.1);
+            color: #4facfe;
+            font-style: italic;
+        }
+
+        .instructions {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 30px;
+            text-align: center;
+        }
+
+        .instructions h3 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+
+        .instructions p {
+            color: #388e3c;
+            font-weight: 500;
+        }
+
+        .summary {
+            background: #f8f9fa;
+            padding: 30px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .summary h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .summary-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #4facfe;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .summary-item .category-name {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .summary-item .time-amount {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #4facfe;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.success {
+            background: #4caf50;
+        }
+
+        .notification.error {
+            background: #f44336;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 300px 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 1fr;
+            }
+            
+            .sidebar {
+                border-right: none;
+                border-bottom: 1px solid #e9ecef;
+                max-height: 400px;
+            }
+            
+            .control-row {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .add-category-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .add-category-form input[type="color"] {
+                width: 100%;
+            }
+            
+            .categories {
+                justify-content: center;
+            }
+            
+            .time-grid {
+                grid-template-columns: 60px 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Daily Time Blocker - Multi-View</h1>
+            <p>Plan your day, week, and month with colorful time blocks - now with calendar integration!</p>
+        </div>
+
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <h3>📅 Current Week</h3>
+                <div class="week-view" id="weekView">
+                    <!-- Week days will be populated by JavaScript -->
+                </div>
+                <div class="apply-template">
+                    <button class="apply-btn" id="applyToWeekBtn" onclick="applyToSelectedWeekDays()" disabled>
+                        Apply Current Day to Selected Week Days
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>🗓️ Calendar</h3>
+                <div class="calendar">
+                    <div class="calendar-header">
+                        <button class="calendar-nav" onclick="changeMonth(-1)">‹</button>
+                        <div class="calendar-title" id="calendarTitle"></div>
+                        <button class="calendar-nav" onclick="changeMonth(1)">›</button>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- Calendar will be populated by JavaScript -->
+                    </div>
+                </div>
+                <div class="apply-template">
+                    <button class="apply-btn" id="applyToMonthBtn" onclick="applyToSelectedMonthDays()" disabled>
+                        Apply Current Day to Selected Month Days
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>📊 Week Totals</h3>
+                <div class="totals-section">
+                    <div class="totals-grid" id="weekTotals">
+                        <!-- Week totals will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>📈 Month Totals</h3>
+                <div class="totals-section">
+                    <div class="totals-grid" id="monthTotals">
+                        <!-- Month totals will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="controls">
+                <div class="control-row">
+                    <div class="control-group">
+                        <h3>⚙️ Time Settings</h3>
+                        <label for="resolution">Time Block Size:</label>
+                        <select id="resolution">
+                            <option value="60">60 minutes (24 blocks)</option>
+                            <option value="30">30 minutes (48 blocks)</option>
+                            <option value="15">15 minutes (96 blocks)</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <h3>💾 Save & Load</h3>
+                        <div class="import-export">
+                            <button class="export-btn" onclick="exportDay()">📤 Export Day</button>
+                            <button class="import-btn" onclick="document.getElementById('importFile').click()">📥 Import Day</button>
+                        </div>
+                        <input type="file" id="importFile" class="hidden-file-input" accept=".json" onchange="importDay(event)">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>🏷️ Activity Categories</h3>
+                    <div class="add-category-form">
+                        <input type="text" id="categoryName" placeholder="Enter category name" maxlength="20">
+                        <input type="color" id="categoryColor" value="#4facfe" title="Choose category color">
+                        <button onclick="addCustomCategory()">➕ Add</button>
+                    </div>
+                    <div class="categories" id="categories">
+                        <!-- Categories will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="instructions">
+                <h3>How to Use Multi-View</h3>
+                <p>1. Plan your day with time blocks • 2. Select days in week/month view • 3. Apply current day template to selected days • 4. View running totals for week and month</p>
+            </div>
+
+            <div class="grid-container">
+                <div class="day-header" id="dayHeader">Today's Schedule</div>
+                <div class="time-grid" id="timeGrid">
+                    <!-- Grid will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="summary">
+                <h3>Today's Summary</h3>
+                <div class="summary-grid" id="summary">
+                    <!-- Summary will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Core application state
+        let resolution = 60;
+        let selectedCategory = null;
+        let currentDate = new Date();
+        let currentViewDate = new Date();
+        let currentCalendarDate = new Date();
+        
+        // Data storage
+        let allSchedules = {}; // stores schedules for all dates
+        let selectedWeekDays = new Set();
+        let selectedMonthDays = new Set();
+        
+        // Default categories
+        let categories = [
+            { name: 'Sleep', color: '#9c27b0', isDefault: true },
+            { name: 'Work', color: '#2196f3', isDefault: true },
+            { name: 'Exercise', color: '#4caf50', isDefault: true },
+            { name: 'Meals', color: '#ff9800', isDefault: true },
+            { name: 'Commute', color: '#607d8b', isDefault: true },
+            { name: 'Leisure', color: '#e91e63', isDefault: true },
+            { name: 'Study', color: '#673ab7', isDefault: true },
+            { name: 'Family', color: '#795548', isDefault: true }
+        ];
+
+        // Initialize the application
+        function init() {
+            createCategories();
+            createWeekView();
+            createCalendar();
+            createTimeGrid();
+            updateAllTotals();
+            
+            // Add event listeners
+            document.getElementById('resolution').addEventListener('change', function() {
+                resolution = parseInt(this.value);
+                getCurrentSchedule().timeBlocks = {}; // Clear existing blocks when changing resolution
+                createTimeGrid();
+                updateAllTotals();
+            });
+
+            document.getElementById('categoryName').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addCustomCategory();
+                }
+            });
+        }
+
+        // Get current schedule object
+        function getCurrentSchedule() {
+            const dateKey = formatDate(currentViewDate);
+            if (!allSchedules[dateKey]) {
+                allSchedules[dateKey] = {
+                    date: dateKey,
+                    resolution: resolution,
+                    categories: [...categories],
+                    timeBlocks: {}
+                };
+            }
+            return allSchedules[dateKey];
+        }
+
+        // Format date as YYYY-MM-DD
+        function formatDate(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        // Get week start date (Sunday)
+        function getWeekStart(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day;
+            return new Date(d.setDate(diff));
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Create week view
+        function createWeekView() {
+            const container = document.getElementById('weekView');
+            container.innerHTML = '';
+            
+            const weekStart = getWeekStart(currentViewDate);
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(weekStart);
+                date.setDate(weekStart.getDate() + i);
+                const dateKey = formatDate(date);
+                
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'week-day';
+                dayDiv.dataset.date = dateKey;
+                
+                // Check if this day has a schedule
+                if (allSchedules[dateKey] && Object.keys(allSchedules[dateKey].timeBlocks).length > 0) {
+                    dayDiv.classList.add('has-schedule');
+                }
+                
+                // Check if this is today
+                if (formatDate(date) === formatDate(new Date())) {
+                    dayDiv.classList.add('today');
+                }
+                
+                // Check if this is the currently viewed date
+                if (formatDate(date) === formatDate(currentViewDate)) {
+                    dayDiv.classList.add('selected');
+                }
+                
+                dayDiv.innerHTML = `
+                    <div class="week-day-name">${dayNames[i]}</div>
+                    <div class="week-day-number">${date.getDate()}</div>
+                `;
+                
+                dayDiv.addEventListener('click', () => {
+                    if (selectedWeekDays.has(dateKey)) {
+                        selectedWeekDays.delete(dateKey);
+                        dayDiv.style.boxShadow = '';
+                    } else {
+                        selectedWeekDays.add(dateKey);
+                        dayDiv.style.boxShadow = '0 0 0 3px #ff9800';
+                    }
+                    updateApplyButtons();
+                });
+                
+                dayDiv.addEventListener('dblclick', () => {
+                    currentViewDate = new Date(date);
+                    createWeekView();
+                    createCalendar();
+                    createTimeGrid();
+                    updateDayHeader();
+                });
+                
+                container.appendChild(dayDiv);
+            }
+        }
+
+        // Create calendar
+        function createCalendar() {
+            const container = document.getElementById('calendarGrid');
+            const title = document.getElementById('calendarTitle');
+            
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            
+            title.textContent = new Date(year, month).toLocaleDateString('en-US', { 
+                month: 'long', 
+                year: 'numeric' 
+            });
+            
+            container.innerHTML = '';
+            
+            // Add day headers
+            const dayHeaders = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+            dayHeaders.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-day-header';
+                header.textContent = day;
+                container.appendChild(header);
+            });
+            
+            // Get first day of month and number of days
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+            
+            // Create calendar days
+            for (let i = 0; i < 42; i++) {
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + i);
+                const dateKey = formatDate(date);
+                
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day';
+                dayDiv.dataset.date = dateKey;
+                dayDiv.textContent = date.getDate();
+                
+                // Check if day is in current month
+                if (date.getMonth() !== month) {
+                    dayDiv.classList.add('other-month');
+                }
+                
+                // Check if this day has a schedule
+                if (allSchedules[dateKey] && Object.keys(allSchedules[dateKey].timeBlocks).length > 0) {
+                    dayDiv.classList.add('has-schedule');
+                }
+                
+                // Check if this is today
+                if (formatDate(date) === formatDate(new Date())) {
+                    dayDiv.classList.add('today');
+                }
+                
+                dayDiv.addEventListener('click', () => {
+                    if (selectedMonthDays.has(dateKey)) {
+                        selectedMonthDays.delete(dateKey);
+                        dayDiv.style.border = '1px solid #e9ecef';
+                    } else {
+                        selectedMonthDays.add(dateKey);
+                        dayDiv.style.border = '2px solid #ff9800';
+                    }
+                    updateApplyButtons();
+                });
+                
+                dayDiv.addEventListener('dblclick', () => {
+                    currentViewDate = new Date(date);
+                    createWeekView();
+                    createCalendar();
+                    createTimeGrid();
+                    updateDayHeader();
+                });
+                
+                container.appendChild(dayDiv);
+            }
+        }
+
+        // Change calendar month
+        function changeMonth(direction) {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
+            createCalendar();
+            updateMonthTotals();
+        }
+
+        // Update apply buttons
+        function updateApplyButtons() {
+            const weekBtn = document.getElementById('applyToWeekBtn');
+            const monthBtn = document.getElementById('applyToMonthBtn');
+            
+            weekBtn.disabled = selectedWeekDays.size === 0;
+            monthBtn.disabled = selectedMonthDays.size === 0;
+        }
+
+        // Apply current day to selected week days
+        function applyToSelectedWeekDays() {
+            const currentSchedule = getCurrentSchedule();
+            let appliedCount = 0;
+            
+            selectedWeekDays.forEach(dateKey => {
+                if (dateKey !== formatDate(currentViewDate)) {
+                    allSchedules[dateKey] = {
+                        date: dateKey,
+                        resolution: currentSchedule.resolution,
+                        categories: [...currentSchedule.categories],
+                        timeBlocks: {...currentSchedule.timeBlocks}
+                    };
+                    appliedCount++;
+                }
+            });
+            
+            selectedWeekDays.clear();
+            createWeekView();
+            updateAllTotals();
+            showNotification(`Applied current day template to ${appliedCount} days`, 'success');
+        }
+
+        // Apply current day to selected month days
+        function applyToSelectedMonthDays() {
+            const currentSchedule = getCurrentSchedule();
+            let appliedCount = 0;
+            
+            selectedMonthDays.forEach(dateKey => {
+                if (dateKey !== formatDate(currentViewDate)) {
+                    allSchedules[dateKey] = {
+                        date: dateKey,
+                        resolution: currentSchedule.resolution,
+                        categories: [...currentSchedule.categories],
+                        timeBlocks: {...currentSchedule.timeBlocks}
+                    };
+                    appliedCount++;
+                }
+            });
+            
+            selectedMonthDays.clear();
+            createCalendar();
+            updateAllTotals();
+            showNotification(`Applied current day template to ${appliedCount} days`, 'success');
+        }
+
+        // Update day header
+        function updateDayHeader() {
+            const header = document.getElementById('dayHeader');
+            const dayName = currentViewDate.toLocaleDateString('en-US', { weekday: 'long' });
+            const dateStr = currentViewDate.toLocaleDateString('en-US', { 
+                month: 'long', 
+                day: 'numeric',
+                year: 'numeric'
+            });
+            header.textContent = `${dayName} - ${dateStr}`;
+        }
+
+        // Update all totals
+        function updateAllTotals() {
+            updateWeekTotals();
+            updateMonthTotals();
+            updateDaySummary();
+        }
+
+        // Update week totals
+        function updateWeekTotals() {
+            const container = document.getElementById('weekTotals');
+            container.innerHTML = '';
+            
+            const weekStart = getWeekStart(currentViewDate);
+            const weekTotals = {};
+            
+            // Calculate totals for the week
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(weekStart);
+                date.setDate(weekStart.getDate() + i);
+                const dateKey = formatDate(date);
+                
+                if (allSchedules[dateKey]) {
+                    Object.entries(allSchedules[dateKey].timeBlocks).forEach(([slot, category]) => {
+                        const scheduleResolution = allSchedules[dateKey].resolution || 60;
+                        weekTotals[category] = (weekTotals[category] || 0) + scheduleResolution;
+                    });
+                }
+            }
+            
+            // Display week totals
+            Object.entries(weekTotals).forEach(([categoryName, minutes]) => {
+                const hours = (minutes / 60).toFixed(1);
+                const category = categories.find(cat => cat.name === categoryName);
+                
+                const item = document.createElement('div');
+                item.className = 'total-item';
+                if (category) {
+                    item.style.borderLeftColor = category.color;
+                }
+                item.innerHTML = `
+                    <div class="total-category">${categoryName}</div>
+                    <div class="total-time">${hours}h</div>
+                `;
+                container.appendChild(item);
+            });
+            
+            if (Object.keys(weekTotals).length === 0) {
+                const item = document.createElement('div');
+                item.className = 'total-item';
+                item.innerHTML = `
+                    <div class="total-category">No activities this week</div>
+                    <div class="total-time">0h</div>
+                `;
+                container.appendChild(item);
+            }
+        }
+
+        // Update month totals
+        function updateMonthTotals() {
+            const container = document.getElementById('monthTotals');
+            container.innerHTML = '';
+            
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            const monthTotals = {};
+            
+            // Calculate totals for the month
+            Object.entries(allSchedules).forEach(([dateKey, schedule]) => {
+                const scheduleDate = new Date(dateKey);
+                if (scheduleDate.getFullYear() === year && scheduleDate.getMonth() === month) {
+                    Object.entries(schedule.timeBlocks).forEach(([slot, category]) => {
+                        const scheduleResolution = schedule.resolution || 60;
+                        monthTotals[category] = (monthTotals[category] || 0) + scheduleResolution;
+                    });
+                }
+            });
+            
+            // Display month totals
+            Object.entries(monthTotals).forEach(([categoryName, minutes]) => {
+                const hours = (minutes / 60).toFixed(1);
+                const category = categories.find(cat => cat.name === categoryName);
+                
+                const item = document.createElement('div');
+                item.className = 'total-item';
+                if (category) {
+                    item.style.borderLeftColor = category.color;
+                }
+                item.innerHTML = `
+                    <div class="total-category">${categoryName}</div>
+                    <div class="total-time">${hours}h</div>
+                `;
+                container.appendChild(item);
+            });
+            
+            if (Object.keys(monthTotals).length === 0) {
+                const item = document.createElement('div');
+                item.className = 'total-item';
+                item.innerHTML = `
+                    <div class="total-category">No activities this month</div>
+                    <div class="total-time">0h</div>
+                `;
+                container.appendChild(item);
+            }
+        }
+
+        // Add custom category
+        function addCustomCategory() {
+            const nameInput = document.getElementById('categoryName');
+            const colorInput = document.getElementById('categoryColor');
+            const name = nameInput.value.trim();
+            const color = colorInput.value;
+
+            if (!name) {
+                showNotification('Please enter a category name', 'error');
+                return;
+            }
+
+            if (categories.find(cat => cat.name.toLowerCase() === name.toLowerCase())) {
+                showNotification('Category already exists', 'error');
+                return;
+            }
+
+            categories.push({ name, color, isDefault: false });
+            nameInput.value = '';
+            colorInput.value = '#4facfe';
+            
+            createCategories();
+            showNotification(`Added category: ${name}`, 'success');
+        }
+
+        // Delete custom category
+        function deleteCategory(categoryName) {
+            if (confirm(`Delete category "${categoryName}"? This will also remove all time blocks using this category.`)) {
+                categories = categories.filter(cat => cat.name !== categoryName);
+                
+                // Remove from all schedules
+                Object.values(allSchedules).forEach(schedule => {
+                    Object.keys(schedule.timeBlocks).forEach(slot => {
+                        if (schedule.timeBlocks[slot] === categoryName) {
+                            delete schedule.timeBlocks[slot];
+                        }
+                    });
+                });
+                
+                if (selectedCategory && selectedCategory.name === categoryName) {
+                    selectedCategory = null;
+                }
+                
+                createCategories();
+                createTimeGrid();
+                updateAllTotals();
+                showNotification(`Deleted category: ${categoryName}`, 'success');
+            }
+        }
+
+        // Create category buttons
+        function createCategories() {
+            const container = document.getElementById('categories');
+            container.innerHTML = '';
+            
+            categories.forEach(category => {
+                const button = document.createElement('div');
+                button.className = `category ${category.isDefault ? '' : 'custom'}`;
+                button.textContent = category.name;
+                button.style.backgroundColor = category.color;
+                button.onclick = () => selectCategory(category);
+                
+                if (!category.isDefault) {
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'delete-btn';
+                    deleteBtn.textContent = '×';
+                    deleteBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        deleteCategory(category.name);
+                    };
+                    button.appendChild(deleteBtn);
+                }
+                
+                container.appendChild(button);
+            });
+        }
+
+        // Select a category
+        function selectCategory(category) {
+            selectedCategory = category;
+            
+            document.querySelectorAll('.category').forEach(cat => {
+                cat.classList.remove('selected');
+            });
+            event.target.closest('.category').classList.add('selected');
+        }
+
+        // Export day data
+        function exportDay() {
+            const currentSchedule = getCurrentSchedule();
+            const dataStr = JSON.stringify(currentSchedule, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `daily-schedule-${currentSchedule.date}.json`;
+            link.click();
+            
+            showNotification('Day exported successfully!', 'success');
+        }
+
+        // Import day data
+        function importDay(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const dayData = JSON.parse(e.target.result);
+                    
+                    if (!dayData.resolution || !dayData.categories || !dayData.timeBlocks) {
+                        throw new Error('Invalid file format');
+                    }
+                    
+                    // Store the imported schedule
+                    allSchedules[dayData.date] = dayData;
+                    
+                    // If importing today's date, update current view
+                    if (dayData.date === formatDate(currentViewDate)) {
+                        resolution = dayData.resolution;
+                        categories = dayData.categories;
+                        selectedCategory = null;
+                        
+                        document.getElementById('resolution').value = resolution;
+                        createCategories();
+                        createTimeGrid();
+                    }
+                    
+                    createWeekView();
+                    createCalendar();
+                    updateAllTotals();
+                    
+                    showNotification(`Day imported successfully! (${dayData.date})`, 'success');
+                    
+                } catch (error) {
+                    showNotification('Error importing file: Invalid format', 'error');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // Create the time grid
+        function createTimeGrid() {
+            const container = document.getElementById('timeGrid');
+            container.innerHTML = '';
+            
+            const currentSchedule = getCurrentSchedule();
+            const slotsPerHour = 60 / resolution;
+            const totalSlots = 24 * slotsPerHour;
+            
+            for (let hour = 0; hour < 24; hour++) {
+                for (let slot = 0; slot < slotsPerHour; slot++) {
+                    const slotIndex = hour * slotsPerHour + slot;
+                    
+                    if (slot === 0) {
+                        const timeLabel = document.createElement('div');
+                        timeLabel.className = 'time-label';
+                        timeLabel.textContent = `${hour.toString().padStart(2, '0')}:00`;
+                        container.appendChild(timeLabel);
+                    } else {
+                        const emptyLabel = document.createElement('div');
+                        emptyLabel.className = 'time-label';
+                        emptyLabel.style.background = 'transparent';
+                        container.appendChild(emptyLabel);
+                    }
+                    
+                    const timeSlot = document.createElement('div');
+                    timeSlot.className = 'time-slot';
+                    timeSlot.dataset.slot = slotIndex;
+                    
+                    if (currentSchedule.timeBlocks[slotIndex]) {
+                        const category = categories.find(cat => cat.name === currentSchedule.timeBlocks[slotIndex]);
+                        if (category) {
+                            timeSlot.textContent = category.name;
+                            timeSlot.style.backgroundColor = category.color;
+                            timeSlot.classList.add('filled');
+                        }
+                    }
+                    
+                    timeSlot.addEventListener('click', () => placeBlock(slotIndex));
+                    timeSlot.addEventListener('mouseenter', () => showPreview(slotIndex));
+                    timeSlot.addEventListener('mouseleave', () => hidePreview(slotIndex));
+                    
+                    container.appendChild(timeSlot);
+                }
+            }
+            
+            updateDayHeader();
+        }
+
+        // Show preview when hovering
+        function showPreview(slotIndex) {
+            const currentSchedule = getCurrentSchedule();
+            if (!selectedCategory || currentSchedule.timeBlocks[slotIndex]) return;
+            
+            const slot = document.querySelector(`[data-slot="${slotIndex}"]`);
+            slot.classList.add('preview');
+            slot.textContent = selectedCategory.name;
+        }
+
+        // Hide preview when not hovering
+        function hidePreview(slotIndex) {
+            const currentSchedule = getCurrentSchedule();
+            if (!selectedCategory || currentSchedule.timeBlocks[slotIndex]) return;
+            
+            const slot = document.querySelector(`[data-slot="${slotIndex}"]`);
+            slot.classList.remove('preview');
+            slot.textContent = '';
+        }
+
+        // Place a time block
+        function placeBlock(slotIndex) {
+            if (!selectedCategory) {
+                showNotification('Please select an activity category first!', 'error');
+                return;
+            }
+            
+            const currentSchedule = getCurrentSchedule();
+            const slot = document.querySelector(`[data-slot="${slotIndex}"]`);
+            
+            currentSchedule.timeBlocks[slotIndex] = selectedCategory.name;
+            slot.textContent = selectedCategory.name;
+            slot.style.backgroundColor = selectedCategory.color;
+            slot.classList.add('filled');
+            slot.classList.remove('preview');
+            
+            slot.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                slot.style.transform = '';
+            }, 200);
+            
+            createWeekView();
+            createCalendar();
+            updateAllTotals();
+        }
+
+        // Update day summary
+        function updateDaySummary() {
+            const container = document.getElementById('summary');
+            container.innerHTML = '';
+            
+            const currentSchedule = getCurrentSchedule();
+            const totals = {};
+            
+            Object.values(currentSchedule.timeBlocks).forEach(categoryName => {
+                totals[categoryName] = (totals[categoryName] || 0) + resolution;
+            });
+            
+            Object.entries(totals).forEach(([categoryName, minutes]) => {
+                const hours = (minutes / 60).toFixed(1);
+                const category = categories.find(cat => cat.name === categoryName);
+                
+                const item = document.createElement('div');
+                item.className = 'summary-item';
+                if (category) {
+                    item.style.borderLeftColor = category.color;
+                }
+                item.innerHTML = `
+                    <div class="category-name">${categoryName}</div>
+                    <div class="time-amount">${hours} hours</div>
+                `;
+                container.appendChild(item);
+            });
+            
+            if (Object.keys(totals).length === 0) {
+                const item = document.createElement('div');
+                item.className = 'summary-item';
+                item.innerHTML = `
+                    <div class="category-name">No activities planned yet</div>
+                    <div class="time-amount">Start by selecting a category and clicking time slots!</div>
+                `;
+                container.appendChild(item);
+            }
+        }
+
+        // Start the application
+        init();
+    </script>
+</body>
+</html>
