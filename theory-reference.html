@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Theory Reference</title>
+    <style>
+        :root {
+            --theme-color: #1e90ff;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #1a1a1a, #2c3e50);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            background: #111;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        header h1 {
+            margin: 0;
+            font-size: 2em;
+            color: var(--theme-color);
+        }
+        
+        .controls {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            background: #222;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        select, button, input[type="color"] {
+            padding: 10px 15px;
+            font-size: 14px;
+            border: none;
+            border-radius: 4px;
+            background: #333;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        select:hover, button:hover {
+            background: #444;
+        }
+        
+        .content {
+            max-width: 1200px;
+            margin: 0 auto 20px;
+            padding: 20px;
+            flex: 1;
+        }
+        
+        .canvas-wrapper {
+            background: #282828;
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border: 1px solid #444;
+        }
+        
+        .canvas-wrapper h2 {
+            margin-top: 0;
+            color: var(--theme-color);
+        }
+        
+        canvas {
+            max-width: 100%;
+            background: #fff;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            display: block;
+            margin: 0 auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #282828;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        th, td {
+            padding: 12px;
+            border: 1px solid #444;
+            text-align: left;
+        }
+        
+        th {
+            background: var(--theme-color);
+            color: #fff;
+            font-weight: bold;
+        }
+        
+        footer {
+            background: #111;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.8em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Music Theory Reference</h1>
+    </header>
+
+    <div class="controls">
+        <select id="key-select">
+            <option value="C">C</option>
+            <option value="C#">C#/Db</option>
+            <option value="D">D</option>
+            <option value="D#">D#/Eb</option>
+            <option value="E">E</option>
+            <option value="F">F</option>
+            <option value="F#">F#/Gb</option>
+            <option value="G">G</option>
+            <option value="G#">G#/Ab</option>
+            <option value="A">A</option>
+            <option value="A#">A#/Bb</option>
+            <option value="B">B</option>
+        </select>
+        
+        <select id="mode-select">
+            <option value="ionian">Ionian (Major)</option>
+            <option value="dorian">Dorian</option>
+            <option value="phrygian">Phrygian</option>
+            <option value="lydian">Lydian</option>
+            <option value="mixolydian">Mixolydian</option>
+            <option value="aeolian">Aeolian (Natural Minor)</option>
+            <option value="locrian">Locrian</option>
+            <option value="major-pentatonic">Major Pentatonic</option>
+            <option value="minor-pentatonic">Minor Pentatonic</option>
+            <option value="blues">Blues Scale</option>
+            <option value="harmonic-minor">Harmonic Minor</option>
+            <option value="melodic-minor">Melodic Minor</option>
+        </select>
+        
+        <select id="notation">
+            <option value="sharps">♯ Sharps</option>
+            <option value="flats">♭ Flats</option>
+        </select>
+        
+        <select id="tuning">
+            <option value="standard">Standard (EADGBE)</option>
+            <option value="drop-d">Drop D (DADGBE)</option>
+            <option value="open-g">Open G (DGDGBD)</option>
+            <option value="dadgad">DADGAD</option>
+        </select>
+        
+        <select id="string-order">
+            <option value="high-bottom">High E Bottom</option>
+            <option value="low-bottom">Low E Bottom</option>
+        </select>
+        
+        <input type="color" id="theme-color" value="#1e90ff" title="Theme Color">
+        
+        <button onclick="window.location.href='index.html'">← Back to MIDI Visualizer</button>
+    </div>
+
+    <div class="content">
+        <div class="canvas-wrapper">
+            <h2 id="fretboard-title">Guitar Fretboard</h2>
+            <canvas id="fretboard" width="800" height="400"></canvas>
+        </div>
+        
+        <div class="canvas-wrapper">
+            <h2 id="piano-title">Piano Roll</h2>
+            <canvas id="piano-roll" width="800" height="200"></canvas>
+        </div>
+        
+        <div class="canvas-wrapper">
+            <h2>Mode Information</h2>
+            <table>
+                <tr>
+                    <th>Property</th>
+                    <th>Details</th>
+                </tr>
+                <tr>
+                    <td>Notes</td>
+                    <td id="notes"></td>
+                </tr>
+                <tr>
+                    <td>Intervals</td>
+                    <td id="intervals"></td>
+                </tr>
+                <tr>
+                    <td>Formula</td>
+                    <td id="formula"></td>
+                </tr>
+                <tr>
+                    <td>Character</td>
+                    <td id="character"></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <footer>
+        © 2025 Music Theory Reference
+    </footer>
+
+    <script>
+        // Mode definitions
+        const modes = {
+            'ionian': { intervals: [0, 2, 4, 5, 7, 9, 11], formula: 'W-W-H-W-W-W-H', character: 'Bright, happy, major sound' },
+            'dorian': { intervals: [0, 2, 3, 5, 7, 9, 10], formula: 'W-H-W-W-W-H-W', character: 'Minor with a raised 6th, jazzy' },
+            'phrygian': { intervals: [0, 1, 3, 5, 7, 8, 10], formula: 'H-W-W-W-H-W-W', character: 'Dark, Spanish/flamenco sound' },
+            'lydian': { intervals: [0, 2, 4, 6, 7, 9, 11], formula: 'W-W-W-H-W-W-H', character: 'Bright, dreamy, raised 4th' },
+            'mixolydian': { intervals: [0, 2, 4, 5, 7, 9, 10], formula: 'W-W-H-W-W-H-W', character: 'Major with flat 7th, bluesy' },
+            'aeolian': { intervals: [0, 2, 3, 5, 7, 8, 10], formula: 'W-H-W-W-H-W-W', character: 'Natural minor, sad, dark' },
+            'locrian': { intervals: [0, 1, 3, 5, 6, 8, 10], formula: 'H-W-W-H-W-W-W', character: 'Diminished, unstable, tense' },
+            'major-pentatonic': { intervals: [0, 2, 4, 7, 9], formula: '1-2-3-5-6', character: 'Simple, happy, country/folk' },
+            'minor-pentatonic': { intervals: [0, 3, 5, 7, 10], formula: '1-♭3-4-5-♭7', character: 'Blues, rock, simple minor' },
+            'blues': { intervals: [0, 3, 5, 6, 7, 10], formula: '1-♭3-4-♭5-5-♭7', character: 'Blues scale with blue note' },
+            'harmonic-minor': { intervals: [0, 2, 3, 5, 7, 8, 11], formula: 'W-H-W-W-H-W+H-H', character: 'Exotic, Middle Eastern sound' },
+            'melodic-minor': { intervals: [0, 2, 3, 5, 7, 9, 11], formula: 'W-H-W-W-W-W-H', character: 'Jazz minor, ascending form' }
+        };
+
+        // Tunings
+        const tunings = {
+            'standard': [40, 45, 50, 55, 59, 64],
+            'drop-d': [38, 45, 50, 55, 59, 64],
+            'open-g': [38, 43, 50, 55, 59, 62],
+            'dadgad': [38, 45, 50, 55, 57, 62]
+        };
+
+        const noteNames = {
+            sharps: ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'],
+            flats: ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
+        };
+
+        let currentKey = 'C';
+        let currentMode = 'ionian';
+        let currentNotation = 'sharps';
+        let currentTuning = tunings.standard;
+        let currentStringOrder = 'high-bottom';
+        let themeColor = '#1e90ff';
+
+        function noteToName(noteNumber, notation) {
+            const names = noteNames[notation];
+            const octave = Math.floor(noteNumber / 12) - 1;
+            const note = names[noteNumber % 12];
+            return `${note}${octave}`;
+        }
+
+        function drawFretboard() {
+            const canvas = document.getElementById('fretboard');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const numFrets = 12;
+            const startX = 80;
+            const startY = 60;
+            const fretSpacing = 55;
+            const stringSpacing = 35;
+
+            const stringOrder = currentStringOrder === 'high-bottom' 
+                ? [...currentTuning].reverse() 
+                : currentTuning;
+
+            // Draw frets
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 2;
+            for (let i = 0; i <= numFrets; i++) {
+                const x = startX + i * fretSpacing;
+                ctx.beginPath();
+                ctx.moveTo(x, startY);
+                ctx.lineTo(x, startY + 5 * stringSpacing);
+                ctx.stroke();
+            }
+
+            // Draw strings
+            for (let i = 0; i < 6; i++) {
+                const y = startY + i * stringSpacing;
+                ctx.beginPath();
+                ctx.moveTo(startX, y);
+                ctx.lineTo(startX + numFrets * fretSpacing, y);
+                ctx.stroke();
+            }
+
+            // Fret markers
+            const markers = [3, 5, 7, 9, 12];
+            ctx.fillStyle = '#888';
+            markers.forEach(fret => {
+                const x = startX + (fret - 0.5) * fretSpacing;
+                const y = startY + 2.5 * stringSpacing;
+                ctx.beginPath();
+                ctx.arc(x, y, 8, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Fret numbers (above fretboard)
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            const fretboardBottom = startY + 5 * stringSpacing;
+            for (let f = 0; f <= numFrets; f++) {
+                const x = startX + f * fretSpacing;
+                ctx.fillText(f.toString(), x, startY - 8);
+                ctx.fillText(f.toString(), x, fretboardBottom + 20);
+            }
+            
+            // String labels
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'right';
+            stringOrder.forEach((noteNum, i) => {
+                const y = startY + i * stringSpacing;
+                const noteName = noteToName(noteNum, currentNotation);
+                ctx.fillText(noteName, startX - 10, y + 5);
+            });
+
+            // Draw scale notes
+            const rootNote = noteNames.sharps.indexOf(currentKey);
+            const scaleIntervals = modes[currentMode].intervals;
+            const scaleNotes = new Set(scaleIntervals.map(interval => (rootNote + interval) % 12));
+
+            ctx.fillStyle = themeColor;
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+
+            stringOrder.forEach((stringNote, stringIndex) => {
+                for (let fret = 0; fret <= numFrets; fret++) {
+                    const noteNumber = stringNote + fret;
+                    const pitch = noteNumber % 12;
+                    
+                    if (scaleNotes.has(pitch)) {
+                        const x = startX + fret * fretSpacing;
+                        const y = startY + stringIndex * stringSpacing;
+                        
+                        ctx.beginPath();
+                        ctx.arc(x, y, 12, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.stroke();
+
+                        // Note name
+                        ctx.fillStyle = '#000';
+                        ctx.font = 'bold 10px Arial';
+                        ctx.textAlign = 'center';
+                        const noteName = noteNames[currentNotation][pitch];
+                        ctx.fillText(noteName, x, y + 4);
+                        ctx.fillStyle = themeColor;
+                    }
+                }
+            });
+        }
+
+        function drawPianoRoll() {
+            const canvas = document.getElementById('piano-roll');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const numKeys = 24; // 2 octaves
+            const keyWidth = canvas.width / 14; // 14 white keys in 2 octaves
+            const blackKeyHeight = canvas.height * 0.6;
+            const whiteKeys = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+            const blackKeyOffsets = [0, 1, 3, 4, 5]; // After C, D, F, G, A
+
+            const rootNote = noteNames.sharps.indexOf(currentKey);
+            const scaleIntervals = modes[currentMode].intervals;
+            const scaleNotes = new Set(scaleIntervals.map(interval => (rootNote + interval) % 12));
+
+            // Draw white keys
+            let whiteKeyIndex = 0;
+            for (let octave = 0; octave < 2; octave++) {
+                for (let i = 0; i < 7; i++) {
+                    const x = whiteKeyIndex * keyWidth;
+                    const noteIndex = [0, 2, 4, 5, 7, 9, 11][i];
+                    const pitch = (noteIndex + 48 + octave * 12) % 12;
+
+                    // Draw key
+                    ctx.fillStyle = scaleNotes.has(pitch) ? themeColor : '#fff';
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 1;
+                    ctx.fillRect(x, 0, keyWidth - 1, canvas.height);
+                    ctx.strokeRect(x, 0, keyWidth - 1, canvas.height);
+
+                    // Label
+                    ctx.fillStyle = scaleNotes.has(pitch) ? '#000' : '#666';
+                    ctx.font = '10px Arial';
+                    ctx.textAlign = 'center';
+                    const noteName = noteNames[currentNotation][pitch];
+                    ctx.fillText(noteName, x + keyWidth / 2, canvas.height - 10);
+
+                    whiteKeyIndex++;
+                }
+            }
+
+            // Draw black keys
+            whiteKeyIndex = 0;
+            for (let octave = 0; octave < 2; octave++) {
+                for (let i = 0; i < 7; i++) {
+                    if (blackKeyOffsets.includes(i)) {
+                        const x = (whiteKeyIndex + 0.7) * keyWidth;
+                        const noteIndex = [0, 2, 4, 5, 7, 9, 11][i] + 1;
+                        const pitch = (noteIndex + 48 + octave * 12) % 12;
+
+                        ctx.fillStyle = scaleNotes.has(pitch) ? themeColor : '#000';
+                        ctx.strokeStyle = '#000';
+                        ctx.fillRect(x, 0, keyWidth * 0.6, blackKeyHeight);
+                        ctx.strokeRect(x, 0, keyWidth * 0.6, blackKeyHeight);
+
+                        // Label
+                        ctx.fillStyle = scaleNotes.has(pitch) ? '#000' : '#fff';
+                        ctx.font = '9px Arial';
+                        ctx.textAlign = 'center';
+                        const noteName = noteNames[currentNotation][pitch];
+                        ctx.fillText(noteName, x + keyWidth * 0.3, blackKeyHeight - 10);
+                    }
+                    whiteKeyIndex++;
+                }
+            }
+        }
+
+        function updateInfo() {
+            const rootNote = noteNames.sharps.indexOf(currentKey);
+            const mode = modes[currentMode];
+            const scaleNotes = mode.intervals.map(interval => {
+                const pitch = (rootNote + interval) % 12;
+                return noteNames[currentNotation][pitch];
+            });
+
+            document.getElementById('notes').textContent = scaleNotes.join(', ');
+            document.getElementById('intervals').textContent = mode.intervals.join(', ');
+            document.getElementById('formula').textContent = mode.formula;
+            document.getElementById('character').textContent = mode.character;
+
+            const modeName = currentMode.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+            document.getElementById('fretboard-title').textContent = `${currentKey} ${modeName} - Guitar Fretboard`;
+            document.getElementById('piano-title').textContent = `${currentKey} ${modeName} - Piano Roll`;
+        }
+
+        function updateAll() {
+            drawFretboard();
+            drawPianoRoll();
+            updateInfo();
+        }
+
+        // Event listeners
+        document.getElementById('key-select').addEventListener('change', e => {
+            currentKey = e.target.value;
+            updateAll();
+        });
+
+        document.getElementById('mode-select').addEventListener('change', e => {
+            currentMode = e.target.value;
+            updateAll();
+        });
+
+        document.getElementById('notation').addEventListener('change', e => {
+            currentNotation = e.target.value === 'sharps' ? 'sharps' : 'flats';
+            updateAll();
+        });
+
+        document.getElementById('tuning').addEventListener('change', e => {
+            currentTuning = tunings[e.target.value];
+            updateAll();
+        });
+
+        document.getElementById('string-order').addEventListener('change', e => {
+            currentStringOrder = e.target.value;
+            updateAll();
+        });
+
+        document.getElementById('theme-color').addEventListener('change', e => {
+            themeColor = e.target.value;
+            document.documentElement.style.setProperty('--theme-color', themeColor);
+            updateAll();
+        });
+
+        // Initialize
+        updateAll();
+    </script>
+</body>
+</html>
