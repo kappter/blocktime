@@ -1,0 +1,2308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Time Blocker - Ultimate Pro Intuitive</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            /* Earth tone color palette */
+            --bg-primary: #f7f5f3;
+            --bg-secondary: #ede8e3;
+            --bg-tertiary: #e6ddd6;
+            --text-primary: #3c3530;
+            --text-secondary: #6b5b4f;
+            --accent-warm: #d4a574;
+            --accent-sage: #8faa96;
+            --accent-terracotta: #c17b5a;
+            --accent-cream: #f2ead3;
+            --border-light: #d4c4b0;
+            --shadow: rgba(60, 53, 48, 0.1);
+            
+            /* Dark theme overrides */
+            --dark-bg-primary: #2c2520;
+            --dark-bg-secondary: #3a342e;
+            --dark-bg-tertiary: #4a423a;
+            --dark-text-primary: #e8e0d6;
+            --dark-text-secondary: #c4b8a8;
+            --dark-accent-warm: #b8956b;
+            --dark-accent-sage: #7a9682;
+            --dark-accent-terracotta: #a66b4f;
+            --dark-border-light: #5a4f42;
+            --dark-shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-theme {
+            background: linear-gradient(135deg, var(--dark-bg-primary) 0%, var(--dark-bg-secondary) 100%);
+            color: var(--dark-text-primary);
+        }
+
+        body.dark-theme :root {
+            --bg-primary: var(--dark-bg-primary);
+            --bg-secondary: var(--dark-bg-secondary);
+            --bg-tertiary: var(--dark-bg-tertiary);
+            --text-primary: var(--dark-text-primary);
+            --text-secondary: var(--dark-text-secondary);
+            --accent-warm: var(--dark-accent-warm);
+            --accent-sage: var(--dark-accent-sage);
+            --accent-terracotta: var(--dark-accent-terracotta);
+            --border-light: var(--dark-border-light);
+            --shadow: var(--dark-shadow);
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px var(--shadow);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-light);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        body.dark-theme .sidebar {
+            background: rgba(42, 37, 32, 0.8);
+            border: 1px solid var(--dark-border-light);
+        }
+
+        .main-content {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px var(--shadow);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-light);
+        }
+
+        body.dark-theme .main-content {
+            background: rgba(42, 37, 32, 0.8);
+            border: 1px solid var(--dark-border-light);
+        }
+
+        .section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+        }
+
+        body.dark-theme .section {
+            background: var(--dark-bg-tertiary);
+            border: 1px solid var(--dark-border-light);
+        }
+
+        .section h3 {
+            color: var(--accent-terracotta);
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        body.dark-theme .section h3 {
+            color: var(--dark-accent-terracotta);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--accent-sage);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 4px 15px var(--shadow);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--shadow);
+        }
+
+        /* Day Navigation */
+        .day-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .day-nav button {
+            background: var(--accent-warm);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .day-nav button:hover {
+            background: var(--accent-terracotta);
+            transform: translateY(-1px);
+        }
+
+        .current-date {
+            text-align: center;
+            font-weight: 600;
+            color: var(--text-primary);
+            flex: 1;
+            margin: 0 15px;
+        }
+
+        .date-picker {
+            margin-top: 10px;
+            padding: 8px;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            width: 100%;
+        }
+
+        body.dark-theme .date-picker {
+            background: var(--dark-bg-primary);
+            border: 1px solid var(--dark-border-light);
+            color: var(--dark-text-primary);
+        }
+
+        /* Week View */
+        .week-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .week-day {
+            text-align: center;
+            padding: 12px 8px;
+            border-radius: 8px;
+            background: var(--bg-primary);
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .week-day:hover {
+            border-color: var(--accent-sage);
+            transform: translateY(-1px);
+        }
+
+        .week-day.current {
+            background: var(--accent-sage);
+            color: white;
+            font-weight: 600;
+        }
+
+        .week-day.selected {
+            border-color: var(--accent-warm);
+            background: var(--accent-cream);
+        }
+
+        .week-day.has-data {
+            background: var(--accent-sage);
+            color: white;
+        }
+
+        body.dark-theme .week-day {
+            background: var(--dark-bg-primary);
+        }
+
+        body.dark-theme .week-day.current {
+            background: var(--dark-accent-sage);
+        }
+
+        body.dark-theme .week-day.selected {
+            background: var(--dark-accent-terracotta);
+        }
+
+        /* Calendar */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .calendar-nav {
+            background: var(--accent-warm);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .calendar-nav:hover {
+            background: var(--accent-terracotta);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+        }
+
+        .calendar-day:hover {
+            background: var(--accent-cream);
+            transform: scale(1.05);
+        }
+
+        .calendar-day.current {
+            background: var(--accent-sage);
+            color: white;
+            font-weight: 600;
+        }
+
+        .calendar-day.selected {
+            background: var(--accent-warm);
+            color: white;
+        }
+
+        .calendar-day.has-data {
+            background: var(--accent-sage);
+            color: white;
+        }
+
+        body.dark-theme .calendar-day {
+            background: var(--dark-bg-primary);
+            border: 1px solid var(--dark-border-light);
+        }
+
+        /* Totals */
+        .totals {
+            background: var(--accent-cream);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        body.dark-theme .totals {
+            background: var(--dark-bg-tertiary);
+        }
+
+        .total-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        .total-hours {
+            font-weight: 600;
+            color: var(--accent-terracotta);
+        }
+
+        /* Main Content Sections */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .control-section {
+            background: var(--bg-tertiary);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+        }
+
+        body.dark-theme .control-section {
+            background: var(--dark-bg-tertiary);
+            border: 1px solid var(--dark-border-light);
+        }
+
+        .control-section h3 {
+            color: var(--accent-terracotta);
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        /* Form Elements */
+        select, input[type="text"], input[type="color"], input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        body.dark-theme select,
+        body.dark-theme input[type="text"],
+        body.dark-theme input[type="color"],
+        body.dark-theme input[type="file"] {
+            background: var(--dark-bg-primary);
+            border: 1px solid var(--dark-border-light);
+            color: var(--dark-text-primary);
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--accent-warm);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 5px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: var(--accent-terracotta);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+
+        .btn-secondary {
+            background: var(--accent-sage);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-terracotta);
+        }
+
+        /* Categories */
+        .categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .category {
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .category:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+
+        .category.selected {
+            border-color: white;
+            box-shadow: 0 0 0 2px var(--accent-warm);
+        }
+
+        .category .delete-btn {
+            margin-left: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            color: white;
+        }
+
+        /* Time Grid */
+        .time-grid {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            gap: 2px;
+            margin-top: 20px;
+        }
+
+        .time-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-light);
+        }
+
+        body.dark-theme .time-label {
+            background: var(--dark-bg-tertiary);
+            border: 1px solid var(--dark-border-light);
+            color: var(--dark-text-secondary);
+        }
+
+        .time-slot {
+            min-height: 40px;
+            background: var(--bg-primary);
+            border: 2px solid var(--border-light);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .time-slot:hover {
+            border-color: var(--accent-sage);
+            transform: scale(1.02);
+        }
+
+        .time-slot.preview {
+            border-style: dashed;
+            background: var(--accent-cream);
+            opacity: 0.7;
+        }
+
+        body.dark-theme .time-slot {
+            background: var(--dark-bg-primary);
+            border: 2px solid var(--dark-border-light);
+        }
+
+        body.dark-theme .time-slot.preview {
+            background: var(--dark-bg-tertiary);
+        }
+
+        /* Summary */
+        .summary {
+            background: var(--accent-cream);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            border: 1px solid var(--border-light);
+        }
+
+        body.dark-theme .summary {
+            background: var(--dark-bg-tertiary);
+            border: 1px solid var(--dark-border-light);
+        }
+
+        .summary h3 {
+            color: var(--accent-terracotta);
+            margin-bottom: 15px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 5px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        body.dark-theme .summary-item {
+            border-bottom: 1px solid var(--dark-border-light);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--bg-primary);
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px var(--shadow);
+            border: 1px solid var(--border-light);
+        }
+
+        body.dark-theme .modal-content {
+            background: var(--dark-bg-primary);
+            border: 1px solid var(--dark-border-light);
+        }
+
+        .close {
+            color: var(--text-secondary);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            background: var(--accent-sage);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close:hover {
+            background: var(--accent-terracotta);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 10px;
+            }
+            
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .week-grid {
+                grid-template-columns: repeat(7, 1fr);
+                gap: 4px;
+            }
+            
+            .week-day {
+                padding: 8px 4px;
+                font-size: 0.8em;
+            }
+        }
+
+        /* Success/Error Messages */
+        .message {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .message.success {
+            background: var(--accent-sage);
+            color: white;
+        }
+
+        .message.error {
+            background: var(--accent-terracotta);
+            color: white;
+        }
+
+        /* Loading States */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 20px 0;
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .comparison-table th {
+            background: var(--accent-cream);
+            font-weight: 600;
+            color: var(--accent-terracotta);
+        }
+
+        body.dark-theme .comparison-table th {
+            background: var(--dark-bg-tertiary);
+            color: var(--dark-accent-terracotta);
+        }
+
+        body.dark-theme .comparison-table th,
+        body.dark-theme .comparison-table td {
+            border-bottom: 1px solid var(--dark-border-light);
+        }
+
+        .difference-positive {
+            color: var(--accent-sage);
+            font-weight: 600;
+        }
+
+        .difference-negative {
+            color: var(--accent-terracotta);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+    
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Day Navigation -->
+            <div class="section">
+                <h3>📅 Day Navigation</h3>
+                <div class="day-nav">
+                    <button onclick="previousDay()">‹</button>
+                    <div class="current-date" id="currentDate">Tuesday, October 14, 2025</div>
+                    <button onclick="nextDay()">›</button>
+                </div>
+                <input type="date" class="date-picker" id="datePicker" onchange="selectDate()">
+                <div id="dayStatus" style="margin-top: 10px; font-size: 0.9em; color: var(--text-secondary);"></div>
+            </div>
+
+            <!-- Lifestyle Templates -->
+            <div class="section">
+                <h3>🎭 Lifestyle Templates</h3>
+                <select id="lifestyleTemplate">
+                    <option value="">Choose a lifestyle template...</option>
+                    <option value="athlete">🏃‍♂️ Professional Athlete</option>
+                    <option value="musician">🎵 Professional Musician</option>
+                    <option value="college">🎓 College Student</option>
+                    <option value="highschool">📚 High School Student</option>
+                    <option value="middleschool">📝 Middle School Student</option>
+                    <option value="workingdad">👨‍💼 Working Dad</option>
+                    <option value="workingmom">👩‍💼 Working Mom</option>
+                    <option value="stayathome">🏠 Stay-at-Home Parent</option>
+                    <option value="rockstar">🎸 Rock Star</option>
+                </select>
+                <button class="btn" onclick="loadLifestyleTemplate()">Load Weekly Template</button>
+            </div>
+
+            <!-- Current Week -->
+            <div class="section">
+                <h3>📅 Current Week</h3>
+                <div class="week-grid" id="weekGrid"></div>
+                <button class="btn btn-secondary" onclick="applyToSelectedWeekDays()">Apply Current Day to Selected Week Days</button>
+            </div>
+
+            <!-- Calendar -->
+            <div class="section">
+                <h3>🗓️ Calendar</h3>
+                <div class="calendar-header">
+                    <button class="calendar-nav" onclick="previousMonth()">‹</button>
+                    <span id="currentMonth">October 2025</span>
+                    <button class="calendar-nav" onclick="nextMonth()">›</button>
+                </div>
+                <div class="calendar-grid" id="calendarGrid"></div>
+                <button class="btn btn-secondary" onclick="applyToSelectedMonthDays()">Apply Current Day to Selected Month Days</button>
+            </div>
+
+            <!-- Week Totals -->
+            <div class="section">
+                <h3>📊 Week Totals</h3>
+                <div class="totals" id="weekTotals">
+                    <div class="total-item">
+                        <span>No activities this week</span>
+                        <span class="total-hours">0h</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Month Totals -->
+            <div class="section">
+                <h3>📈 Month Totals</h3>
+                <div class="totals" id="monthTotals">
+                    <div class="total-item">
+                        <span>No activities this month</span>
+                        <span class="total-hours">0h</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <h1>Daily Time Blocker - Ultimate Pro</h1>
+            <p style="color: var(--text-secondary); margin-bottom: 30px;">Complete time management with lifestyle templates, advanced reporting, and calendar integration</p>
+
+            <!-- Controls Grid -->
+            <div class="controls-grid">
+                <!-- Time Settings -->
+                <div class="control-section">
+                    <h3>⚙️ Time Settings</h3>
+                    <label for="timeResolution">Time Block Size:</label>
+                    <select id="timeResolution" onchange="updateTimeGrid()">
+                        <option value="60">60 minutes (24 blocks)</option>
+                        <option value="30">30 minutes (48 blocks)</option>
+                        <option value="15">15 minutes (96 blocks)</option>
+                    </select>
+                </div>
+
+                <!-- Data Management -->
+                <div class="control-section">
+                    <h3>💾 Data Management</h3>
+                    <button class="btn" onclick="exportDay()">📤 Export Day</button>
+                    <button class="btn" onclick="importDay()">📥 Import Day</button>
+                    <button class="btn" onclick="exportFullCalendar()">📊 Export Full Calendar</button>
+                    <button class="btn" onclick="importCalendar()">📋 Import Calendar</button>
+                    <input type="file" id="importFile" style="display: none;" accept=".json" onchange="handleImport()">
+                </div>
+            </div>
+
+            <div class="controls-grid">
+                <!-- Advanced Reports -->
+                <div class="control-section">
+                    <h3>📊 Advanced Reports</h3>
+                    <button class="btn" onclick="showDetailedReports()">📈 Detailed Reports</button>
+                    <button class="btn" onclick="showComparison()">🔍 Compare Schedules</button>
+                </div>
+
+                <!-- Calendar Integration -->
+                <div class="control-section">
+                    <h3>📅 Calendar Integration</h3>
+                    <button class="btn" onclick="exportToGoogleCalendar()">📅 Google Calendar</button>
+                    <button class="btn" onclick="exportToOutlook()">📧 Outlook</button>
+                    <button class="btn" onclick="exportICS()">📋 Export ICS File</button>
+                </div>
+            </div>
+
+            <!-- Activity Categories -->
+            <div class="section">
+                <h3>🏷️ Activity Categories</h3>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <input type="text" id="categoryName" placeholder="Enter category name" style="flex: 1;">
+                    <input type="color" id="categoryColor" value="#8faa96" style="width: 60px;">
+                    <button class="btn" onclick="addCategory()">➕ Add</button>
+                </div>
+                <div class="categories" id="categories"></div>
+            </div>
+
+            <!-- How to Use -->
+            <div class="section">
+                <h3>💡 How to Use Ultimate Pro</h3>
+                <p>1. Choose a lifestyle template or plan your day manually • 2. Navigate through days using pagination controls • 3. Generate detailed reports (daily/weekly/monthly/annual) • 4. Compare with others' schedules • 5. Export to Google Calendar or Outlook • 6. Analyze patterns and optimize your time</p>
+            </div>
+
+            <!-- Time Grid -->
+            <div class="time-grid" id="timeGrid"></div>
+
+            <!-- Summary -->
+            <div class="summary">
+                <h3 id="summaryTitle">Tuesday's Summary</h3>
+                <div id="summaryContent">
+                    <p>No activities planned yet</p>
+                    <p style="color: var(--text-secondary); font-style: italic;">Start by selecting a category and clicking time slots, or load a lifestyle template!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Reports Modal -->
+    <div id="reportsModal" class="modal">
+        <div class="modal-content">
+            <button class="close" onclick="closeModal('reportsModal')">✕</button>
+            <h2>📊 Detailed Reports</h2>
+            <div id="reportsContent">
+                <h3>📊 Daily Report - <span id="reportDate"></span></h3>
+                <div class="chart-container">
+                    <canvas id="dailyChart"></canvas>
+                </div>
+                <div id="dailyStats"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison Modal -->
+    <div id="comparisonModal" class="modal">
+        <div class="modal-content">
+            <button class="close" onclick="closeModal('comparisonModal')">✕</button>
+            <h2>🔍 Schedule Comparison</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div>
+                    <label>First Schedule:</label>
+                    <select id="firstSchedule">
+                        <option value="current">Current Schedule</option>
+                        <option value="athlete">Professional Athlete</option>
+                        <option value="musician">Professional Musician</option>
+                        <option value="college">College Student</option>
+                        <option value="highschool">High School Student</option>
+                        <option value="middleschool">Middle School Student</option>
+                        <option value="workingdad">Working Dad</option>
+                        <option value="workingmom">Working Mom</option>
+                        <option value="stayathome">Stay-at-Home Parent</option>
+                        <option value="rockstar">Rock Star</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Second Schedule:</label>
+                    <select id="secondSchedule">
+                        <option value="athlete">Professional Athlete</option>
+                        <option value="musician">Professional Musician</option>
+                        <option value="college">College Student</option>
+                        <option value="highschool">High School Student</option>
+                        <option value="middleschool">Middle School Student</option>
+                        <option value="workingdad">Working Dad</option>
+                        <option value="workingmom">Working Mom</option>
+                        <option value="stayathome">Stay-at-Home Parent</option>
+                        <option value="rockstar">Rock Star</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn" onclick="generateComparison()">Generate Comparison</button>
+            <div id="comparisonContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentDate = new Date(2025, 9, 14); // October 14, 2025
+        let selectedCategory = null;
+        let timeResolution = 60; // minutes
+        let scheduleData = {}; // Store all schedule data by date
+        let categories = [
+            { name: 'Sleep', color: '#8B7B8B', default: true },
+            { name: 'Work', color: '#4A90A4', default: true },
+            { name: 'Exercise', color: '#8FBA8F', default: true },
+            { name: 'Meals', color: '#D4A574', default: true },
+            { name: 'Commute', color: '#C17B5A', default: true },
+            { name: 'Leisure', color: '#E6A8D0', default: true },
+            { name: 'Study', color: '#7FB3D3', default: true },
+            { name: 'Family', color: '#B8D4B8', default: true }
+        ];
+        let selectedWeekDays = [];
+        let selectedMonthDays = [];
+
+        // Lifestyle templates with proper time allocations
+        const lifestyleTemplates = {
+            athlete: {
+                name: "Professional Athlete",
+                categories: [
+                    { name: 'Sleep', color: '#8B7B8B' },
+                    { name: 'Training', color: '#4A90A4' },
+                    { name: 'Recovery', color: '#8FBA8F' },
+                    { name: 'Meals', color: '#D4A574' },
+                    { name: 'Therapy', color: '#C17B5A' },
+                    { name: 'Media', color: '#E6A8D0' }
+                ],
+                schedule: {
+                    // 7-day schedule with hourly allocations
+                    0: { // Sunday
+                        'Sleep': [0,1,2,3,4,5,6,7,22,23],
+                        'Recovery': [8,9,10,11,12,13,14,15],
+                        'Meals': [16,17,18],
+                        'Media': [19,20],
+                        'Recovery': [21]
+                    },
+                    1: { // Monday
+                        'Sleep': [0,1,2,3,4,5,6,7,22,23],
+                        'Training': [8,9,10,11],
+                        'Meals': [12,13,14],
+                        'Training': [15,16,17,18],
+                        'Recovery': [19,20,21]
+                    },
+                    2: { // Tuesday
+                        'Sleep': [0,1,2,3,4,5,6,7,22,23],
+                        'Training': [8,9,10,11],
+                        'Meals': [12,13,14],
+                        'Training': [15,16,17,18],
+                        'Therapy': [19,20],
+                        'Recovery': [21]
+                    },
+                    3: { // Wednesday
+                        'Sleep': [0,1,2,3,4,5,6,7,22,23],
+                        'Training': [8,9,10,11],
+                        'Meals': [12,13,14],
+                        'Training': [15,16,17,18],
+                        'Recovery': [19,20,21]
+                    },
+                    4: { // Thursday
+                        'Sleep': [0,1,2,3,4,5,6,7,22,23],
+                        'Training': [8,9,10,11],
+                        'Meals': [12,13,14],
+                        'Training': [15,16,17,18],
+                        'Recovery': [19,20,21]
+                    },
+                    5: { // Friday
+                        'Sleep': [0,1,2,3,4,5,6,7,22,23],
+                        'Training': [8,9,10,11],
+                        'Meals': [12,13,14],
+                        'Training': [15,16,17,18],
+                        'Recovery': [19,20,21]
+                    },
+                    6: { // Saturday
+                        'Sleep': [0,1,2,3,4,5,6,7,22,23],
+                        'Recovery': [8,9,10,11,12,13,14,15],
+                        'Meals': [16,17,18],
+                        'Recovery': [19,20,21]
+                    }
+                }
+            },
+            musician: {
+                name: "Professional Musician",
+                categories: [
+                    { name: 'Sleep', color: '#8B7B8B' },
+                    { name: 'Practice', color: '#4A90A4' },
+                    { name: 'Performance', color: '#8FBA8F' },
+                    { name: 'Meals', color: '#D4A574' },
+                    { name: 'Business', color: '#C17B5A' },
+                    { name: 'Leisure', color: '#E6A8D0' }
+                ],
+                schedule: {
+                    0: { 'Sleep': [0,1,2,3,4,5,6,7,8,22,23], 'Practice': [9,10,11,12], 'Meals': [13,14], 'Performance': [15,16,17,18,19,20], 'Leisure': [21] },
+                    1: { 'Sleep': [0,1,2,3,4,5,6,7,22,23], 'Practice': [8,9,10,11], 'Meals': [12,13], 'Business': [14,15,16], 'Practice': [17,18,19,20], 'Leisure': [21] },
+                    2: { 'Sleep': [0,1,2,3,4,5,6,7,22,23], 'Practice': [8,9,10,11], 'Meals': [12,13], 'Business': [14,15,16], 'Practice': [17,18,19,20], 'Leisure': [21] },
+                    3: { 'Sleep': [0,1,2,3,4,5,6,7,22,23], 'Practice': [8,9,10,11], 'Meals': [12,13], 'Business': [14,15,16], 'Practice': [17,18,19,20], 'Leisure': [21] },
+                    4: { 'Sleep': [0,1,2,3,4,5,6,7,22,23], 'Practice': [8,9,10,11], 'Meals': [12,13], 'Business': [14,15,16], 'Practice': [17,18,19,20], 'Leisure': [21] },
+                    5: { 'Sleep': [0,1,2,3,4,5,6,7,8,22,23], 'Practice': [9,10,11,12], 'Meals': [13,14], 'Performance': [15,16,17,18,19,20], 'Leisure': [21] },
+                    6: { 'Sleep': [0,1,2,3,4,5,6,7,8,22,23], 'Practice': [9,10,11,12], 'Meals': [13,14], 'Performance': [15,16,17,18,19,20], 'Leisure': [21] }
+                }
+            },
+            college: {
+                name: "College Student",
+                categories: [
+                    { name: 'Sleep', color: '#8B7B8B' },
+                    { name: 'Classes', color: '#4A90A4' },
+                    { name: 'Study', color: '#8FBA8F' },
+                    { name: 'Meals', color: '#D4A574' },
+                    { name: 'Work', color: '#C17B5A' },
+                    { name: 'Social', color: '#E6A8D0' }
+                ],
+                schedule: {
+                    0: { 'Sleep': [0,1,2,3,4,5,6,7,8,9], 'Study': [10,11,12,13], 'Meals': [14,15], 'Social': [16,17,18,19,20,21], 'Sleep': [22,23] },
+                    1: { 'Sleep': [0,1,2,3,4,5,6,7], 'Classes': [8,9,10,11], 'Meals': [12,13], 'Study': [14,15,16,17], 'Work': [18,19,20], 'Social': [21], 'Sleep': [22,23] },
+                    2: { 'Sleep': [0,1,2,3,4,5,6,7], 'Classes': [8,9,10,11], 'Meals': [12,13], 'Study': [14,15,16,17], 'Work': [18,19,20], 'Social': [21], 'Sleep': [22,23] },
+                    3: { 'Sleep': [0,1,2,3,4,5,6,7], 'Classes': [8,9,10,11], 'Meals': [12,13], 'Study': [14,15,16,17], 'Work': [18,19,20], 'Social': [21], 'Sleep': [22,23] },
+                    4: { 'Sleep': [0,1,2,3,4,5,6,7], 'Classes': [8,9,10,11], 'Meals': [12,13], 'Study': [14,15,16,17], 'Work': [18,19,20], 'Social': [21], 'Sleep': [22,23] },
+                    5: { 'Sleep': [0,1,2,3,4,5,6,7], 'Classes': [8,9,10,11], 'Meals': [12,13], 'Study': [14,15,16,17], 'Social': [18,19,20,21], 'Sleep': [22,23] },
+                    6: { 'Sleep': [0,1,2,3,4,5,6,7,8,9], 'Study': [10,11,12,13], 'Meals': [14,15], 'Social': [16,17,18,19,20,21], 'Sleep': [22,23] }
+                }
+            },
+            highschool: {
+                name: "High School Student",
+                categories: [
+                    { name: 'Sleep', color: '#8B7B8B' },
+                    { name: 'School', color: '#4A90A4' },
+                    { name: 'Homework', color: '#8FBA8F' },
+                    { name: 'Meals', color: '#D4A574' },
+                    { name: 'Sports', color: '#C17B5A' },
+                    { name: 'Free Time', color: '#E6A8D0' }
+                ],
+                schedule: {
+                    0: { 'Sleep': [0,1,2,3,4,5,6,7,8,9], 'Homework': [10,11,12], 'Meals': [13,14], 'Free Time': [15,16,17,18,19,20,21], 'Sleep': [22,23] },
+                    1: { 'Sleep': [0,1,2,3,4,5,6], 'Meals': [7], 'School': [8,9,10,11,12,13,14], 'Sports': [15,16,17], 'Meals': [18], 'Homework': [19,20,21], 'Sleep': [22,23] },
+                    2: { 'Sleep': [0,1,2,3,4,5,6], 'Meals': [7], 'School': [8,9,10,11,12,13,14], 'Sports': [15,16,17], 'Meals': [18], 'Homework': [19,20,21], 'Sleep': [22,23] },
+                    3: { 'Sleep': [0,1,2,3,4,5,6], 'Meals': [7], 'School': [8,9,10,11,12,13,14], 'Sports': [15,16,17], 'Meals': [18], 'Homework': [19,20,21], 'Sleep': [22,23] },
+                    4: { 'Sleep': [0,1,2,3,4,5,6], 'Meals': [7], 'School': [8,9,10,11,12,13,14], 'Sports': [15,16,17], 'Meals': [18], 'Homework': [19,20,21], 'Sleep': [22,23] },
+                    5: { 'Sleep': [0,1,2,3,4,5,6], 'Meals': [7], 'School': [8,9,10,11,12,13,14], 'Sports': [15,16,17], 'Meals': [18], 'Free Time': [19,20,21], 'Sleep': [22,23] },
+                    6: { 'Sleep': [0,1,2,3,4,5,6,7,8,9], 'Homework': [10,11,12], 'Meals': [13,14], 'Free Time': [15,16,17,18,19,20,21], 'Sleep': [22,23] }
+                }
+            },
+            middleschool: {
+                name: "Middle School Student",
+                categories: [
+                    { name: 'Sleep', color: '#8B7B8B' },
+                    { name: 'School', color: '#4A90A4' },
+                    { name: 'Homework', color: '#8FBA8F' },
+                    { name: 'Meals', color: '#D4A574' },
+                    { name: 'Activities', color: '#C17B5A' },
+                    { name: 'Play', color: '#E6A8D0' }
+                ],
+                schedule: {
+                    0: { 'Sleep': [0,1,2,3,4,5,6,7,8,9], 'Homework': [10,11], 'Meals': [12,13], 'Play': [14,15,16,17,18,19,20], 'Sleep': [21,22,23] },
+                    1: { 'Sleep': [0,1,2,3,4,5,6], 'Meals': [7], 'School': [8,9,10,11,12,13,14], 'Activities': [15,16], 'Meals': [17], 'Homework': [18,19], 'Play': [20], 'Sleep': [21,22,23] },
+                    2: { 'Sleep': [0,1,2,3,4,5,6], 'Meals': [7], 'School': [8,9,10,11,12,13,14], 'Activities': [15,16], 'Meals': [17], 'Homework': [18,19], 'Play': [20], 'Sleep': [21,22,23] },
+                    3: { 'Sleep': [0,1,2,3,4,5,6], 'Meals': [7], 'School': [8,9,10,11,12,13,14], 'Activities': [15,16], 'Meals': [17], 'Homework': [18,19], 'Play': [20], 'Sleep': [21,22,23] },
+                    4: { 'Sleep': [0,1,2,3,4,5,6], 'Meals': [7], 'School': [8,9,10,11,12,13,14], 'Activities': [15,16], 'Meals': [17], 'Homework': [18,19], 'Play': [20], 'Sleep': [21,22,23] },
+                    5: { 'Sleep': [0,1,2,3,4,5,6], 'Meals': [7], 'School': [8,9,10,11,12,13,14], 'Activities': [15,16], 'Meals': [17], 'Play': [18,19,20], 'Sleep': [21,22,23] },
+                    6: { 'Sleep': [0,1,2,3,4,5,6,7,8,9], 'Homework': [10,11], 'Meals': [12,13], 'Play': [14,15,16,17,18,19,20], 'Sleep': [21,22,23] }
+                }
+            },
+            workingdad: {
+                name: "Working Dad",
+                categories: [
+                    { name: 'Sleep', color: '#8B7B8B' },
+                    { name: 'Work', color: '#4A90A4' },
+                    { name: 'Commute', color: '#8FBA8F' },
+                    { name: 'Meals', color: '#D4A574' },
+                    { name: 'Family', color: '#C17B5A' },
+                    { name: 'Personal', color: '#E6A8D0' }
+                ],
+                schedule: {
+                    0: { 'Sleep': [0,1,2,3,4,5,6,7], 'Family': [8,9,10,11,12,13,14,15,16], 'Meals': [17,18], 'Family': [19,20], 'Personal': [21], 'Sleep': [22,23] },
+                    1: { 'Sleep': [0,1,2,3,4,5], 'Personal': [6], 'Commute': [7], 'Work': [8,9,10,11,12,13,14,15,16], 'Commute': [17], 'Meals': [18], 'Family': [19,20,21], 'Sleep': [22,23] },
+                    2: { 'Sleep': [0,1,2,3,4,5], 'Personal': [6], 'Commute': [7], 'Work': [8,9,10,11,12,13,14,15,16], 'Commute': [17], 'Meals': [18], 'Family': [19,20,21], 'Sleep': [22,23] },
+                    3: { 'Sleep': [0,1,2,3,4,5], 'Personal': [6], 'Commute': [7], 'Work': [8,9,10,11,12,13,14,15,16], 'Commute': [17], 'Meals': [18], 'Family': [19,20,21], 'Sleep': [22,23] },
+                    4: { 'Sleep': [0,1,2,3,4,5], 'Personal': [6], 'Commute': [7], 'Work': [8,9,10,11,12,13,14,15,16], 'Commute': [17], 'Meals': [18], 'Family': [19,20,21], 'Sleep': [22,23] },
+                    5: { 'Sleep': [0,1,2,3,4,5], 'Personal': [6], 'Commute': [7], 'Work': [8,9,10,11,12,13,14,15,16], 'Commute': [17], 'Meals': [18], 'Family': [19,20,21], 'Sleep': [22,23] },
+                    6: { 'Sleep': [0,1,2,3,4,5,6,7], 'Family': [8,9,10,11,12,13,14,15,16], 'Meals': [17,18], 'Family': [19,20], 'Personal': [21], 'Sleep': [22,23] }
+                }
+            },
+            workingmom: {
+                name: "Working Mom",
+                categories: [
+                    { name: 'Sleep', color: '#8B7B8B' },
+                    { name: 'Work', color: '#4A90A4' },
+                    { name: 'Commute', color: '#8FBA8F' },
+                    { name: 'Meals', color: '#D4A574' },
+                    { name: 'Family', color: '#C17B5A' },
+                    { name: 'Personal', color: '#E6A8D0' }
+                ],
+                schedule: {
+                    0: { 'Sleep': [0,1,2,3,4,5,6,7], 'Family': [8,9,10,11,12,13,14,15,16], 'Meals': [17,18], 'Family': [19,20], 'Personal': [21], 'Sleep': [22,23] },
+                    1: { 'Sleep': [0,1,2,3,4,5], 'Personal': [6], 'Commute': [7], 'Work': [8,9,10,11,12,13,14,15,16], 'Commute': [17], 'Meals': [18], 'Family': [19,20,21], 'Sleep': [22,23] },
+                    2: { 'Sleep': [0,1,2,3,4,5], 'Personal': [6], 'Commute': [7], 'Work': [8,9,10,11,12,13,14,15,16], 'Commute': [17], 'Meals': [18], 'Family': [19,20,21], 'Sleep': [22,23] },
+                    3: { 'Sleep': [0,1,2,3,4,5], 'Personal': [6], 'Commute': [7], 'Work': [8,9,10,11,12,13,14,15,16], 'Commute': [17], 'Meals': [18], 'Family': [19,20,21], 'Sleep': [22,23] },
+                    4: { 'Sleep': [0,1,2,3,4,5], 'Personal': [6], 'Commute': [7], 'Work': [8,9,10,11,12,13,14,15,16], 'Commute': [17], 'Meals': [18], 'Family': [19,20,21], 'Sleep': [22,23] },
+                    5: { 'Sleep': [0,1,2,3,4,5], 'Personal': [6], 'Commute': [7], 'Work': [8,9,10,11,12,13,14,15,16], 'Commute': [17], 'Meals': [18], 'Family': [19,20,21], 'Sleep': [22,23] },
+                    6: { 'Sleep': [0,1,2,3,4,5,6,7], 'Family': [8,9,10,11,12,13,14,15,16], 'Meals': [17,18], 'Family': [19,20], 'Personal': [21], 'Sleep': [22,23] }
+                }
+            },
+            stayathome: {
+                name: "Stay-at-Home Parent",
+                categories: [
+                    { name: 'Sleep', color: '#8B7B8B' },
+                    { name: 'Childcare', color: '#4A90A4' },
+                    { name: 'Household', color: '#8FBA8F' },
+                    { name: 'Meals', color: '#D4A574' },
+                    { name: 'Personal', color: '#C17B5A' },
+                    { name: 'Family', color: '#E6A8D0' }
+                ],
+                schedule: {
+                    0: { 'Sleep': [0,1,2,3,4,5,6,7], 'Family': [8,9,10,11,12,13,14,15,16,17,18], 'Meals': [19,20], 'Personal': [21], 'Sleep': [22,23] },
+                    1: { 'Sleep': [0,1,2,3,4,5], 'Childcare': [6,7,8,9,10,11], 'Meals': [12,13], 'Household': [14,15,16], 'Childcare': [17,18], 'Meals': [19], 'Family': [20], 'Personal': [21], 'Sleep': [22,23] },
+                    2: { 'Sleep': [0,1,2,3,4,5], 'Childcare': [6,7,8,9,10,11], 'Meals': [12,13], 'Household': [14,15,16], 'Childcare': [17,18], 'Meals': [19], 'Family': [20], 'Personal': [21], 'Sleep': [22,23] },
+                    3: { 'Sleep': [0,1,2,3,4,5], 'Childcare': [6,7,8,9,10,11], 'Meals': [12,13], 'Household': [14,15,16], 'Childcare': [17,18], 'Meals': [19], 'Family': [20], 'Personal': [21], 'Sleep': [22,23] },
+                    4: { 'Sleep': [0,1,2,3,4,5], 'Childcare': [6,7,8,9,10,11], 'Meals': [12,13], 'Household': [14,15,16], 'Childcare': [17,18], 'Meals': [19], 'Family': [20], 'Personal': [21], 'Sleep': [22,23] },
+                    5: { 'Sleep': [0,1,2,3,4,5], 'Childcare': [6,7,8,9,10,11], 'Meals': [12,13], 'Household': [14,15,16], 'Childcare': [17,18], 'Meals': [19], 'Family': [20], 'Personal': [21], 'Sleep': [22,23] },
+                    6: { 'Sleep': [0,1,2,3,4,5,6,7], 'Family': [8,9,10,11,12,13,14,15,16,17,18], 'Meals': [19,20], 'Personal': [21], 'Sleep': [22,23] }
+                }
+            },
+            rockstar: {
+                name: "Rock Star",
+                categories: [
+                    { name: 'Sleep', color: '#8B7B8B' },
+                    { name: 'Performance', color: '#4A90A4' },
+                    { name: 'Recording', color: '#8FBA8F' },
+                    { name: 'Meals', color: '#D4A574' },
+                    { name: 'Travel', color: '#C17B5A' },
+                    { name: 'Party', color: '#E6A8D0' }
+                ],
+                schedule: {
+                    0: { 'Sleep': [0,1,2,3,4,5,6,7,8,9,10,11], 'Meals': [12,13], 'Recording': [14,15,16,17], 'Party': [18,19,20,21,22,23] },
+                    1: { 'Sleep': [0,1,2,3,4,5,6,7,8,9,10,11], 'Meals': [12,13], 'Recording': [14,15,16,17], 'Travel': [18,19], 'Performance': [20,21,22,23] },
+                    2: { 'Sleep': [0,1,2,3,4,5,6,7,8,9,10,11], 'Meals': [12,13], 'Recording': [14,15,16,17], 'Travel': [18,19], 'Performance': [20,21,22,23] },
+                    3: { 'Sleep': [0,1,2,3,4,5,6,7,8,9,10,11], 'Meals': [12,13], 'Recording': [14,15,16,17], 'Travel': [18,19], 'Performance': [20,21,22,23] },
+                    4: { 'Sleep': [0,1,2,3,4,5,6,7,8,9,10,11], 'Meals': [12,13], 'Recording': [14,15,16,17], 'Travel': [18,19], 'Performance': [20,21,22,23] },
+                    5: { 'Sleep': [0,1,2,3,4,5,6,7,8,9,10,11], 'Meals': [12,13], 'Recording': [14,15,16,17], 'Travel': [18,19], 'Performance': [20,21,22,23] },
+                    6: { 'Sleep': [0,1,2,3,4,5,6,7,8,9,10,11], 'Meals': [12,13], 'Recording': [14,15,16,17], 'Party': [18,19,20,21,22,23] }
+                }
+            }
+        };
+
+        // Initialize the application
+        function init() {
+            updateDateDisplay();
+            updateTimeGrid();
+            updateCategories();
+            updateWeekView();
+            updateCalendarView();
+            updateTotals();
+            loadTheme();
+            
+            // Set date picker to current date
+            document.getElementById('datePicker').value = formatDateForInput(currentDate);
+        }
+
+        // Theme management
+        function toggleTheme() {
+            const body = document.body;
+            const button = document.querySelector('.theme-toggle');
+            
+            if (body.classList.contains('dark-theme')) {
+                body.classList.remove('dark-theme');
+                button.textContent = '🌙 Dark';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.add('dark-theme');
+                button.textContent = '☀️ Light';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const button = document.querySelector('.theme-toggle');
+            
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+                button.textContent = '☀️ Light';
+            } else {
+                button.textContent = '🌙 Dark';
+            }
+        }
+
+        // Date management
+        function formatDateForDisplay(date) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        function formatDateForInput(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        function formatDateKey(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        function updateDateDisplay() {
+            document.getElementById('currentDate').textContent = formatDateForDisplay(currentDate);
+            document.getElementById('datePicker').value = formatDateForInput(currentDate);
+            
+            // Update day status
+            const dateKey = formatDateKey(currentDate);
+            const hasData = scheduleData[dateKey] && Object.keys(scheduleData[dateKey]).length > 0;
+            const statusElement = document.getElementById('dayStatus');
+            
+            if (hasData) {
+                statusElement.textContent = '✅ Schedule data available';
+                statusElement.style.color = 'var(--accent-sage)';
+            } else {
+                statusElement.textContent = 'No schedule data for this day';
+                statusElement.style.color = 'var(--text-secondary)';
+            }
+            
+            // Update summary title
+            const dayName = currentDate.toLocaleDateString('en-US', { weekday: 'long' });
+            document.getElementById('summaryTitle').textContent = `${dayName}'s Summary`;
+            
+            // Load and display the schedule for this day
+            loadDaySchedule();
+        }
+
+        function previousDay() {
+            saveDaySchedule(); // Save current day before navigating
+            currentDate.setDate(currentDate.getDate() - 1);
+            updateDateDisplay();
+            updateWeekView();
+            updateCalendarView();
+            updateTotals();
+        }
+
+        function nextDay() {
+            saveDaySchedule(); // Save current day before navigating
+            currentDate.setDate(currentDate.getDate() + 1);
+            updateDateDisplay();
+            updateWeekView();
+            updateCalendarView();
+            updateTotals();
+        }
+
+        function selectDate() {
+            saveDaySchedule(); // Save current day before navigating
+            const selectedDate = new Date(document.getElementById('datePicker').value);
+            currentDate = selectedDate;
+            updateDateDisplay();
+            updateWeekView();
+            updateCalendarView();
+            updateTotals();
+        }
+
+        // Save current day's schedule to scheduleData
+        function saveDaySchedule() {
+            const dateKey = formatDateKey(currentDate);
+            const daySchedule = {};
+            
+            // Get all time slots and their assignments
+            const timeSlots = document.querySelectorAll('.time-slot');
+            timeSlots.forEach(slot => {
+                if (slot.dataset.category && slot.dataset.category !== 'Available') {
+                    const timeIndex = parseInt(slot.dataset.time);
+                    daySchedule[timeIndex] = slot.dataset.category;
+                }
+            });
+            
+            // Only save if there's actual data
+            if (Object.keys(daySchedule).length > 0) {
+                scheduleData[dateKey] = daySchedule;
+            } else {
+                delete scheduleData[dateKey]; // Remove empty schedules
+            }
+        }
+
+        // Load schedule for the current day
+        function loadDaySchedule() {
+            const dateKey = formatDateKey(currentDate);
+            const daySchedule = scheduleData[dateKey] || {};
+            
+            // Clear all time slots first
+            const timeSlots = document.querySelectorAll('.time-slot');
+            timeSlots.forEach(slot => {
+                slot.textContent = 'Available';
+                slot.style.background = 'var(--bg-primary)';
+                slot.style.color = 'var(--text-secondary)';
+                slot.dataset.category = 'Available';
+            });
+            
+            // Apply saved schedule
+            Object.entries(daySchedule).forEach(([timeIndex, categoryName]) => {
+                const slot = document.querySelector(`[data-time="${timeIndex}"]`);
+                if (slot) {
+                    const category = categories.find(c => c.name === categoryName);
+                    if (category) {
+                        slot.textContent = categoryName;
+                        slot.style.background = category.color;
+                        slot.style.color = 'white';
+                        slot.dataset.category = categoryName;
+                    }
+                }
+            });
+            
+            updateSummary();
+        }
+
+        // Time grid management
+        function updateTimeGrid() {
+            timeResolution = parseInt(document.getElementById('timeResolution').value);
+            const slotsPerDay = 24 * (60 / timeResolution);
+            const grid = document.getElementById('timeGrid');
+            grid.innerHTML = '';
+
+            for (let i = 0; i < slotsPerDay; i++) {
+                const hour = Math.floor(i * timeResolution / 60);
+                const minute = (i * timeResolution) % 60;
+                const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+
+                // Time label
+                const label = document.createElement('div');
+                label.className = 'time-label';
+                label.textContent = timeString;
+                grid.appendChild(label);
+
+                // Time slot
+                const slot = document.createElement('div');
+                slot.className = 'time-slot';
+                slot.textContent = 'Available';
+                slot.dataset.time = i;
+                slot.dataset.category = 'Available';
+                
+                slot.addEventListener('click', () => assignTimeSlot(slot));
+                slot.addEventListener('mouseenter', () => previewTimeSlot(slot));
+                slot.addEventListener('mouseleave', () => clearPreview(slot));
+                
+                grid.appendChild(slot);
+            }
+            
+            // Reload the current day's schedule after grid update
+            loadDaySchedule();
+        }
+
+        function assignTimeSlot(slot) {
+            if (!selectedCategory) {
+                showMessage('Please select a category first', 'error');
+                return;
+            }
+
+            const category = categories.find(c => c.name === selectedCategory);
+            if (category) {
+                slot.textContent = category.name;
+                slot.style.background = category.color;
+                slot.style.color = 'white';
+                slot.dataset.category = category.name;
+                updateSummary();
+                saveDaySchedule(); // Auto-save when changes are made
+            }
+        }
+
+        function previewTimeSlot(slot) {
+            if (!selectedCategory || slot.dataset.category !== 'Available') return;
+            
+            const category = categories.find(c => c.name === selectedCategory);
+            if (category) {
+                slot.classList.add('preview');
+                slot.textContent = category.name;
+                slot.style.background = category.color;
+                slot.style.color = 'white';
+                slot.style.opacity = '0.7';
+            }
+        }
+
+        function clearPreview(slot) {
+            if (slot.classList.contains('preview')) {
+                slot.classList.remove('preview');
+                if (slot.dataset.category === 'Available') {
+                    slot.textContent = 'Available';
+                    slot.style.background = 'var(--bg-primary)';
+                    slot.style.color = 'var(--text-secondary)';
+                    slot.style.opacity = '1';
+                } else {
+                    // Restore original assignment
+                    const category = categories.find(c => c.name === slot.dataset.category);
+                    if (category) {
+                        slot.textContent = category.name;
+                        slot.style.background = category.color;
+                        slot.style.color = 'white';
+                        slot.style.opacity = '1';
+                    }
+                }
+            }
+        }
+
+        // Category management
+        function updateCategories() {
+            const container = document.getElementById('categories');
+            container.innerHTML = '';
+
+            categories.forEach(category => {
+                const element = document.createElement('div');
+                element.className = 'category';
+                element.style.background = category.color;
+                element.style.color = 'white';
+                element.textContent = category.name;
+                
+                if (!category.default) {
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'delete-btn';
+                    deleteBtn.textContent = '×';
+                    deleteBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        deleteCategory(category.name);
+                    };
+                    element.appendChild(deleteBtn);
+                }
+                
+                element.addEventListener('click', () => selectCategory(category.name));
+                container.appendChild(element);
+            });
+        }
+
+        function selectCategory(categoryName) {
+            selectedCategory = categoryName;
+            
+            // Update visual selection
+            document.querySelectorAll('.category').forEach(cat => {
+                cat.classList.remove('selected');
+            });
+            
+            const selectedElement = Array.from(document.querySelectorAll('.category'))
+                .find(cat => cat.textContent.includes(categoryName));
+            if (selectedElement) {
+                selectedElement.classList.add('selected');
+            }
+        }
+
+        function addCategory() {
+            const nameInput = document.getElementById('categoryName');
+            const colorInput = document.getElementById('categoryColor');
+            const name = nameInput.value.trim();
+            const color = colorInput.value;
+
+            if (!name) {
+                showMessage('Please enter a category name', 'error');
+                return;
+            }
+
+            if (categories.find(c => c.name === name)) {
+                showMessage('Category already exists', 'error');
+                return;
+            }
+
+            categories.push({ name, color, default: false });
+            updateCategories();
+            nameInput.value = '';
+            showMessage(`Category "${name}" added successfully`, 'success');
+        }
+
+        function deleteCategory(categoryName) {
+            if (confirm(`Are you sure you want to delete the "${categoryName}" category?`)) {
+                categories = categories.filter(c => c.name !== categoryName);
+                updateCategories();
+                
+                if (selectedCategory === categoryName) {
+                    selectedCategory = null;
+                }
+                
+                showMessage(`Category "${categoryName}" deleted`, 'success');
+            }
+        }
+
+        // Lifestyle template management
+        function loadLifestyleTemplate() {
+            const templateSelect = document.getElementById('lifestyleTemplate');
+            const templateKey = templateSelect.value;
+            
+            if (!templateKey) {
+                showMessage('Please select a lifestyle template', 'error');
+                return;
+            }
+            
+            const template = lifestyleTemplates[templateKey];
+            if (!template) {
+                showMessage('Template not found', 'error');
+                return;
+            }
+            
+            // Update categories to match template
+            categories = [...template.categories.map(cat => ({...cat, default: false}))];
+            updateCategories();
+            
+            // Apply template schedule to all 7 days of the current week
+            const startOfWeek = new Date(currentDate);
+            startOfWeek.setDate(currentDate.getDate() - currentDate.getDay()); // Go to Sunday
+            
+            for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
+                const templateDate = new Date(startOfWeek);
+                templateDate.setDate(startOfWeek.getDate() + dayOffset);
+                const dateKey = formatDateKey(templateDate);
+                
+                const daySchedule = template.schedule[dayOffset];
+                if (daySchedule) {
+                    const convertedSchedule = {};
+                    
+                    // Convert hour-based schedule to time slot based schedule
+                    Object.entries(daySchedule).forEach(([categoryName, hours]) => {
+                        hours.forEach(hour => {
+                            // Convert hour to appropriate time slots based on current resolution
+                            const slotsPerHour = 60 / timeResolution;
+                            for (let slot = 0; slot < slotsPerHour; slot++) {
+                                const timeIndex = hour * slotsPerHour + slot;
+                                convertedSchedule[timeIndex] = categoryName;
+                            }
+                        });
+                    });
+                    
+                    scheduleData[dateKey] = convertedSchedule;
+                }
+            }
+            
+            // Reload current day to show the template
+            loadDaySchedule();
+            updateWeekView();
+            updateCalendarView();
+            updateTotals();
+            
+            showMessage(`${template.name} template loaded for the entire week!`, 'success');
+        }
+
+        // Week view management
+        function updateWeekView() {
+            const grid = document.getElementById('weekGrid');
+            grid.innerHTML = '';
+            
+            const startOfWeek = new Date(currentDate);
+            startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+            
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(startOfWeek);
+                date.setDate(startOfWeek.getDate() + i);
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'week-day';
+                dayElement.innerHTML = `${dayNames[i]}<br>${date.getDate()}`;
+                
+                const dateKey = formatDateKey(date);
+                const hasData = scheduleData[dateKey] && Object.keys(scheduleData[dateKey]).length > 0;
+                
+                if (date.toDateString() === currentDate.toDateString()) {
+                    dayElement.classList.add('current');
+                }
+                
+                if (hasData) {
+                    dayElement.classList.add('has-data');
+                }
+                
+                if (selectedWeekDays.includes(dateKey)) {
+                    dayElement.classList.add('selected');
+                }
+                
+                dayElement.addEventListener('click', () => toggleWeekDaySelection(dateKey, dayElement));
+                grid.appendChild(dayElement);
+            }
+        }
+
+        function toggleWeekDaySelection(dateKey, element) {
+            if (selectedWeekDays.includes(dateKey)) {
+                selectedWeekDays = selectedWeekDays.filter(d => d !== dateKey);
+                element.classList.remove('selected');
+            } else {
+                selectedWeekDays.push(dateKey);
+                element.classList.add('selected');
+            }
+        }
+
+        function applyToSelectedWeekDays() {
+            if (selectedWeekDays.length === 0) {
+                showMessage('Please select days to apply the current schedule to', 'error');
+                return;
+            }
+            
+            saveDaySchedule(); // Save current day first
+            const currentDateKey = formatDateKey(currentDate);
+            const currentSchedule = scheduleData[currentDateKey] || {};
+            
+            selectedWeekDays.forEach(dateKey => {
+                if (dateKey !== currentDateKey) {
+                    scheduleData[dateKey] = {...currentSchedule};
+                }
+            });
+            
+            selectedWeekDays = [];
+            updateWeekView();
+            updateCalendarView();
+            updateTotals();
+            showMessage(`Schedule applied to ${selectedWeekDays.length} selected days`, 'success');
+        }
+
+        // Calendar view management
+        function updateCalendarView() {
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+            
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            // Update month display
+            document.getElementById('currentMonth').textContent = 
+                new Date(year, month).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            
+            // Get first day of month and number of days
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startingDayOfWeek = firstDay.getDay();
+            
+            // Add day headers
+            const dayHeaders = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+            dayHeaders.forEach(header => {
+                const headerElement = document.createElement('div');
+                headerElement.textContent = header;
+                headerElement.style.fontWeight = 'bold';
+                headerElement.style.textAlign = 'center';
+                headerElement.style.padding = '8px';
+                headerElement.style.background = 'var(--accent-cream)';
+                headerElement.style.borderRadius = '6px';
+                grid.appendChild(headerElement);
+            });
+            
+            // Add empty cells for days before month starts
+            for (let i = 0; i < startingDayOfWeek; i++) {
+                const emptyElement = document.createElement('div');
+                grid.appendChild(emptyElement);
+            }
+            
+            // Add days of month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dateKey = formatDateKey(date);
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = day;
+                
+                const hasData = scheduleData[dateKey] && Object.keys(scheduleData[dateKey]).length > 0;
+                
+                if (date.toDateString() === currentDate.toDateString()) {
+                    dayElement.classList.add('current');
+                }
+                
+                if (hasData) {
+                    dayElement.classList.add('has-data');
+                }
+                
+                if (selectedMonthDays.includes(dateKey)) {
+                    dayElement.classList.add('selected');
+                }
+                
+                dayElement.addEventListener('click', () => toggleMonthDaySelection(dateKey, dayElement));
+                grid.appendChild(dayElement);
+            }
+        }
+
+        function toggleMonthDaySelection(dateKey, element) {
+            if (selectedMonthDays.includes(dateKey)) {
+                selectedMonthDays = selectedMonthDays.filter(d => d !== dateKey);
+                element.classList.remove('selected');
+            } else {
+                selectedMonthDays.push(dateKey);
+                element.classList.add('selected');
+            }
+        }
+
+        function applyToSelectedMonthDays() {
+            if (selectedMonthDays.length === 0) {
+                showMessage('Please select days to apply the current schedule to', 'error');
+                return;
+            }
+            
+            saveDaySchedule(); // Save current day first
+            const currentDateKey = formatDateKey(currentDate);
+            const currentSchedule = scheduleData[currentDateKey] || {};
+            
+            selectedMonthDays.forEach(dateKey => {
+                if (dateKey !== currentDateKey) {
+                    scheduleData[dateKey] = {...currentSchedule};
+                }
+            });
+            
+            const appliedCount = selectedMonthDays.length;
+            selectedMonthDays = [];
+            updateWeekView();
+            updateCalendarView();
+            updateTotals();
+            showMessage(`Schedule applied to ${appliedCount} selected days`, 'success');
+        }
+
+        function previousMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            updateCalendarView();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            updateCalendarView();
+        }
+
+        // Summary and totals
+        function updateSummary() {
+            const summaryContent = document.getElementById('summaryContent');
+            const categoryTotals = {};
+            
+            // Count time slots for each category
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                const category = slot.dataset.category;
+                if (category && category !== 'Available') {
+                    categoryTotals[category] = (categoryTotals[category] || 0) + timeResolution;
+                }
+            });
+            
+            if (Object.keys(categoryTotals).length === 0) {
+                summaryContent.innerHTML = `
+                    <p>No activities planned yet</p>
+                    <p style="color: var(--text-secondary); font-style: italic;">Start by selecting a category and clicking time slots, or load a lifestyle template!</p>
+                `;
+                return;
+            }
+            
+            let summaryHTML = '';
+            Object.entries(categoryTotals).forEach(([category, minutes]) => {
+                const hours = (minutes / 60).toFixed(1);
+                summaryHTML += `
+                    <div class="summary-item">
+                        <span>${category}</span>
+                        <span class="total-hours">${hours}h</span>
+                    </div>
+                `;
+            });
+            
+            summaryContent.innerHTML = summaryHTML;
+        }
+
+        function updateTotals() {
+            updateWeekTotals();
+            updateMonthTotals();
+        }
+
+        function updateWeekTotals() {
+            const weekTotalsElement = document.getElementById('weekTotals');
+            const startOfWeek = new Date(currentDate);
+            startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+            
+            const weekTotals = {};
+            
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(startOfWeek);
+                date.setDate(startOfWeek.getDate() + i);
+                const dateKey = formatDateKey(date);
+                const daySchedule = scheduleData[dateKey] || {};
+                
+                Object.values(daySchedule).forEach(category => {
+                    weekTotals[category] = (weekTotals[category] || 0) + timeResolution;
+                });
+            }
+            
+            if (Object.keys(weekTotals).length === 0) {
+                weekTotalsElement.innerHTML = `
+                    <div class="total-item">
+                        <span>No activities this week</span>
+                        <span class="total-hours">0h</span>
+                    </div>
+                `;
+                return;
+            }
+            
+            let totalsHTML = '';
+            Object.entries(weekTotals).forEach(([category, minutes]) => {
+                const hours = (minutes / 60).toFixed(1);
+                totalsHTML += `
+                    <div class="total-item">
+                        <span>${category}</span>
+                        <span class="total-hours">${hours}h</span>
+                    </div>
+                `;
+            });
+            
+            weekTotalsElement.innerHTML = totalsHTML;
+        }
+
+        function updateMonthTotals() {
+            const monthTotalsElement = document.getElementById('monthTotals');
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            const monthTotals = {};
+            
+            // Get all days in current month
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dateKey = formatDateKey(date);
+                const daySchedule = scheduleData[dateKey] || {};
+                
+                Object.values(daySchedule).forEach(category => {
+                    monthTotals[category] = (monthTotals[category] || 0) + timeResolution;
+                });
+            }
+            
+            if (Object.keys(monthTotals).length === 0) {
+                monthTotalsElement.innerHTML = `
+                    <div class="total-item">
+                        <span>No activities this month</span>
+                        <span class="total-hours">0h</span>
+                    </div>
+                `;
+                return;
+            }
+            
+            let totalsHTML = '';
+            Object.entries(monthTotals).forEach(([category, minutes]) => {
+                const hours = (minutes / 60).toFixed(1);
+                totalsHTML += `
+                    <div class="total-item">
+                        <span>${category}</span>
+                        <span class="total-hours">${hours}h</span>
+                    </div>
+                `;
+            });
+            
+            monthTotalsElement.innerHTML = totalsHTML;
+        }
+
+        // Import/Export functionality
+        function exportDay() {
+            saveDaySchedule();
+            const dateKey = formatDateKey(currentDate);
+            const dayData = {
+                date: dateKey,
+                schedule: scheduleData[dateKey] || {},
+                categories: categories,
+                timeResolution: timeResolution
+            };
+            
+            const dataStr = JSON.stringify(dayData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `daily-schedule-${dateKey}.json`;
+            link.click();
+            
+            showMessage('Day schedule exported successfully', 'success');
+        }
+
+        function importDay() {
+            document.getElementById('importFile').click();
+        }
+
+        function exportFullCalendar() {
+            saveDaySchedule();
+            const fullData = {
+                scheduleData: scheduleData,
+                categories: categories,
+                timeResolution: timeResolution,
+                exportDate: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(fullData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `full-calendar-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            showMessage('Full calendar exported successfully', 'success');
+        }
+
+        function importCalendar() {
+            document.getElementById('importFile').click();
+        }
+
+        function handleImport() {
+            const file = document.getElementById('importFile').files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (data.scheduleData) {
+                        // Full calendar import
+                        scheduleData = data.scheduleData;
+                        categories = data.categories || categories;
+                        timeResolution = data.timeResolution || timeResolution;
+                        
+                        // Update UI
+                        document.getElementById('timeResolution').value = timeResolution;
+                        updateTimeGrid();
+                        updateCategories();
+                        updateWeekView();
+                        updateCalendarView();
+                        updateTotals();
+                        
+                        showMessage('Full calendar imported successfully', 'success');
+                    } else if (data.date && data.schedule) {
+                        // Single day import
+                        scheduleData[data.date] = data.schedule;
+                        if (data.categories) {
+                            categories = data.categories;
+                        }
+                        if (data.timeResolution) {
+                            timeResolution = data.timeResolution;
+                            document.getElementById('timeResolution').value = timeResolution;
+                            updateTimeGrid();
+                        }
+                        
+                        updateCategories();
+                        loadDaySchedule();
+                        updateWeekView();
+                        updateCalendarView();
+                        updateTotals();
+                        
+                        showMessage('Day schedule imported successfully', 'success');
+                    } else {
+                        showMessage('Invalid file format', 'error');
+                    }
+                } catch (error) {
+                    showMessage('Error reading file: ' + error.message, 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Calendar integration
+        function exportToGoogleCalendar() {
+            exportICS();
+            showMessage('ICS file exported - import it into Google Calendar', 'success');
+        }
+
+        function exportToOutlook() {
+            exportICS();
+            showMessage('ICS file exported - import it into Outlook', 'success');
+        }
+
+        function exportICS() {
+            saveDaySchedule();
+            let icsContent = [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'PRODID:-//Daily Time Blocker//Ultimate Pro//EN',
+                'CALSCALE:GREGORIAN'
+            ];
+            
+            Object.entries(scheduleData).forEach(([dateKey, daySchedule]) => {
+                const date = new Date(dateKey);
+                const categoryBlocks = {};
+                
+                // Group consecutive time slots by category
+                Object.entries(daySchedule).forEach(([timeIndex, category]) => {
+                    if (!categoryBlocks[category]) {
+                        categoryBlocks[category] = [];
+                    }
+                    categoryBlocks[category].push(parseInt(timeIndex));
+                });
+                
+                // Create events for each category block
+                Object.entries(categoryBlocks).forEach(([category, timeSlots]) => {
+                    timeSlots.sort((a, b) => a - b);
+                    
+                    let blockStart = timeSlots[0];
+                    let blockEnd = timeSlots[0];
+                    
+                    for (let i = 1; i < timeSlots.length; i++) {
+                        if (timeSlots[i] === blockEnd + 1) {
+                            blockEnd = timeSlots[i];
+                        } else {
+                            // Create event for current block
+                            addICSEvent(icsContent, date, blockStart, blockEnd + 1, category);
+                            blockStart = timeSlots[i];
+                            blockEnd = timeSlots[i];
+                        }
+                    }
+                    
+                    // Add final block
+                    addICSEvent(icsContent, date, blockStart, blockEnd + 1, category);
+                });
+            });
+            
+            icsContent.push('END:VCALENDAR');
+            
+            const icsBlob = new Blob([icsContent.join('\r\n')], { type: 'text/calendar' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(icsBlob);
+            link.download = `time-blocks-${new Date().toISOString().split('T')[0]}.ics`;
+            link.click();
+        }
+
+        function addICSEvent(icsContent, date, startSlot, endSlot, category) {
+            const startMinutes = startSlot * timeResolution;
+            const endMinutes = endSlot * timeResolution;
+            
+            const startHour = Math.floor(startMinutes / 60);
+            const startMin = startMinutes % 60;
+            const endHour = Math.floor(endMinutes / 60);
+            const endMin = endMinutes % 60;
+            
+            const startDateTime = new Date(date);
+            startDateTime.setHours(startHour, startMin, 0, 0);
+            
+            const endDateTime = new Date(date);
+            endDateTime.setHours(endHour, endMin, 0, 0);
+            
+            const formatDateTime = (dt) => {
+                return dt.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+            };
+            
+            icsContent.push(
+                'BEGIN:VEVENT',
+                `UID:${Date.now()}-${Math.random()}@dailytimeblocker.com`,
+                `DTSTART:${formatDateTime(startDateTime)}`,
+                `DTEND:${formatDateTime(endDateTime)}`,
+                `SUMMARY:${category}`,
+                `DESCRIPTION:Time block for ${category}`,
+                'END:VEVENT'
+            );
+        }
+
+        // Reports and comparison
+        function showDetailedReports() {
+            document.getElementById('reportsModal').style.display = 'block';
+            generateDailyReport();
+        }
+
+        function generateDailyReport() {
+            const dateKey = formatDateKey(currentDate);
+            const daySchedule = scheduleData[dateKey] || {};
+            
+            document.getElementById('reportDate').textContent = formatDateForDisplay(currentDate);
+            
+            // Calculate category totals
+            const categoryTotals = {};
+            Object.values(daySchedule).forEach(category => {
+                categoryTotals[category] = (categoryTotals[category] || 0) + timeResolution;
+            });
+            
+            // Create chart
+            const ctx = document.getElementById('dailyChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (window.dailyChart) {
+                window.dailyChart.destroy();
+            }
+            
+            const chartData = {
+                labels: Object.keys(categoryTotals),
+                datasets: [{
+                    data: Object.values(categoryTotals).map(minutes => minutes / 60),
+                    backgroundColor: Object.keys(categoryTotals).map(category => {
+                        const cat = categories.find(c => c.name === category);
+                        return cat ? cat.color : '#8faa96';
+                    })
+                }]
+            };
+            
+            window.dailyChart = new Chart(ctx, {
+                type: 'pie',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Daily Time Allocation'
+                        }
+                    }
+                }
+            });
+            
+            // Generate stats
+            const statsHTML = Object.entries(categoryTotals)
+                .map(([category, minutes]) => {
+                    const hours = (minutes / 60).toFixed(1);
+                    const percentage = ((minutes / (24 * 60)) * 100).toFixed(1);
+                    return `<p><strong>${category}:</strong> ${hours} hours (${percentage}%)</p>`;
+                })
+                .join('');
+            
+            document.getElementById('dailyStats').innerHTML = statsHTML || '<p>No activities recorded for this day.</p>';
+        }
+
+        function showComparison() {
+            document.getElementById('comparisonModal').style.display = 'block';
+        }
+
+        function generateComparison() {
+            const firstScheduleKey = document.getElementById('firstSchedule').value;
+            const secondScheduleKey = document.getElementById('secondSchedule').value;
+            
+            const firstData = getScheduleData(firstScheduleKey);
+            const secondData = getScheduleData(secondScheduleKey);
+            
+            const comparisonContent = document.getElementById('comparisonContent');
+            
+            // Create comparison chart
+            const chartContainer = document.createElement('div');
+            chartContainer.innerHTML = '<h3>📊 Schedule Comparison</h3><canvas id="comparisonChart" style="max-height: 400px;"></canvas>';
+            comparisonContent.innerHTML = '';
+            comparisonContent.appendChild(chartContainer);
+            
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            
+            // Get all unique categories
+            const allCategories = new Set([...Object.keys(firstData), ...Object.keys(secondData)]);
+            
+            const chartData = {
+                labels: Array.from(allCategories),
+                datasets: [
+                    {
+                        label: getScheduleName(firstScheduleKey),
+                        data: Array.from(allCategories).map(cat => (firstData[cat] || 0) / 60),
+                        backgroundColor: 'rgba(212, 165, 116, 0.7)',
+                        borderColor: 'rgba(212, 165, 116, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: getScheduleName(secondScheduleKey),
+                        data: Array.from(allCategories).map(cat => (secondData[cat] || 0) / 60),
+                        backgroundColor: 'rgba(143, 170, 150, 0.7)',
+                        borderColor: 'rgba(143, 170, 150, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            };
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Hours per Week'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+            
+            // Create comparison table
+            const tableContainer = document.createElement('div');
+            tableContainer.innerHTML = '<h4>Detailed Comparison</h4>';
+            
+            const table = document.createElement('table');
+            table.className = 'comparison-table';
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>${getScheduleName(firstScheduleKey)}</th>
+                        <th>${getScheduleName(secondScheduleKey)}</th>
+                        <th>Difference</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${Array.from(allCategories).map(category => {
+                        const first = (firstData[category] || 0) / 60;
+                        const second = (secondData[category] || 0) / 60;
+                        const diff = first - second;
+                        const diffClass = diff > 0 ? 'difference-positive' : 'difference-negative';
+                        return `
+                            <tr>
+                                <td>${category}</td>
+                                <td>${first.toFixed(1)}h</td>
+                                <td>${second.toFixed(1)}h</td>
+                                <td class="${diffClass}">${diff > 0 ? '+' : ''}${diff.toFixed(1)}h</td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            `;
+            
+            tableContainer.appendChild(table);
+            comparisonContent.appendChild(tableContainer);
+        }
+
+        function getScheduleData(scheduleKey) {
+            if (scheduleKey === 'current') {
+                // Get current week's data
+                const weekData = {};
+                const startOfWeek = new Date(currentDate);
+                startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+                
+                for (let i = 0; i < 7; i++) {
+                    const date = new Date(startOfWeek);
+                    date.setDate(startOfWeek.getDate() + i);
+                    const dateKey = formatDateKey(date);
+                    const daySchedule = scheduleData[dateKey] || {};
+                    
+                    Object.values(daySchedule).forEach(category => {
+                        weekData[category] = (weekData[category] || 0) + timeResolution;
+                    });
+                }
+                
+                return weekData;
+            } else {
+                // Get template data
+                const template = lifestyleTemplates[scheduleKey];
+                if (!template) return {};
+                
+                const templateData = {};
+                Object.values(template.schedule).forEach(daySchedule => {
+                    Object.entries(daySchedule).forEach(([category, hours]) => {
+                        const minutes = hours.length * 60; // Each hour is 60 minutes
+                        templateData[category] = (templateData[category] || 0) + minutes;
+                    });
+                });
+                
+                return templateData;
+            }
+        }
+
+        function getScheduleName(scheduleKey) {
+            if (scheduleKey === 'current') {
+                return 'Current Schedule';
+            }
+            const template = lifestyleTemplates[scheduleKey];
+            return template ? template.name : scheduleKey;
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Utility functions
+        function showMessage(text, type) {
+            const message = document.createElement('div');
+            message.className = `message ${type}`;
+            message.textContent = text;
+            
+            document.body.appendChild(message);
+            
+            setTimeout(() => {
+                message.classList.add('show');
+            }, 100);
+            
+            setTimeout(() => {
+                message.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(message);
+                }, 300);
+            }, 3000);
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        };
+
+        // Initialize the application when page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
