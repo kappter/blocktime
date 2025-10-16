@@ -984,10 +984,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>📊 Detailed Reports</h2>
-                <div style="display: flex; gap: 10px;">
-                    <button onclick="exportReports()" style="background: var(--success); color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">📄 Export Report</button>
-                    <button class="close-btn" onclick="closeModal('reportsModal')">&times;</button>
-                </div>
+                <button class="close-btn" onclick="closeModal('reportsModal')">&times;</button>
             </div>
             <div id="reportsContent">
                 <!-- Reports content will be populated by JavaScript -->
@@ -1000,10 +997,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>🔍 Schedule Comparison</h2>
-                <div style="display: flex; gap: 10px;">
-                    <button onclick="exportComparison()" style="background: var(--success); color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">📄 Export Comparison</button>
-                    <button class="close-btn" onclick="closeModal('comparisonModal')">&times;</button>
-                </div>
+                <button class="close-btn" onclick="closeModal('comparisonModal')">&times;</button>
             </div>
             <div id="comparisonContent">
                 <div style="margin-bottom: 20px;">
@@ -1048,7 +1042,6 @@
         let selectedCategory = null;
         let resolution = 60; // minutes
         let scheduleData = {}; // Store all schedule data by date
-        let currentTemplate = null; // Track currently loaded template
         let selectedWeekDays = [];
         let selectedMonthDays = [];
         let categories = [
@@ -1387,20 +1380,14 @@
             updateSummary();
         }
 
-        // Resolution change with template preservation
+        // Resolution change
         function changeResolution() {
             const newResolution = parseInt(document.getElementById('resolution').value);
             if (newResolution !== resolution) {
                 saveCurrentDay();
-                const templateToReload = currentTemplate; // Save current template
                 resolution = newResolution;
                 generateTimeGrid();
                 loadCurrentDay();
-                
-                // Reapply template if one was loaded
-                if (templateToReload) {
-                    applyTemplateSchedule(templateToReload);
-                }
             }
         }
 
@@ -1565,9 +1552,37 @@
             }
         }
 
-        // Apply template schedule to current grid
-        function applyTemplateSchedule(template) {
+        // Template loading with proper resolution support
+        function loadTemplate() {
+            const templateSelect = document.getElementById('templateSelect');
+            const templateId = templateSelect.value;
+            
+            if (!templateId) {
+                alert('Please select a template');
+                return;
+            }
+            
+            const template = lifestyleTemplates[templateId];
             if (!template) return;
+            
+            // Update categories
+            categories = [...template.categories];
+            
+            // Add CSS for template categories
+            template.categories.forEach(category => {
+                const existingStyle = document.querySelector(`style[data-category="${category.id}"]`);
+                if (!existingStyle) {
+                    const style = document.createElement('style');
+                    style.setAttribute('data-category', category.id);
+                    style.textContent = `
+                        .category.${category.id} { background: ${category.color} !important; color: white; }
+                        .time-slot.${category.id} { background: ${category.color} !important; }
+                    `;
+                    document.head.appendChild(style);
+                }
+            });
+            
+            renderCategories();
             
             // Clear current schedule
             document.querySelectorAll('.time-slot').forEach(slot => {
@@ -1601,45 +1616,7 @@
             });
             
             updateSummary();
-        }
-
-        // Template loading with proper resolution support
-        function loadTemplate() {
-            const templateSelect = document.getElementById('templateSelect');
-            const templateId = templateSelect.value;
-            
-            if (!templateId) {
-                alert('Please select a template');
-                return;
-            }
-            
-            const template = lifestyleTemplates[templateId];
-            if (!template) return;
-            
-            // Store current template for resolution changes
-            currentTemplate = template;
-            
-            // Update categories
-            categories = [...template.categories];
-            
-            // Add CSS for template categories
-            template.categories.forEach(category => {
-                const existingStyle = document.querySelector(`style[data-category="${category.id}"]`);
-                if (!existingStyle) {
-                    const style = document.createElement('style');
-                    style.setAttribute('data-category', category.id);
-                    style.textContent = `
-                        .category.${category.id} { background: ${category.color} !important; color: white; }
-                        .time-slot.${category.id} { background: ${category.color} !important; }
-                    `;
-                    document.head.appendChild(style);
-                }
-            });
-            
-            renderCategories();
-            applyTemplateSchedule(template);
-            
-            alert(`${template.name} template loaded successfully! You can now change the time resolution and the template will automatically adjust.`);
+            alert(`${template.name} template loaded successfully!`);
         }
 
         // Week view
@@ -2377,437 +2354,6 @@
                     }
                 }
             });
-        }
-
-        // Export Reports to HTML
-        function exportReports() {
-            const currentDateStr = currentDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            const startOfWeek = new Date(currentDate);
-            startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
-            
-            // Calculate week totals for the chart
-            const weekTotals = {};
-            for (let i = 0; i < 7; i++) {
-                const day = new Date(startOfWeek);
-                day.setDate(startOfWeek.getDate() + i);
-                const dateKey = formatDateKey(day);
-                const dayData = scheduleData[dateKey] || {};
-                
-                Object.values(dayData).forEach(categoryId => {
-                    const categoryObj = categories.find(c => c.id === categoryId);
-                    if (categoryObj) {
-                        const categoryName = categoryObj.name;
-                        weekTotals[categoryName] = (weekTotals[categoryName] || 0) + (resolution / 60);
-                    }
-                });
-            }
-            
-            // Generate weekly report table
-            let weeklyTableHTML = '<table style="width: 100%; border-collapse: collapse; margin-top: 20px;">';
-            weeklyTableHTML += '<tr><th style="border: 1px solid #d4c4b0; padding: 12px; background: #e8e4e0;">Day</th><th style="border: 1px solid #d4c4b0; padding: 12px; background: #e8e4e0;">Total Hours</th><th style="border: 1px solid #d4c4b0; padding: 12px; background: #e8e4e0;">Top Activity</th></tr>';
-            
-            for (let i = 0; i < 7; i++) {
-                const day = new Date(startOfWeek);
-                day.setDate(startOfWeek.getDate() + i);
-                const dateKey = formatDateKey(day);
-                const dayData = scheduleData[dateKey] || {};
-                
-                const dayTotals = {};
-                Object.values(dayData).forEach(categoryId => {
-                    const categoryObj = categories.find(c => c.id === categoryId);
-                    if (categoryObj) {
-                        const categoryName = categoryObj.name;
-                        dayTotals[categoryName] = (dayTotals[categoryName] || 0) + (resolution / 60);
-                    }
-                });
-                
-                const totalHours = Object.values(dayTotals).reduce((sum, hours) => sum + hours, 0);
-                const topActivity = Object.keys(dayTotals).length > 0 ? Object.keys(dayTotals).reduce((a, b) => dayTotals[a] > dayTotals[b] ? a : b) : 'None';
-                
-                weeklyTableHTML += `<tr>
-                    <td style="border: 1px solid #d4c4b0; padding: 10px;">${day.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</td>
-                    <td style="border: 1px solid #d4c4b0; padding: 10px; text-align: center;">${totalHours.toFixed(1)}</td>
-                    <td style="border: 1px solid #d4c4b0; padding: 10px;">${topActivity}</td>
-                </tr>`;
-            }
-            weeklyTableHTML += '</table>';
-            
-            // Generate category summary
-            let categorySummaryHTML = '<div style="margin-top: 30px;"><h3 style="color: #2c2c2c; margin-bottom: 15px;">📊 Category Breakdown</h3>';
-            categorySummaryHTML += '<table style="width: 100%; border-collapse: collapse;">';
-            categorySummaryHTML += '<tr><th style="border: 1px solid #d4c4b0; padding: 12px; background: #e8e4e0; text-align: left;">Category</th><th style="border: 1px solid #d4c4b0; padding: 12px; background: #e8e4e0; text-align: center;">Total Hours</th><th style="border: 1px solid #d4c4b0; padding: 12px; background: #e8e4e0; text-align: center;">Percentage</th></tr>';
-            
-            const totalWeekHours = Object.values(weekTotals).reduce((sum, hours) => sum + hours, 0);
-            Object.entries(weekTotals).sort((a, b) => b[1] - a[1]).forEach(([category, hours]) => {
-                const percentage = totalWeekHours > 0 ? (hours / totalWeekHours * 100).toFixed(1) : 0;
-                const categoryObj = categories.find(c => c.name === category);
-                const color = categoryObj ? categoryObj.color : '#c4a484';
-                categorySummaryHTML += `<tr>
-                    <td style="border: 1px solid #d4c4b0; padding: 10px;"><span style="display: inline-block; width: 20px; height: 20px; background: ${color}; border-radius: 4px; margin-right: 8px; vertical-align: middle;"></span>${category}</td>
-                    <td style="border: 1px solid #d4c4b0; padding: 10px; text-align: center;">${hours.toFixed(1)}h</td>
-                    <td style="border: 1px solid #d4c4b0; padding: 10px; text-align: center;">${percentage}%</td>
-                </tr>`;
-            });
-            categorySummaryHTML += '</table></div>';
-            
-            // Create the export HTML
-            const exportHTML = `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weekly Time Report - ${currentDateStr}</title>
-    <style>
-        @media print {
-            body { margin: 0; padding: 20px; }
-            .no-print { display: none; }
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            background: #ffffff;
-            color: #2c2c2c;
-            line-height: 1.6;
-        }
-        h1 {
-            color: #2c2c2c;
-            border-bottom: 3px solid #c4a484;
-            padding-bottom: 15px;
-            margin-bottom: 30px;
-        }
-        h2 {
-            color: #5a5a5a;
-            margin-top: 30px;
-            margin-bottom: 15px;
-        }
-        h3 {
-            color: #2c2c2c;
-            margin-top: 25px;
-            margin-bottom: 12px;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        .date-info {
-            color: #8a8a8a;
-            font-size: 14px;
-            margin-top: 10px;
-        }
-        .summary-box {
-            background: #f7f5f3;
-            border-left: 4px solid #c4a484;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 4px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        th {
-            background: #e8e4e0;
-            color: #2c2c2c;
-            font-weight: 600;
-            text-align: left;
-            padding: 12px;
-            border: 1px solid #d4c4b0;
-        }
-        td {
-            padding: 10px;
-            border: 1px solid #d4c4b0;
-        }
-        tr:nth-child(even) {
-            background: #f7f5f3;
-        }
-        .footer {
-            margin-top: 50px;
-            padding-top: 20px;
-            border-top: 2px solid #e8e4e0;
-            text-align: center;
-            color: #8a8a8a;
-            font-size: 12px;
-        }
-        .print-btn {
-            background: #7a9b76;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 20px 0;
-        }
-        .print-btn:hover {
-            background: #6a8b66;
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>📊 Weekly Time Management Report</h1>
-        <div class="date-info">Generated on ${currentDateStr}</div>
-        <div class="date-info">Week of ${startOfWeek.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</div>
-    </div>
-    
-    <button class="print-btn no-print" onclick="window.print()">🖨️ Print / Save as PDF</button>
-    
-    <div class="summary-box">
-        <h3>📈 Week Summary</h3>
-        <p><strong>Total Scheduled Hours:</strong> ${totalWeekHours.toFixed(1)} hours</p>
-        <p><strong>Number of Activities:</strong> ${Object.keys(weekTotals).length}</p>
-        <p><strong>Most Time Spent On:</strong> ${Object.keys(weekTotals).length > 0 ? Object.keys(weekTotals).reduce((a, b) => weekTotals[a] > weekTotals[b] ? a : b) : 'None'}</p>
-    </div>
-    
-    <h2>📅 Daily Breakdown</h2>
-    ${weeklyTableHTML}
-    
-    ${categorySummaryHTML}
-    
-    <div class="footer">
-        <p>Generated by BlockTime Ultimate Pro</p>
-        <p>Time Management & Productivity Tracking System</p>
-    </div>
-</body>
-</html>`;
-            
-            // Create and download the file
-            const blob = new Blob([exportHTML], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `weekly-report-${formatDateKey(currentDate)}.html`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            alert('✅ Report exported successfully! Open the HTML file and use Print to save as PDF.');
-        }
-        
-        // Export Comparison to HTML
-        function exportComparison() {
-            const comparison1 = document.getElementById('comparison1').value;
-            const comparison2 = document.getElementById('comparison2').value;
-            
-            if (comparison1 === comparison2) {
-                alert('Please generate a comparison first!');
-                return;
-            }
-            
-            const data1 = getScheduleData(comparison1);
-            const data2 = getScheduleData(comparison2);
-            const name1 = getScheduleName(comparison1);
-            const name2 = getScheduleName(comparison2);
-            
-            // Calculate differences
-            const allCategories = new Set([...Object.keys(data1), ...Object.keys(data2)]);
-            let comparisonTableHTML = '<table style="width: 100%; border-collapse: collapse; margin-top: 20px;">';
-            comparisonTableHTML += `<tr>
-                <th style="border: 1px solid #d4c4b0; padding: 12px; background: #e8e4e0;">Category</th>
-                <th style="border: 1px solid #d4c4b0; padding: 12px; background: #e8e4e0; text-align: center;">${name1}</th>
-                <th style="border: 1px solid #d4c4b0; padding: 12px; background: #e8e4e0; text-align: center;">${name2}</th>
-                <th style="border: 1px solid #d4c4b0; padding: 12px; background: #e8e4e0; text-align: center;">Difference</th>
-            </tr>`;
-            
-            let totalDiff = 0;
-            allCategories.forEach(category => {
-                const hours1 = data1[category] || 0;
-                const hours2 = data2[category] || 0;
-                const diff = hours1 - hours2;
-                totalDiff += Math.abs(diff);
-                const diffColor = diff < 0 ? '#c47a7a' : (diff > 0 ? '#7a9b76' : '#8a8a8a');
-                const diffSign = diff > 0 ? '+' : '';
-                
-                comparisonTableHTML += `<tr>
-                    <td style="border: 1px solid #d4c4b0; padding: 10px;">${category}</td>
-                    <td style="border: 1px solid #d4c4b0; padding: 10px; text-align: center;">${hours1.toFixed(1)}h</td>
-                    <td style="border: 1px solid #d4c4b0; padding: 10px; text-align: center;">${hours2.toFixed(1)}h</td>
-                    <td style="border: 1px solid #d4c4b0; padding: 10px; text-align: center; color: ${diffColor}; font-weight: bold;">${diffSign}${diff.toFixed(1)}h</td>
-                </tr>`;
-            });
-            comparisonTableHTML += '</table>';
-            
-            // Generate insights
-            let insightsHTML = '<div style="margin-top: 30px;"><h3 style="color: #2c2c2c; margin-bottom: 15px;">💡 Key Insights</h3><ul style="line-height: 2;">';
-            
-            const sortedDiffs = Array.from(allCategories).map(cat => ({
-                category: cat,
-                diff: (data1[cat] || 0) - (data2[cat] || 0)
-            })).sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff));
-            
-            if (sortedDiffs.length > 0 && Math.abs(sortedDiffs[0].diff) > 0) {
-                const biggest = sortedDiffs[0];
-                if (biggest.diff > 0) {
-                    insightsHTML += `<li><strong>${name1}</strong> spends <strong>${Math.abs(biggest.diff).toFixed(1)} more hours</strong> on <strong>${biggest.category}</strong> than ${name2}</li>`;
-                } else {
-                    insightsHTML += `<li><strong>${name2}</strong> spends <strong>${Math.abs(biggest.diff).toFixed(1)} more hours</strong> on <strong>${biggest.category}</strong> than ${name1}</li>`;
-                }
-            }
-            
-            insightsHTML += `<li>Total difference across all categories: <strong>${totalDiff.toFixed(1)} hours</strong></li>`;
-            insightsHTML += '</ul></div>';
-            
-            // Create the export HTML
-            const currentDateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            const exportHTML = `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Schedule Comparison - ${name1} vs ${name2}</title>
-    <style>
-        @media print {
-            body { margin: 0; padding: 20px; }
-            .no-print { display: none; }
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            background: #ffffff;
-            color: #2c2c2c;
-            line-height: 1.6;
-        }
-        h1 {
-            color: #2c2c2c;
-            border-bottom: 3px solid #c4a484;
-            padding-bottom: 15px;
-            margin-bottom: 30px;
-        }
-        h2 {
-            color: #5a5a5a;
-            margin-top: 30px;
-            margin-bottom: 15px;
-        }
-        h3 {
-            color: #2c2c2c;
-            margin-top: 25px;
-            margin-bottom: 12px;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        .date-info {
-            color: #8a8a8a;
-            font-size: 14px;
-            margin-top: 10px;
-        }
-        .comparison-header {
-            background: #f7f5f3;
-            border-left: 4px solid #c4a484;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 4px;
-        }
-        .schedule-name {
-            font-size: 18px;
-            font-weight: 600;
-            color: #2c2c2c;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        th {
-            background: #e8e4e0;
-            color: #2c2c2c;
-            font-weight: 600;
-            text-align: left;
-            padding: 12px;
-            border: 1px solid #d4c4b0;
-        }
-        td {
-            padding: 10px;
-            border: 1px solid #d4c4b0;
-        }
-        tr:nth-child(even) {
-            background: #f7f5f3;
-        }
-        ul {
-            list-style-type: none;
-            padding-left: 0;
-        }
-        ul li {
-            padding: 8px 0;
-            padding-left: 25px;
-            position: relative;
-        }
-        ul li:before {
-            content: '•';
-            color: #c4a484;
-            font-weight: bold;
-            font-size: 20px;
-            position: absolute;
-            left: 0;
-        }
-        .footer {
-            margin-top: 50px;
-            padding-top: 20px;
-            border-top: 2px solid #e8e4e0;
-            text-align: center;
-            color: #8a8a8a;
-            font-size: 12px;
-        }
-        .print-btn {
-            background: #7a9b76;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 20px 0;
-        }
-        .print-btn:hover {
-            background: #6a8b66;
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>🔍 Schedule Comparison Analysis</h1>
-        <div class="date-info">Generated on ${currentDateStr}</div>
-    </div>
-    
-    <button class="print-btn no-print" onclick="window.print()">🖨️ Print / Save as PDF</button>
-    
-    <div class="comparison-header">
-        <div class="schedule-name">📅 Comparing:</div>
-        <p style="margin: 10px 0;"><strong>Schedule A:</strong> ${name1}</p>
-        <p style="margin: 10px 0;"><strong>Schedule B:</strong> ${name2}</p>
-    </div>
-    
-    <h2>📊 Detailed Comparison</h2>
-    ${comparisonTableHTML}
-    
-    ${insightsHTML}
-    
-    <div class="footer">
-        <p>Generated by BlockTime Ultimate Pro</p>
-        <p>Time Management & Productivity Tracking System</p>
-    </div>
-</body>
-</html>`;
-            
-            // Create and download the file
-            const blob = new Blob([exportHTML], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `comparison-${comparison1}-vs-${comparison2}.html`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            alert('✅ Comparison exported successfully! Open the HTML file and use Print to save as PDF.');
         }
 
         function closeModal(modalId) {
