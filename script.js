@@ -319,8 +319,9 @@
             // Clear current time slots
             const timeSlots = document.querySelectorAll('.time-slot');
             timeSlots.forEach(slot => {
+                const time = slot.dataset.time;
                 slot.className = 'time-slot';
-                slot.textContent = 'Available';
+                slot.innerHTML = `<div class="time-label">${time}</div><div class="slot-content">Available</div>`;
                 delete slot.dataset.category;
             });
             
@@ -332,7 +333,7 @@
                     const categoryObj = categories.find(c => c.id === category);
                     if (categoryObj) {
                         slot.className = `time-slot occupied ${category}`;
-                        slot.textContent = categoryObj.name;
+                        slot.innerHTML = `<div class="time-label">${time}</div><div class="slot-content">${categoryObj.name}</div>`;
                         slot.dataset.category = category;
                     }
                 }
