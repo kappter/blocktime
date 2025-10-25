@@ -290,15 +290,6 @@
             return date.toISOString().split('T')[0];
         }
 
-        // Get ISO week number
-        function getWeekNumber(date) {
-            const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-            const dayNum = d.getUTCDay() || 7;
-            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-        }
-
         // Save and load day data
         function saveCurrentDay() {
             const dateKey = formatDateKey(currentDate);
@@ -396,16 +387,10 @@
                         const minute = slot * resolution;
                         const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
                         
-                        // Time label
-                        const timeLabel = document.createElement('div');
-                        timeLabel.className = 'time-label';
-                        timeLabel.textContent = timeString;
-                        column.appendChild(timeLabel);
-                        
-                        // Time slot
+                        // Combined time slot (shows time + status/category)
                         const timeSlot = document.createElement('div');
                         timeSlot.className = 'time-slot';
-                        timeSlot.textContent = 'Available';
+                        timeSlot.innerHTML = `<div class="time-label">${timeString}</div><div class="slot-content">Available</div>`;
                         timeSlot.dataset.time = timeString;
                         timeSlot.onclick = () => assignCategory(timeSlot);
                         timeSlot.onmouseenter = () => previewCategory(timeSlot);
@@ -524,8 +509,9 @@
             const categoryObj = categories.find(c => c.id === selectedCategory);
             if (!categoryObj) return;
             
+            const time = slot.dataset.time;
             slot.className = `time-slot occupied ${selectedCategory}`;
-            slot.textContent = categoryObj.name;
+            slot.innerHTML = `<div class="time-label">${time}</div><div class="slot-content">${categoryObj.name}</div>`;
             slot.dataset.category = selectedCategory;
             
             updateSummary();
@@ -537,15 +523,18 @@
             const categoryObj = categories.find(c => c.id === selectedCategory);
             if (!categoryObj) return;
             
+            const time = slot.dataset.time;
             slot.classList.add('preview');
-            slot.textContent = categoryObj.name;
+            const slotContent = slot.querySelector('.slot-content');
+            if (slotContent) slotContent.textContent = categoryObj.name;
         }
 
         function clearPreview(slot) {
             if (slot.classList.contains('preview')) {
                 slot.classList.remove('preview');
                 if (!slot.classList.contains('occupied')) {
-                    slot.textContent = 'Available';
+                    const slotContent = slot.querySelector('.slot-content');
+                    if (slotContent) slotContent.textContent = 'Available';
                 }
             }
         }
@@ -621,13 +610,6 @@
         function updateWeekView() {
             const startOfWeek = new Date(currentDate);
             startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
-            
-            // Calculate ISO week number
-            const weekNum = getWeekNumber(currentDate);
-            const weekNumberElement = document.getElementById('weekNumber');
-            if (weekNumberElement) {
-                weekNumberElement.textContent = `(Week ${weekNum})`;
-            }
             
             for (let i = 0; i < 7; i++) {
                 const day = new Date(startOfWeek);
