@@ -173,6 +173,8 @@
                         <button class="btn success" onclick="importDay()">📥 Import Day</button>
                         <button class="btn warning" onclick="exportFullCalendar()">📊 Export Full Calendar</button>
                         <button class="btn" onclick="importCalendar()">📋 Import Calendar</button>
+                        <button class="btn danger" onclick="resetDay()">🗑️ Reset Day</button>
+                        <button class="btn danger" onclick="resetAllData()">⚠️ Reset All Data</button>
                         <input type="file" id="importFile" style="display: none;" accept=".json" onchange="handleImport()">
                     </div>
                 </div>
@@ -217,6 +219,8 @@
                         <button class="btn success" onclick="importDay()">📥 Import Day</button>
                         <button class="btn warning" onclick="exportFullCalendar()">📊 Export Full Calendar</button>
                         <button class="btn" onclick="importCalendar()">📋 Import Calendar</button>
+                        <button class="btn danger" onclick="resetDay()">🗑️ Reset Day</button>
+                        <button class="btn danger" onclick="resetAllData()">⚠️ Reset All Data</button>
                         <input type="file" id="importFile" style="display: none;" accept=".json" onchange="handleImport()">
                     </div>
                 </div>
@@ -292,6 +296,8 @@
                         <button class="btn success" onclick="importDay()">📥 Import Day</button>
                         <button class="btn warning" onclick="exportFullCalendar()">📊 Export Full Calendar</button>
                         <button class="btn" onclick="importCalendar()">📋 Import Calendar</button>
+                        <button class="btn danger" onclick="resetDay()">🗑️ Reset Day</button>
+                        <button class="btn danger" onclick="resetAllData()">⚠️ Reset All Data</button>
                         <input type="file" id="importFile" style="display: none;" accept=".json" onchange="handleImport()">
                     </div>
                 </div>
@@ -326,14 +332,30 @@
                 <button class="close-btn" onclick="closeModal('howToUseModal')">&times;</button>
             </div>
             <div style="color: var(--text-secondary);">
-                <ol style="padding-left: 20px; line-height: 2;">
-                    <li>Choose a lifestyle template or plan your day manually</li>
-                    <li>Navigate through days using pagination controls</li>
-                    <li>Generate detailed reports (daily/weekly/monthly/annual)</li>
-                    <li>Compare with others' schedules</li>
-                    <li>Export to Google Calendar or Outlook</li>
-                    <li>Analyze patterns and optimize your time</li>
+                <p style="font-size: 16px; font-weight: 600; color: var(--accent); margin-bottom: 15px;">
+                    🚀 Fill an entire year in minutes! Perfect for students, teachers, and professionals.
+                </p>
+                
+                <h3 style="color: var(--text-primary); margin-top: 20px;">⚡ Quick Start (3 steps):</h3>
+                <ol style="padding-left: 20px; line-height: 2; font-size: 15px;">
+                    <li><strong>Load a template</strong> - Choose from 9 lifestyle templates (athlete, student, parent, etc.)</li>
+                    <li><strong>Apply to multiple days</strong> - Select days in the week/month view and click "Apply Current Day"</li>
+                    <li><strong>Customize as needed</strong> - Click any time slot to change activities</li>
                 </ol>
+                
+                <h3 style="color: var(--text-primary); margin-top: 20px;">🎯 Pro Tips:</h3>
+                <ul style="padding-left: 20px; line-height: 2; font-size: 14px;">
+                    <li><strong>Templates save automatically</strong> to the current day you're viewing</li>
+                    <li><strong>Switch resolutions</strong> (15/30/60 min) for different planning detail levels</li>
+                    <li><strong>Export your calendar</strong> to share with classmates or import to Google Calendar</li>
+                    <li><strong>Use reports</strong> to analyze how you spend your time across weeks/months</li>
+                    <li><strong>Create custom categories</strong> for activities specific to your lifestyle</li>
+                </ul>
+                
+                <p style="margin-top: 20px; padding: 15px; background: var(--bg-secondary); border-radius: 8px; font-size: 14px;">
+                    💡 <strong>Example workflow:</strong> Load "College Student" template → Select all weekdays in October → 
+                    Click "Apply" → Entire month planned in 30 seconds!
+                </p>
             </div>
         </div>
     </div>

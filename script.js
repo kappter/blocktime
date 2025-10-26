@@ -574,8 +574,9 @@
             
             // Clear current schedule
             document.querySelectorAll('.time-slot').forEach(slot => {
+                const time = slot.dataset.time;
                 slot.className = 'time-slot';
-                slot.textContent = 'Available';
+                slot.innerHTML = `<div class="time-label">${time}</div><div class="slot-content">Available</div>`;
                 delete slot.dataset.category;
             });
             
@@ -596,15 +597,17 @@
                         
                         if (timeSlot) {
                             timeSlot.className = `time-slot occupied ${categoryId}`;
-                            timeSlot.textContent = categoryObj.name;
+                            timeSlot.innerHTML = `<div class="time-label">${timeString}</div><div class="slot-content">${categoryObj.name}</div>`;
                             timeSlot.dataset.category = categoryId;
                         }
                     }
                 }
             });
             
+            // Save the template to current day
+            saveCurrentDay();
             updateSummary();
-            alert(`${template.name} template loaded successfully!`);
+            alert(`${template.name} template loaded successfully for ${formatDateDisplay(currentDate)}!`);
         }
 
         // Week view
@@ -914,6 +917,50 @@
                     `;
                 });
                 monthTotalsElement.innerHTML = totalsHTML;
+            }
+        }
+
+        // Reset functions
+        function resetDay() {
+            if (confirm(`Are you sure you want to clear all activities for ${formatDateDisplay(currentDate)}?`)) {
+                // Clear visual slots
+                document.querySelectorAll('.time-slot').forEach(slot => {
+                    const time = slot.dataset.time;
+                    slot.className = 'time-slot';
+                    slot.innerHTML = `<div class="time-label">${time}</div><div class="slot-content">Available</div>`;
+                    delete slot.dataset.category;
+                });
+                
+                // Remove from storage
+                const dateKey = formatDateKey(currentDate);
+                delete scheduleData[dateKey];
+                localStorage.setItem('scheduleData', JSON.stringify(scheduleData));
+                
+                updateSummary();
+                updateWeekView();
+                alert('Day cleared successfully!');
+            }
+        }
+        
+        function resetAllData() {
+            if (confirm('⚠️ WARNING: This will delete ALL your schedule data from the entire calendar. This cannot be undone!\n\nAre you absolutely sure?')) {
+                if (confirm('Final confirmation: Delete ALL schedule data?')) {
+                    // Clear all data
+                    scheduleData = {};
+                    localStorage.removeItem('scheduleData');
+                    
+                    // Clear visual slots
+                    document.querySelectorAll('.time-slot').forEach(slot => {
+                        const time = slot.dataset.time;
+                        slot.className = 'time-slot';
+                        slot.innerHTML = `<div class="time-label">${time}</div><div class="slot-content">Available</div>`;
+                        delete slot.dataset.category;
+                    });
+                    
+                    updateSummary();
+                    updateWeekView();
+                    alert('All data has been cleared!');
+                }
             }
         }
 
