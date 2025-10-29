@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ICS Fixer – Google Calendar Ready</title>
+  <style>
+    body {font-family: system-ui; max-width: 600px; margin: 2rem auto; padding: 1rem;}
+    .dropzone {border: 3px dashed #666; padding: 2rem; text-align: center; border-radius: 12px; background:#fafafa;}
+    .dropzone.dragover {background:#e0f7fa;}
+    .info {margin:1rem 0; padding:1rem; background:#fff8e1; border-radius:8px;}
+    button {padding:0.8rem 1.5rem; font-size:1rem; margin-top:1rem;}
+    .hidden {display:none;}
+  </style>
+</head>
+<body>
+
+<h1>Fix .ics for Google Calendar</h1>
+<div id="dropzone" class="dropzone">Drop your .ics file here</div>
+
+<div id="result" class="hidden">
+  <div class="info" id="info"></div>
+  <button id="download">Download Fixed .ics</button>
+</div>
+
+<script>
+const dropzone = document.getElementById('dropzone');
+const result = document.getElementById('result');
+const info = document.getElementById('info');
+const downloadBtn = document.getElementById('download');
+
+let fixedBlob = null;
+
+// Detect user timezone
+const userTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const userOffset = new Date().getTimezoneOffset(); // minutes
+
+['dragover', 'dragenter'].forEach(e => dropzone.addEventListener(e, () => dropzone.classList.add('dragover')));
+['dragleave', 'dragend', 'drop'].forEach(e => dropzone.addEventListener(e, () => dropzone.classList.remove('dragover')));
+
+dropzone.addEventListener('drop', async (e) => {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (!file.name.endsWith('.ics')) return alert('Please drop a .ics file');
+  
+  const icsText = await file.text();
+  const fixed = await fixICS(icsText, file.name, userTZ);
+  fixedBlob = new Blob([fixed], {type: 'text/calendar'});
+  
+  // Show info
+  const intentDate = extractDateFromName(file.name);
+  const firstUTC = extractFirstUTC(icsText);
+  const needsShift = firstUTC && intentDate && firstUTC !== intentDate;
+
+  info.innerHTML = `
+    <strong>Detected schedule date:</strong> ${intentDate}<br>
+    <strong>Your time zone:</strong> ${userTZ} (UTC${userOffset<=0?'+':''}${userOffset/-60})<br>
+    ${needsShift ? '<span style="color:#d32f2f">Warning: Events are in UTC and will appear <strong>one day early</strong> in Google Calendar.</span>' : '<span style="color:green">No shift needed.</span>'}
+  `;
+  result.classList.remove('hidden');
+});
+
+downloadBtn.addEventListener('click', () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(fixedBlob);
+  a.download = 'schedule-fixed.ics';
+  a.click();
+});
+
+// Helper: extract YYYY-MM-DD from filename
+function extractDateFromName(name) {
+  const m = name.match(/\d{4}-\d{2}-\d{2}/);
+  if (!m) return null;
+  const [y,m,d] = m[0].split('-').map(Number);
+  return new Date(y, m-1, d).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+}
+
+// Helper: get first DTSTART date (UTC)
+function extractFirstUTC(ics) {
+  const m = ics.match(/DTSTART[^\n]*:(\d{8})/);
+  if (!m) return null;
+  const [y,mo,d] = [m[1].slice(0,4), m[1].slice(4,6), m[1].slice(6,8)];
+  return new Date(Date.UTC(y, mo-1, d)).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+}
+
+// Main fix logic (client-side, safe for demo)
+async function fixICS(icsText, filename, tzid) {
+  // Simple regex replace – for production use ical.js or Python
+  const intentDate = filename.match(/\d{4}-\d{2}-\d{2}/)?.[0];
+  if (!intentDate) return icsText;
+
+  // Insert VTIMEZONE if missing
+  let out = icsText;
+  if (!out.includes('BEGIN:VTIMEZONE')) {
+    const tzBlock = `
+BEGIN:VTIMEZONE
+TZID:${tzid}
+END:VTIMEZONE
+`.trim();
+    out = out.replace('BEGIN:VCALENDAR', `BEGIN:VCALENDAR\n${tzBlock}`);
+  }
+
+  // Replace all DTSTART/DTEND with local time + TZID
+  out = out.replace(/(DTSTART|DTEND)([:;].*?)(\d{8}T\d{6})Z/g, (match, prop, prefix, utc) => {
+    const utcDate = new Date(utc.replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/, '$1-$2-$3T$4:$5:$6Z'));
+    const local = utcDate.toLocaleString('sv').replace(' ', 'T').slice(0,19).replace(/-/g,'').replace(/:/g,'').slice(0,15);
+    return `${prop};TZID=${tzid}:${local}`;
+  });
+
+  return out;
+}
+</script>
+</body>
+</html>
