@@ -1069,33 +1069,74 @@
                 'CALSCALE:GREGORIAN'
             ];
             
+            // Process each day
             Object.keys(scheduleData).forEach(dateKey => {
                 const dayData = scheduleData[dateKey];
                 const date = new Date(dateKey);
                 
-                Object.keys(dayData).forEach(time => {
+                // Sort times chronologically
+                const sortedTimes = Object.keys(dayData).sort((a, b) => {
+                    const [aH, aM] = a.split(':').map(Number);
+                    const [bH, bM] = b.split(':').map(Number);
+                    return (aH * 60 + aM) - (bH * 60 + bM);
+                });
+                
+                // Merge consecutive blocks of same activity
+                let mergedEvents = [];
+                let currentEvent = null;
+                
+                sortedTimes.forEach(time => {
                     const categoryId = dayData[time];
                     const categoryObj = categories.find(c => c.id === categoryId);
-                    if (categoryObj) {
-                        const [hours, minutes] = time.split(':').map(Number);
-                        const startTime = new Date(date);
-                        startTime.setHours(hours, minutes, 0, 0);
-                        const endTime = new Date(startTime);
-                        endTime.setMinutes(endTime.getMinutes() + resolution);
-                        
-                        const formatDateTime = (dt) => {
-                            return dt.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+                    
+                    if (!categoryObj) return;
+                    
+                    const [hours, minutes] = time.split(':').map(Number);
+                    const timeInMinutes = hours * 60 + minutes;
+                    
+                    if (!currentEvent || currentEvent.categoryId !== categoryId || 
+                        timeInMinutes !== currentEvent.endMinutes) {
+                        // Start new event
+                        if (currentEvent) {
+                            mergedEvents.push(currentEvent);
+                        }
+                        currentEvent = {
+                            categoryId: categoryId,
+                            categoryName: categoryObj.name,
+                            startMinutes: timeInMinutes,
+                            endMinutes: timeInMinutes + resolution
                         };
-                        
-                        icsContent.push(
-                            'BEGIN:VEVENT',
-                            `DTSTART:${formatDateTime(startTime)}`,
-                            `DTEND:${formatDateTime(endTime)}`,
-                            `SUMMARY:${categoryObj.name}`,
-                            `UID:${dateKey}-${time}-${categoryId}@dailytimeblocker.com`,
-                            'END:VEVENT'
-                        );
+                    } else {
+                        // Extend current event
+                        currentEvent.endMinutes = timeInMinutes + resolution;
                     }
+                });
+                
+                // Add last event
+                if (currentEvent) {
+                    mergedEvents.push(currentEvent);
+                }
+                
+                // Create ICS events from merged blocks
+                mergedEvents.forEach(event => {
+                    const startTime = new Date(date);
+                    startTime.setHours(Math.floor(event.startMinutes / 60), event.startMinutes % 60, 0, 0);
+                    
+                    const endTime = new Date(date);
+                    endTime.setHours(Math.floor(event.endMinutes / 60), event.endMinutes % 60, 0, 0);
+                    
+                    const formatDateTime = (dt) => {
+                        return dt.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+                    };
+                    
+                    icsContent.push(
+                        'BEGIN:VEVENT',
+                        `DTSTART:${formatDateTime(startTime)}`,
+                        `DTEND:${formatDateTime(endTime)}`,
+                        `SUMMARY:${event.categoryName}`,
+                        `UID:${dateKey}-${event.startMinutes}-${event.categoryId}@dailytimeblocker.com`,
+                        'END:VEVENT'
+                    );
                 });
             });
             
