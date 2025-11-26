@@ -1,79 +1,398 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlockTime Scheduler</title>
+    <title>Daily Time Blocker - Ultimate Pro Corrected</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="styles.css">
-    <!-- Optional: Add a favicon to avoid 404 -->
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
-    <div id="app">
-        <h1>BlockTime Scheduler</h1>
-        <div id="main-content">
-            <div class="control-panel">
-                <div class="control-module" id="gridSettings">
-                    Grid Settings
-                    <select id="slotDuration">
-                        <option value="15">15 min</option>
-                        <option value="30">30 min</option>
-                        <option value="60">60 min</option>
+    <button class="theme-toggle" onclick="toggleTheme()">☀️ Light</button>
+    
+    <div class="container">
+        <div class="left-column">
+            <!-- Day Navigation -->
+            <div class="card day-nav">
+                <h3>📅 Day Navigation</h3>
+                <div class="nav-controls">
+                    <button class="nav-btn" onclick="previousDay()">‹</button>
+                    <div>
+                        <div id="currentDate">Tuesday, October 14, 2025</div>
+                        <input type="date" id="datePicker" class="date-picker" onchange="goToDate()">
+                    </div>
+                    <button class="nav-btn" onclick="nextDay()">›</button>
+                </div>
+                <div id="scheduleStatus" class="schedule-status schedule-empty">No schedule data for this day</div>
+            </div>
+
+            <!-- Lifestyle Templates -->
+            <div class="card">
+                <h3>🎭 Lifestyle Templates</h3>
+                <select id="templateSelect" class="template-select">
+                    <option value="">Choose a lifestyle template...</option>
+                    <option value="athlete">🏃‍♂️ Professional Athlete</option>
+                    <option value="musician">🎵 Professional Musician</option>
+                    <option value="college">🎓 College Student</option>
+                    <option value="highschool">📚 High School Student</option>
+                    <option value="middleschool">📝 Middle School Student</option>
+                    <option value="workingdad">👨‍💼 Working Dad</option>
+                    <option value="workingmom">👩‍💼 Working Mom</option>
+                    <option value="stayathome">🏠 Stay-at-Home Parent</option>
+                    <option value="rockstar">🎸 Rock Star</option>
+                </select>
+                <button class="template-btn" onclick="loadTemplate()">Load Weekly Template</button>
+            </div>
+
+            <!-- Current Week -->
+            <div class="card">
+                <h3>📅 Current Week</h3>
+                <div class="week-grid">
+                    <div class="week-day" data-day="0" onclick="toggleWeekDay(0)">
+                        <div>Sun</div>
+                        <div id="weekDay0">12</div>
+                    </div>
+                    <div class="week-day" data-day="1" onclick="toggleWeekDay(1)">
+                        <div>Mon</div>
+                        <div id="weekDay1">13</div>
+                    </div>
+                    <div class="week-day today" data-day="2" onclick="toggleWeekDay(2)">
+                        <div>Tue</div>
+                        <div id="weekDay2">14</div>
+                    </div>
+                    <div class="week-day" data-day="3" onclick="toggleWeekDay(3)">
+                        <div>Wed</div>
+                        <div id="weekDay3">15</div>
+                    </div>
+                    <div class="week-day" data-day="4" onclick="toggleWeekDay(4)">
+                        <div>Thu</div>
+                        <div id="weekDay4">16</div>
+                    </div>
+                </div>
+                <div class="week-grid">
+                    <div class="week-day" data-day="5" onclick="toggleWeekDay(5)">
+                        <div>Fri</div>
+                        <div id="weekDay5">17</div>
+                    </div>
+                    <div class="week-day" data-day="6" onclick="toggleWeekDay(6)">
+                        <div>Sat</div>
+                        <div id="weekDay6">18</div>
+                    </div>
+                </div>
+                <button class="apply-btn" onclick="applyToWeekDays()">Apply Current Day to Selected Week Days</button>
+                
+                <div class="totals">
+                    <h4 style="color: var(--text-primary); margin-bottom: 10px;">📊 Week Totals</h4>
+                    <div id="weekTotals">No activities this week</div>
+                </div>
+            </div>
+
+            <!-- Calendar -->
+            <div class="card">
+                <h3>🗓️ Calendar</h3>
+                <div class="calendar-header">
+                    <button class="calendar-nav" onclick="previousMonth()">‹</button>
+                    <span id="calendarMonth">October 2025</span>
+                    <button class="calendar-nav" onclick="nextMonth()">›</button>
+                </div>
+                <div class="calendar-grid">
+                    <div class="calendar-header-day">S</div>
+                    <div class="calendar-header-day">M</div>
+                    <div class="calendar-header-day">T</div>
+                    <div class="calendar-header-day">W</div>
+                    <div class="calendar-header-day">T</div>
+                    <div class="calendar-header-day">F</div>
+                    <div class="calendar-header-day">S</div>
+                    <!-- Calendar days will be generated by JavaScript -->
+                </div>
+                <button class="apply-btn" onclick="applyToMonthDays()">Apply Current Day to Selected Month Days</button>
+                
+                <div class="totals">
+                    <h4 style="color: var(--text-primary); margin-bottom: 10px;">📈 Month Totals</h4>
+                    <div id="monthTotals">No activities this month</div>
+                </div>
+            </div>
+
+            <!-- Time Settings -->
+            <div class="card">
+                <h3>⚙️ Time Settings</h3>
+                <div class="control-group">
+                    <label>Time Block Size:</label>
+                    <select id="resolution" onchange="changeResolution()">
+                        <option value="60">60 minutes (24 blocks)</option>
+                        <option value="30">30 minutes (48 blocks)</option>
+                        <option value="15">15 minutes (96 blocks)</option>
                     </select>
                 </div>
-                <div class="control-module" id="ad">
-                    Add Category
-                    <input type="text" id="newCategory" placeholder="Enter category">
-                    <button id="addCategory">Add</button>
-                    <!-- Dynamic categories will be populated here by grid.js -->
+                <div class="control-group">
+                    <label>Export Timezone:</label>
+                    <select id="timezoneOffset">
+                        <option value="auto" selected>Auto-detect (Recommended)</option>
+                        <option value="-12">UTC-12 (Baker Island)</option>
+                        <option value="-11">UTC-11 (American Samoa)</option>
+                        <option value="-10">UTC-10 (Hawaii)</option>
+                        <option value="-9">UTC-9 (Alaska)</option>
+                        <option value="-8">UTC-8 (PST - Pacific)</option>
+                        <option value="-7">UTC-7 (MST - Mountain)</option>
+                        <option value="-6">UTC-6 (CST - Central)</option>
+                        <option value="-5">UTC-5 (EST - Eastern)</option>
+                        <option value="-4">UTC-4 (Atlantic)</option>
+                        <option value="-3">UTC-3 (Brazil)</option>
+                        <option value="-2">UTC-2 (Mid-Atlantic)</option>
+                        <option value="-1">UTC-1 (Azores)</option>
+                        <option value="0">UTC+0 (London/GMT)</option>
+                        <option value="1">UTC+1 (Paris/Berlin)</option>
+                        <option value="2">UTC+2 (Cairo/Athens)</option>
+                        <option value="3">UTC+3 (Moscow)</option>
+                        <option value="4">UTC+4 (Dubai)</option>
+                        <option value="5">UTC+5 (Pakistan)</option>
+                        <option value="5.5">UTC+5:30 (India)</option>
+                        <option value="6">UTC+6 (Bangladesh)</option>
+                        <option value="7">UTC+7 (Bangkok)</option>
+                        <option value="8">UTC+8 (Singapore/Beijing)</option>
+                        <option value="9">UTC+9 (Tokyo/Seoul)</option>
+                        <option value="9.5">UTC+9:30 (Adelaide)</option>
+                        <option value="10">UTC+10 (Sydney)</option>
+                        <option value="11">UTC+11 (Solomon Islands)</option>
+                        <option value="12">UTC+12 (New Zealand)</option>
+                    </select>
+                    <small style="display: block; margin-top: 5px; color: #666; font-size: 11px;">💡 Use auto-detect for your local timezone, or select manually if exporting for a different timezone.</small>
                 </div>
-                <div class="control-module" id="daySelection">
-                    Day Selection
-                    <div id="day-checkboxes">
-                        <label><input type="checkbox" name="day" value="Monday"> Monday</label>
-                        <label><input type="checkbox" name="day" value="Tuesday"> Tuesday</label>
-                        <label><input type="checkbox" name="day" value="Wednesday"> Wednesday</label>
-                        <label><input type="checkbox" name="day" value="Thursday"> Thursday</label>
-                        <label><input type="checkbox" name="day" value="Friday"> Friday</label>
-                        <label><input type="checkbox" name="day" value="Saturday"> Saturday</label>
-                        <label><input type="checkbox" name="day" value="Sunday"> Sunday</label>
+            </div>
+
+        </div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1>Daily Time Blocker - Ultimate Pro</h1>
+                <p>Complete time management with lifestyle templates, advanced reporting, and calendar integration</p>
+            </div>
+
+            <div class="card">
+                <h3>🏷️ Activity Categories</h3>
+                <div class="category-form">
+                    <input type="text" id="categoryName" placeholder="Enter category name">
+                    <input type="color" id="categoryColor" value="#c4a484">
+                    <button class="btn" onclick="addCategory()">➕ Add</button>
+                </div>
+                <div class="categories" id="categories">
+                    <!-- Categories will be populated by JavaScript -->
+                </div>
+            </div>
+
+<div style="text-align: center; margin-bottom: 20px;">
+                <button class="btn" onclick="showHowToUse()" style="width: 100%; padding: 12px; font-size: 14px; background: var(--accent); color: var(--bg-card); border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                    💡 How to Use
+                </button>
+            </div>
+
+            <div class="time-grid" id="timeGrid">
+                <!-- Time grid will be populated by JavaScript -->
+            </div>
+
+            <div class="summary">
+                <h3 id="summaryTitle">Tuesday's Summary</h3>
+                <div class="summary-content" id="summaryContent">
+                    <p>No activities planned yet</p>
+                    <p>Start by selecting a category and clicking time slots, or load a lifestyle template!</p>
+                </div>
+            </div>
+
+            <!-- Bottom Controls -->
+            <div class="controls-grid" style="margin-top: 30px;">
+                <div class="card">
+                    <h3>💾 Data Management</h3>
+                    <div class="btn-group">
+                        <button class="btn" onclick="exportDay()">📤 Export Day</button>
+                        <button class="btn success" onclick="importDay()">📥 Import Day</button>
+                        <button class="btn warning" onclick="exportFullCalendar()">📊 Export Full Calendar</button>
+                        <button class="btn" onclick="importCalendar()">📋 Import Calendar</button>
+                        <button class="btn danger" onclick="resetDay()">🗑️ Reset Day</button>
+                        <button class="btn danger" onclick="resetAllData()">⚠️ Reset All Data</button>
+                        <input type="file" id="importFile" style="display: none;" accept=".json" onchange="handleImport()">
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>📊 Advanced Reports</h3>
+                    <div class="btn-group">
+                        <button class="btn" onclick="showReports()">📈 Detailed Reports</button>
+                        <button class="btn warning" onclick="showComparison()">🔍 Compare Schedules</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>📅 Calendar Integration</h3>
+                    <div class="btn-group">
+                        <button class="btn" onclick="exportGoogleCalendar()">📅 Google Calendar</button>
+                        <button class="btn" onclick="exportOutlook()">📧 Outlook</button>
+                        <button class="btn success" onclick="exportICS()">📋 Export ICS File</button>
                     </div>
                 </div>
             </div>
-            <div class="content-layout">
-                <div id="categories">
-                    <span class="category">Calm & Relaxed</span>
-                    <span class="category">Fun & Easy</span>
-                    <span class="category">Challenging but Okay</span>
-                    <span class="category">Tough but Want to Do</span>
-                    <span class="category">Really Hard</span>
-                </div>
-                <div id="grid"></div>
+        </div>
+    </div>
+
+    <!-- Reports Modal -->
+    <div id="reportsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📊 Detailed Reports</h2>
+                <button class="close-btn" onclick="closeModal('reportsModal')">&times;</button>
             </div>
-            <div class="bottom-controls">
-                <div class="control-module" id="dayOperations">
-                    Day Operations
-                    <div id="day-checkboxes">
-                        <label><input type="checkbox" name="day" value="Monday"> Monday</label>
-                        <label><input type="checkbox" name="day" value="Tuesday"> Tuesday</label>
-                        <label><input type="checkbox" name="day" value="Wednesday"> Wednesday</label>
-                        <label><input type="checkbox" name="day" value="Thursday"> Thursday</label>
-                        <label><input type="checkbox" name="day" value="Friday"> Friday</label>
-                        <label><input type="checkbox" name="day" value="Saturday"> Saturday</label>
-                        <label><input type="checkbox" name="day" value="Sunday"> Sunday</label>
+            <div id="reportsContent">
+                <!-- Reports content will be populated by JavaScript -->
+            </div>
+
+            <!-- Bottom Controls -->
+            <div class="controls-grid" style="margin-top: 30px;">
+                <div class="card">
+                    <h3>💾 Data Management</h3>
+                    <div class="btn-group">
+                        <button class="btn" onclick="exportDay()">📤 Export Day</button>
+                        <button class="btn success" onclick="importDay()">📥 Import Day</button>
+                        <button class="btn warning" onclick="exportFullCalendar()">📊 Export Full Calendar</button>
+                        <button class="btn" onclick="importCalendar()">📋 Import Calendar</button>
+                        <button class="btn danger" onclick="resetDay()">🗑️ Reset Day</button>
+                        <button class="btn danger" onclick="resetAllData()">⚠️ Reset All Data</button>
+                        <input type="file" id="importFile" style="display: none;" accept=".json" onchange="handleImport()">
                     </div>
-                    <button id="copyDay">Copy Day</button>
-                    <button id="saveDayPlan">Save My Day Plan</button>
-                    <button id="selectDayPlan">Select Day Plan</button>
-                    <div id="day-type-preview"></div>
-                    <button id="applyToDays">Apply to Selected Days</button>
-                    <button id="undo">Undo</button>
                 </div>
-                <div class="control-module" id="schedule">
-                    Schedule
-                    <button id="loadSchedule">Load Schedule</button>
-                    <button id="saveSchedule">Save Schedule</button>
-                    <div>
-                        <input type="file" id="comparisonSchedule" accept=".json">
-                        <button id="loadComparison">Load Comparison Schedule</button>
-                        <button id="generateComparison">Generate Comparison</button>
+
+                <div class="card">
+                    <h3>📊 Advanced Reports</h3>
+                    <div class="btn-group">
+                        <button class="btn" onclick="showReports()">📈 Detailed Reports</button>
+                        <button class="btn warning" onclick="showComparison()">🔍 Compare Schedules</button>
                     </div>
+                </div>
+
+                <div class="card">
+                    <h3>📅 Calendar Integration</h3>
+                    <div class="btn-group">
+                        <button class="btn" onclick="exportGoogleCalendar()">📅 Google Calendar</button>
+                        <button class="btn" onclick="exportOutlook()">📧 Outlook</button>
+                        <button class="btn success" onclick="exportICS()">📋 Export ICS File</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison Modal -->
+    <div id="comparisonModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🔍 Schedule Comparison</h2>
+                <button class="close-btn" onclick="closeModal('comparisonModal')">&times;</button>
+            </div>
+            <div id="comparisonContent">
+                <div style="margin-bottom: 20px;">
+                    <label>Compare:</label>
+                    <select id="comparison1" style="margin: 0 10px; padding: 8px;">
+                        <option value="current">Current Schedule</option>
+                        <option value="athlete">Professional Athlete</option>
+                        <option value="musician">Professional Musician</option>
+                        <option value="college">College Student</option>
+                        <option value="highschool">High School Student</option>
+                        <option value="middleschool">Middle School Student</option>
+                        <option value="workingdad">Working Dad</option>
+                        <option value="workingmom">Working Mom</option>
+                        <option value="stayathome">Stay-at-Home Parent</option>
+                        <option value="rockstar">Rock Star</option>
+                    </select>
+                    <span>vs</span>
+                    <select id="comparison2" style="margin: 0 10px; padding: 8px;">
+                        <option value="athlete">Professional Athlete</option>
+                        <option value="musician">Professional Musician</option>
+                        <option value="college">College Student</option>
+                        <option value="highschool">High School Student</option>
+                        <option value="middleschool">Middle School Student</option>
+                        <option value="workingdad">Working Dad</option>
+                        <option value="workingmom">Working Mom</option>
+                        <option value="stayathome">Stay-at-Home Parent</option>
+                        <option value="rockstar">Rock Star</option>
+                        <option value="current">Current Schedule</option>
+                    </select>
+                    <button class="btn" onclick="generateComparison()" style="margin-left: 10px;">Generate Comparison</button>
+                </div>
+                <div id="comparisonResults">
+                    <!-- Comparison results will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Bottom Controls -->
+            <div class="controls-grid" style="margin-top: 30px;">
+                <div class="card">
+                    <h3>💾 Data Management</h3>
+                    <div class="btn-group">
+                        <button class="btn" onclick="exportDay()">📤 Export Day</button>
+                        <button class="btn success" onclick="importDay()">📥 Import Day</button>
+                        <button class="btn warning" onclick="exportFullCalendar()">📊 Export Full Calendar</button>
+                        <button class="btn" onclick="importCalendar()">📋 Import Calendar</button>
+                        <button class="btn danger" onclick="resetDay()">🗑️ Reset Day</button>
+                        <button class="btn danger" onclick="resetAllData()">⚠️ Reset All Data</button>
+                        <input type="file" id="importFile" style="display: none;" accept=".json" onchange="handleImport()">
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>📊 Advanced Reports</h3>
+                    <div class="btn-group">
+                        <button class="btn" onclick="showReports()">📈 Detailed Reports</button>
+                        <button class="btn warning" onclick="showComparison()">🔍 Compare Schedules</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>📅 Calendar Integration</h3>
+                    <div class="btn-group">
+                        <button class="btn" onclick="exportGoogleCalendar()">📅 Google Calendar</button>
+                        <button class="btn" onclick="exportOutlook()">📧 Outlook</button>
+                        <button class="btn success" onclick="exportICS()">📋 Export ICS File</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+
+    <!-- How to Use Modal -->
+    <div id="howToUseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>💡 How to Use Ultimate Pro</h2>
+                <button class="close-btn" onclick="closeModal('howToUseModal')">&times;</button>
+            </div>
+            <div style="color: var(--text-secondary);">
+                <p style="font-size: 16px; font-weight: 600; color: var(--accent); margin-bottom: 15px;">
+                    🚀 Fill an entire year in minutes! Perfect for students, teachers, and professionals.
+                </p>
+                
+                <h3 style="color: var(--text-primary); margin-top: 20px;">⚡ Quick Start (3 steps):</h3>
+                <ol style="padding-left: 20px; line-height: 2; font-size: 15px;">
+                    <li><strong>Load a template</strong> - Choose from 9 lifestyle templates (athlete, student, parent, etc.)</li>
+                    <li><strong>Apply to multiple days</strong> - Select days in the week/month view and click "Apply Current Day"</li>
+                    <li><strong>Customize as needed</strong> - Click any time slot to change activities</li>
+                </ol>
+                
+                <h3 style="color: var(--text-primary); margin-top: 20px;">🎯 Pro Tips:</h3>
+                <ul style="padding-left: 20px; line-height: 2; font-size: 14px;">
+                    <li><strong>Templates save automatically</strong> to the current day you're viewing</li>
+                    <li><strong>Switch resolutions</strong> (15/30/60 min) for different planning detail levels</li>
+                    <li><strong>Export your calendar</strong> to share with classmates or import to Google Calendar</li>
+                    <li><strong>Use reports</strong> to analyze how you spend your time across weeks/months</li>
+                    <li><strong>Create custom categories</strong> for activities specific to your lifestyle</li>
+                </ul>
+                
+                <p style="margin-top: 20px; padding: 15px; background: var(--bg-secondary); border-radius: 8px; font-size: 14px;">
+                    💡 <strong>Example workflow:</strong> Load "College Student" template → Select all weekdays in October → 
+                    Click "Apply" → Entire month planned in 30 seconds!
+                </p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
