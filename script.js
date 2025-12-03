@@ -1126,7 +1126,14 @@
                     endTime.setHours(Math.floor(event.endMinutes / 60), event.endMinutes % 60, 0, 0);
                     
                     const formatDateTime = (dt) => {
-                        return dt.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+                        // Format as local time (not UTC) to prevent timezone offset issues
+                        const year = dt.getFullYear();
+                        const month = String(dt.getMonth() + 1).padStart(2, '0');
+                        const day = String(dt.getDate()).padStart(2, '0');
+                        const hours = String(dt.getHours()).padStart(2, '0');
+                        const minutes = String(dt.getMinutes()).padStart(2, '0');
+                        const seconds = String(dt.getSeconds()).padStart(2, '0');
+                        return `${year}${month}${day}T${hours}${minutes}${seconds}`;
                     };
                     
                     icsContent.push(
