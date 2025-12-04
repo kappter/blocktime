@@ -1,0 +1,68 @@
+BlockTime - Timezone Fix Summary
+=================================
+
+Date: December 3-4, 2025
+Issue: Events exported to ICS appeared one day earlier in Google Calendar
+
+CHANGES MADE:
+
+1. script.js - exportICS() function
+   - Added complete VTIMEZONE component with America/Denver timezone
+   - Implemented formatTZOffset() helper function for proper offset formatting
+   - Added timezone mapping from UTC offset to IANA timezone identifiers
+   - Fixed TZOFFSETFROM and TZOFFSETTO to use correct format (-0700, -0600)
+   - Added support for both Standard Time (MST) and Daylight Saving Time (MDT)
+   - All events now tagged with TZID parameter (e.g., TZID=America/Denver)
+
+2. index.html
+   - Changed default timezone selection from "Auto-detect" to "UTC-7 (MST - Mountain)"
+   - This ensures reliable timezone handling for Mountain Time users
+
+TECHNICAL DETAILS:
+
+Before Fix:
+- TZID: UTC or Europe/London (incorrect)
+- TZOFFSET: +0000 or malformed
+- Events: No timezone identifier
+- Result: Google Calendar interpreted as UTC, shifted by 7 hours
+
+After Fix:
+- TZID: America/Denver (correct)
+- TZOFFSETFROM: -0600 (MDT to MST transition)
+- TZOFFSETTO: -0700 (MST)
+- TZOFFSETFROM: -0700 (MST to MDT transition)
+- TZOFFSETTO: -0600 (MDT)
+- Events: DTSTART;TZID=America/Denver:20251203T090000
+- Result: Events appear on correct date in Google Calendar
+
+VERIFICATION:
+
+Test Case: December 3, 2025 College Student Schedule
+- Sleep: 12:00 AM - 8:00 AM ✅
+- Classes: 9:00 AM - 12:00 PM ✅
+- Study: 1:00 PM - 3:00 PM, 7:00 PM - 9:00 PM ✅
+- All events appear on December 3 (not December 2) ✅
+
+FILES INCLUDED:
+
+- index.html - Main application (timezone default updated)
+- script.js - Core logic (VTIMEZONE fix implemented)
+- styles.css - Styling (no changes)
+- QUICK_START.md - User guide
+- TIMEZONE_FIX_README.md - Technical documentation
+- SAMPLE_EXPORT.ics - Example export showing correct timezone
+- CHANGES_SUMMARY.txt - This file
+
+DEPLOYMENT:
+
+Simply extract the archive and open index.html in a web browser.
+No server required - runs entirely client-side.
+
+RECOMMENDATIONS:
+
+1. Users should verify timezone setting before each export
+2. Default is UTC-7 (Mountain Time) - change if in different timezone
+3. Keep SAMPLE_EXPORT.ics as reference for correct format
+4. Test import with a single day before exporting full month
+
+STATUS: ✅ FIXED AND TESTED
