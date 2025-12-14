@@ -1191,6 +1191,10 @@
                 const dayData = scheduleData[dateKey];
                 const date = new Date(dateKey);
                 
+                // MANUAL OFFSET: Add 1 day to fix Google Calendar import issue
+                // Events were appearing 1 day earlier, so we add 1 day to compensate
+                date.setDate(date.getDate() + 1);
+                
                 // Sort times chronologically
                 const sortedTimes = Object.keys(dayData).sort((a, b) => {
                     const [aH, aM] = a.split(':').map(Number);
