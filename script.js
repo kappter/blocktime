@@ -295,13 +295,18 @@
             const dateKey = formatDateKey(currentDate);
             const dayData = {};
             
-            // Save time slots
+            // Save time slots with emotional spectrum data
             const timeSlots = document.querySelectorAll('.time-slot.occupied');
             timeSlots.forEach(slot => {
                 const time = slot.dataset.time;
                 const category = slot.dataset.category;
                 if (time && category) {
-                    dayData[time] = category;
+                    // Store as object with happiness/willingness (default 1,1 = Meh/Meh)
+                    dayData[time] = {
+                        category: category,
+                        happiness: parseInt(slot.dataset.happiness || '1'),
+                        willingness: parseInt(slot.dataset.willingness || '1')
+                    };
                 }
             });
             
@@ -325,16 +330,47 @@
                 delete slot.dataset.category;
             });
             
-            // Load saved data
+            // Load saved data (handle both old string format and new object format)
             Object.keys(dayData).forEach(time => {
-                const category = dayData[time];
+                const slotData = dayData[time];
                 const slot = document.querySelector(`[data-time="${time}"]`);
                 if (slot) {
+                    // Handle backward compatibility: old data is string, new data is object
+                    let category, happiness, willingness;
+                    if (typeof slotData === 'string') {
+                        // Old format: just category ID
+                        category = slotData;
+                        happiness = 1; // Default Meh
+                        willingness = 1; // Default Meh
+                    } else {
+                        // New format: object with category, happiness, willingness
+                        category = slotData.category;
+                        happiness = slotData.happiness || 1;
+                        willingness = slotData.willingness || 1;
+                    }
+                    
                     const categoryObj = categories.find(c => c.id === category);
                     if (categoryObj) {
                         slot.className = `time-slot occupied ${category}`;
                         slot.innerHTML = `<div class="time-label">${time}</div><div class="slot-content">${categoryObj.name}</div>`;
                         slot.dataset.category = category;
+                        slot.dataset.happiness = happiness;
+                        slot.dataset.willingness = willingness;
+                        
+                        // Update emotion overlay active state
+                        const overlay = slot.querySelector('.emotion-overlay');
+                        if (overlay) {
+                            overlay.querySelectorAll('.emotion-cell').forEach(cell => {
+                                if (cell.dataset.h === happiness.toString() && cell.dataset.w === willingness.toString()) {
+                                    cell.classList.add('active');
+                                } else {
+                                    cell.classList.remove('active');
+                                }
+                            });
+                        }
+                        
+                        // Show visual indicator
+                        updateBlockEmotionIndicator(slot);
                     }
                 }
             });
@@ -396,6 +432,46 @@
                         timeSlot.onclick = () => assignCategory(timeSlot);
                         timeSlot.onmouseenter = () => previewCategory(timeSlot);
                         timeSlot.onmouseleave = () => clearPreview(timeSlot);
+                        
+                        // Add emotional spectrum overlay (3x3 grid)
+                        const emotionOverlay = document.createElement('div');
+                        emotionOverlay.className = 'emotion-overlay';
+                        emotionOverlay.innerHTML = `
+                            <div class="emotion-grid">
+                                <div class="emotion-cell" data-h="0" data-w="0" title="😞 Unhappy, 🚫 Forced"></div>
+                                <div class="emotion-cell" data-h="1" data-w="0" title="😐 Meh, 🚫 Forced"></div>
+                                <div class="emotion-cell" data-h="2" data-w="0" title="😊 Happy, 🚫 Forced"></div>
+                                <div class="emotion-cell" data-h="0" data-w="1" title="😞 Unhappy, 😑 Meh"></div>
+                                <div class="emotion-cell active" data-h="1" data-w="1" title="😐 Meh, 😑 Meh"></div>
+                                <div class="emotion-cell" data-h="2" data-w="1" title="😊 Happy, 😑 Meh"></div>
+                                <div class="emotion-cell" data-h="0" data-w="2" title="😞 Unhappy, ✅ Willing"></div>
+                                <div class="emotion-cell" data-h="1" data-w="2" title="😐 Meh, ✅ Willing"></div>
+                                <div class="emotion-cell" data-h="2" data-w="2" title="😊 Happy, ✅ Willing"></div>
+                            </div>
+                        `;
+                        timeSlot.appendChild(emotionOverlay);
+                        
+                        // Handle emotion cell clicks
+                        emotionOverlay.querySelectorAll('.emotion-cell').forEach(cell => {
+                            cell.onclick = (e) => {
+                                e.stopPropagation(); // Prevent assignCategory from firing
+                                if (timeSlot.classList.contains('occupied')) {
+                                    const h = cell.dataset.h;
+                                    const w = cell.dataset.w;
+                                    timeSlot.dataset.happiness = h;
+                                    timeSlot.dataset.willingness = w;
+                                    
+                                    // Update active state
+                                    emotionOverlay.querySelectorAll('.emotion-cell').forEach(c => c.classList.remove('active'));
+                                    cell.classList.add('active');
+                                    
+                                    // Update visual indicator on block
+                                    updateBlockEmotionIndicator(timeSlot);
+                                    saveCurrentDay();
+                                }
+                            };
+                        });
+                        
                         column.appendChild(timeSlot);
                     }
                 }
@@ -514,6 +590,9 @@
             slot.className = `time-slot occupied ${selectedCategory}`;
             slot.innerHTML = `<div class="time-label">${time}</div><div class="slot-content">${categoryObj.name}</div>`;
             slot.dataset.category = selectedCategory;
+            // Set default emotional spectrum (Meh/Meh = 1,1)
+            if (!slot.dataset.happiness) slot.dataset.happiness = '1';
+            if (!slot.dataset.willingness) slot.dataset.willingness = '1';
             
             updateSummary();
         }
@@ -531,13 +610,36 @@
         }
 
         function clearPreview(slot) {
-            if (slot.classList.contains('preview')) {
+            if (!slot.classList.contains('occupied')) {
                 slot.classList.remove('preview');
-                if (!slot.classList.contains('occupied')) {
-                    const slotContent = slot.querySelector('.slot-content');
-                    if (slotContent) slotContent.textContent = 'Available';
+                const slotContent = slot.querySelector('.slot-content');
+                if (slotContent) {
+                    slotContent.textContent = 'Available';
                 }
             }
+        }
+        
+        // Update visual indicator for emotional spectrum
+        function updateBlockEmotionIndicator(slot) {
+            const h = parseInt(slot.dataset.happiness || '1');
+            const w = parseInt(slot.dataset.willingness || '1');
+            
+            // Add emotion indicator badge
+            let existingBadge = slot.querySelector('.emotion-badge');
+            if (!existingBadge) {
+                existingBadge = document.createElement('div');
+                existingBadge.className = 'emotion-badge';
+                slot.appendChild(existingBadge);
+            }
+            
+            // Set badge content based on happiness/willingness
+            const happyIcons = ['😞', '😐', '😊'];
+            const willingIcons = ['🚫', '😑', '✅'];
+            existingBadge.textContent = `${happyIcons[h]}${willingIcons[w]}`;
+            existingBadge.title = `Happiness: ${h}, Willingness: ${w}`;
+            
+            // Add data attribute for CSS styling
+            slot.dataset.emotionLevel = `${h}-${w}`;
         }
 
         // Template loading with proper resolution support
@@ -599,6 +701,50 @@
                             timeSlot.className = `time-slot occupied ${categoryId}`;
                             timeSlot.innerHTML = `<div class="time-label">${timeString}</div><div class="slot-content">${categoryObj.name}</div>`;
                             timeSlot.dataset.category = categoryId;
+                            // Set default emotional spectrum (Meh/Meh = 1,1)
+                            timeSlot.dataset.happiness = '1';
+                            timeSlot.dataset.willingness = '1';
+                            
+                            // Re-add emotional spectrum overlay (it was removed by innerHTML)
+                            const emotionOverlay = document.createElement('div');
+                            emotionOverlay.className = 'emotion-overlay';
+                            emotionOverlay.innerHTML = `
+                                <div class="emotion-grid">
+                                    <div class="emotion-cell" data-h="0" data-w="0" title="😞 Unhappy, 🚫 Forced"></div>
+                                    <div class="emotion-cell" data-h="1" data-w="0" title="😐 Meh, 🚫 Forced"></div>
+                                    <div class="emotion-cell" data-h="2" data-w="0" title="😊 Happy, 🚫 Forced"></div>
+                                    <div class="emotion-cell" data-h="0" data-w="1" title="😞 Unhappy, 😑 Meh"></div>
+                                    <div class="emotion-cell active" data-h="1" data-w="1" title="😐 Meh, 😑 Meh"></div>
+                                    <div class="emotion-cell" data-h="2" data-w="1" title="😊 Happy, 😑 Meh"></div>
+                                    <div class="emotion-cell" data-h="0" data-w="2" title="😞 Unhappy, ✅ Willing"></div>
+                                    <div class="emotion-cell" data-h="1" data-w="2" title="😐 Meh, ✅ Willing"></div>
+                                    <div class="emotion-cell" data-h="2" data-w="2" title="😊 Happy, ✅ Willing"></div>
+                                </div>
+                            `;
+                            timeSlot.appendChild(emotionOverlay);
+                            
+                            // Handle emotion cell clicks
+                            emotionOverlay.querySelectorAll('.emotion-cell').forEach(cell => {
+                                cell.onclick = (e) => {
+                                    e.stopPropagation();
+                                    const h = cell.dataset.h;
+                                    const w = cell.dataset.w;
+                                    timeSlot.dataset.happiness = h;
+                                    timeSlot.dataset.willingness = w;
+                                    
+                                    // Update active state
+                                    emotionOverlay.querySelectorAll('.emotion-cell').forEach(c => c.classList.remove('active'));
+                                    cell.classList.add('active');
+                                    
+                                    // Update visual indicator
+                                    updateBlockEmotionIndicator(timeSlot);
+                                    saveCurrentDay();
+                                    updateSummary();
+                                };
+                            });
+                            
+                            // Show visual indicator
+                            updateBlockEmotionIndicator(timeSlot);
                         }
                     }
                 }
@@ -607,7 +753,6 @@
             // Save the template to current day
             saveCurrentDay();
             updateSummary();
-            alert(`${template.name} template loaded successfully for ${formatDateDisplay(currentDate)}!`);
         }
 
         // Week view
@@ -816,16 +961,26 @@
             }
             
             const categoryTotals = {};
+            const emotionTotals = {};
+            let totalBlocks = 0;
+            
             occupiedSlots.forEach(slot => {
                 const category = slot.dataset.category;
                 const categoryObj = categories.find(c => c.id === category);
                 if (categoryObj) {
                     const categoryName = categoryObj.name;
                     categoryTotals[categoryName] = (categoryTotals[categoryName] || 0) + (resolution / 60);
+                    
+                    // Track emotional spectrum
+                    const h = slot.dataset.happiness || '1';
+                    const w = slot.dataset.willingness || '1';
+                    const emotionKey = `${h}-${w}`;
+                    emotionTotals[emotionKey] = (emotionTotals[emotionKey] || 0) + 1;
+                    totalBlocks++;
                 }
             });
             
-            let summaryHTML = '';
+            let summaryHTML = '<div class="summary-section"><h4>Time by Activity</h4>';
             Object.keys(categoryTotals).forEach(categoryName => {
                 const hours = categoryTotals[categoryName];
                 summaryHTML += `
@@ -835,6 +990,36 @@
                     </div>
                 `;
             });
+            summaryHTML += '</div>';
+            
+            // Add emotional spectrum summary
+            summaryHTML += '<div class="summary-section emotion-summary"><h4>Emotional Spectrum</h4>';
+            const emotionLabels = {
+                '0-0': '😞🚫 Unhappy & Forced',
+                '1-0': '😐🚫 Meh & Forced',
+                '2-0': '😊🚫 Happy & Forced',
+                '0-1': '😞😑 Unhappy & Meh',
+                '1-1': '😐😑 Meh & Meh',
+                '2-1': '😊😑 Happy & Meh',
+                '0-2': '😞✅ Unhappy & Willing',
+                '1-2': '😐✅ Meh & Willing',
+                '2-2': '😊✅ Happy & Willing'
+            };
+            
+            // Sort by key to show in consistent order
+            const sortedEmotions = Object.keys(emotionTotals).sort();
+            sortedEmotions.forEach(emotionKey => {
+                const count = emotionTotals[emotionKey];
+                const percentage = ((count / totalBlocks) * 100).toFixed(1);
+                const label = emotionLabels[emotionKey] || emotionKey;
+                summaryHTML += `
+                    <div class="summary-item">
+                        <span class="total-category">${label}</span>
+                        <span class="total-hours">${percentage}%</span>
+                    </div>
+                `;
+            });
+            summaryHTML += '</div>';
             
             summaryContent.innerHTML = summaryHTML;
         }
@@ -922,7 +1107,8 @@
 
         // Reset functions
         function resetDay() {
-            if (confirm(`Are you sure you want to clear all activities for ${formatDateDisplay(currentDate)}?`)) {
+            const dateStr = currentDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            if (confirm(`Are you sure you want to clear all activities for ${dateStr}?`)) {
                 // Clear visual slots
                 document.querySelectorAll('.time-slot').forEach(slot => {
                     const time = slot.dataset.time;

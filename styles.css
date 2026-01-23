@@ -840,3 +840,110 @@
             font-size: 16px;
             font-weight: 600;
         }
+/* Emotional Spectrum Overlay */
+.emotion-overlay {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 10;
+}
+
+.time-slot.occupied:hover .emotion-overlay {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.emotion-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 18px);
+    grid-template-rows: repeat(3, 18px);
+    gap: 2px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    padding: 3px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="dark"] .emotion-grid {
+    background: rgba(74, 67, 58, 0.95);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.emotion-cell {
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    background: var(--bg-secondary);
+}
+
+.emotion-cell:hover {
+    transform: scale(1.15);
+    border-color: var(--accent);
+    box-shadow: 0 0 4px var(--accent);
+}
+
+.emotion-cell.active {
+    background: var(--accent);
+    border-color: var(--accent-hover);
+    box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Emotion indicator badge on blocks */
+.emotion-badge {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    font-size: 10px;
+    line-height: 1;
+    padding: 2px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 3px;
+    pointer-events: none;
+    user-select: none;
+}
+
+[data-theme="dark"] .emotion-badge {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+/* Visual feedback based on emotion level */
+.time-slot[data-emotion-level="2-2"] {
+    box-shadow: inset 0 0 0 2px rgba(122, 155, 118, 0.3);
+}
+
+.time-slot[data-emotion-level="0-0"] {
+    box-shadow: inset 0 0 0 2px rgba(196, 122, 122, 0.3);
+}
+
+.time-slot {
+    position: relative;
+}
+
+/* Emotion Summary Styling */
+.summary-section {
+    margin-bottom: 15px;
+}
+
+.summary-section h4 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 4px;
+}
+
+.emotion-summary .summary-item {
+    font-size: 13px;
+}
+
+.emotion-summary .total-category {
+    font-size: 12px;
+}
