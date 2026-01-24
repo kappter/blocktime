@@ -6,14 +6,14 @@
         let selectedWeekDays = [];
         let selectedMonthDays = [];
         let categories = [
-            { name: 'Sleep', color: '#8b7d6b', id: 'sleep' },
-            { name: 'Work', color: '#6b8b9a', id: 'work' },
-            { name: 'Exercise', color: '#7a9b76', id: 'exercise' },
-            { name: 'Meals', color: '#d4a574', id: 'meals' },
-            { name: 'Commute', color: '#9a8b7d', id: 'commute' },
-            { name: 'Leisure', color: '#b8956f', id: 'leisure' },
-            { name: 'Study', color: '#7d8b9a', id: 'study' },
-            { name: 'Family', color: '#9b7a8b', id: 'family' }
+            { name: 'Sleep', color: '#8b7d6b', id: 'sleep', happiness: 2, willingness: 0 },
+            { name: 'Work', color: '#6b8b9a', id: 'work', happiness: 1, willingness: 0 },
+            { name: 'Exercise', color: '#7a9b76', id: 'exercise', happiness: 1, willingness: 1 },
+            { name: 'Meals', color: '#d4a574', id: 'meals', happiness: 2, willingness: 1 },
+            { name: 'Commute', color: '#9a8b7d', id: 'commute', happiness: 0, willingness: 0 },
+            { name: 'Leisure', color: '#b8956f', id: 'leisure', happiness: 2, willingness: 2 },
+            { name: 'Study', color: '#7d8b9a', id: 'study', happiness: 1, willingness: 1 },
+            { name: 'Family', color: '#9b7a8b', id: 'family', happiness: 2, willingness: 2 }
         ];
 
         // Lifestyle templates with proper time allocation
@@ -530,8 +530,12 @@
         function addCategory() {
             const nameInput = document.getElementById('categoryName');
             const colorInput = document.getElementById('categoryColor');
+            const happinessInput = document.getElementById('categoryHappiness');
+            const willingnessInput = document.getElementById('categoryWillingness');
             const name = nameInput.value.trim();
             const color = colorInput.value;
+            const happiness = parseInt(happinessInput.value);
+            const willingness = parseInt(willingnessInput.value);
             
             if (!name) {
                 alert('Please enter a category name');
@@ -545,7 +549,7 @@
             }
             
             const id = name.toLowerCase().replace(/\s+/g, '');
-            categories.push({ name, color, id });
+            categories.push({ name, color, id, happiness, willingness });
             
             // Add CSS for the new category
             const style = document.createElement('style');
@@ -590,9 +594,9 @@
             slot.className = `time-slot occupied ${selectedCategory}`;
             slot.innerHTML = `<div class="time-label">${time}</div><div class="slot-content">${categoryObj.name}</div>`;
             slot.dataset.category = selectedCategory;
-            // Set default emotional spectrum (Meh/Meh = 1,1)
-            if (!slot.dataset.happiness) slot.dataset.happiness = '1';
-            if (!slot.dataset.willingness) slot.dataset.willingness = '1';
+            // Use category defaults for emotional spectrum
+            slot.dataset.happiness = (categoryObj.happiness !== undefined ? categoryObj.happiness : 1).toString();
+            slot.dataset.willingness = (categoryObj.willingness !== undefined ? categoryObj.willingness : 1).toString();
             
             updateSummary();
         }
@@ -701,9 +705,9 @@
                             timeSlot.className = `time-slot occupied ${categoryId}`;
                             timeSlot.innerHTML = `<div class="time-label">${timeString}</div><div class="slot-content">${categoryObj.name}</div>`;
                             timeSlot.dataset.category = categoryId;
-                            // Set default emotional spectrum (Meh/Meh = 1,1)
-                            timeSlot.dataset.happiness = '1';
-                            timeSlot.dataset.willingness = '1';
+                            // Use category defaults for emotional spectrum
+                            timeSlot.dataset.happiness = (categoryObj.happiness !== undefined ? categoryObj.happiness : 1).toString();
+                            timeSlot.dataset.willingness = (categoryObj.willingness !== undefined ? categoryObj.willingness : 1).toString();
                             
                             // Re-add emotional spectrum overlay (it was removed by innerHTML)
                             const emotionOverlay = document.createElement('div');

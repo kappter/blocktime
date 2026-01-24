@@ -947,3 +947,46 @@
 .emotion-summary .total-category {
     font-size: 12px;
 }
+
+/* Emotion selectors in category form */
+.emotion-selectors {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin: 10px 0;
+    flex-wrap: wrap;
+}
+
+.emotion-selectors label {
+    font-weight: 600;
+    font-size: 0.9em;
+    color: var(--text-secondary);
+}
+
+.emotion-selectors select {
+    padding: 8px 12px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 120px;
+}
+
+.emotion-selectors select:hover {
+    border-color: var(--accent);
+}
+
+.emotion-selectors select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(196, 164, 132, 0.2);
+}
+
+.category-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}

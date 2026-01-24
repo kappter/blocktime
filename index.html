@@ -173,6 +173,19 @@
                 <div class="category-form">
                     <input type="text" id="categoryName" placeholder="Enter category name">
                     <input type="color" id="categoryColor" value="#c4a484">
+                    <div class="emotion-selectors">
+                        <label>Default Feeling:</label>
+                        <select id="categoryHappiness" title="How happy are you doing this?">
+                            <option value="0">😞 Unhappy</option>
+                            <option value="1" selected>😐 Meh</option>
+                            <option value="2">😊 Happy</option>
+                        </select>
+                        <select id="categoryWillingness" title="How willing are you to do this?">
+                            <option value="0">🚫 Forced</option>
+                            <option value="1" selected>😑 Meh</option>
+                            <option value="2">✅ Willing</option>
+                        </select>
+                    </div>
                     <button class="btn" onclick="addCategory()">➕ Add</button>
                 </div>
                 <div class="categories" id="categories">
