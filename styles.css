@@ -504,25 +504,28 @@
         /* Categories */
         .category-form {
             display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            align-items: end;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 10px;
         }
 
         .category-form input[type="text"] {
             flex: 1;
+            min-width: 150px;
             background: var(--bg-secondary);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 10px 12px;
+            border-radius: 6px;
+            padding: 6px 10px;
             color: var(--text-primary);
+            font-size: 0.9em;
         }
 
         .category-form input[type="color"] {
-            width: 50px;
-            height: 42px;
+            width: 40px;
+            height: 32px;
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
         }
 
@@ -951,28 +954,28 @@
 /* Emotion selectors in category form */
 .emotion-selectors {
     display: flex;
-    gap: 10px;
+    gap: 6px;
     align-items: center;
-    margin: 10px 0;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
 }
 
 .emotion-selectors label {
     font-weight: 600;
-    font-size: 0.9em;
+    font-size: 0.85em;
     color: var(--text-secondary);
+    white-space: nowrap;
 }
 
 .emotion-selectors select {
-    padding: 8px 12px;
-    border: 2px solid var(--border);
-    border-radius: 8px;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
     background: var(--bg-secondary);
     color: var(--text-primary);
-    font-size: 0.9em;
+    font-size: 0.85em;
     cursor: pointer;
     transition: all 0.2s;
-    min-width: 120px;
+    min-width: 100px;
 }
 
 .emotion-selectors select:hover {
@@ -987,6 +990,8 @@
 
 .category-form {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 15px;
 }
