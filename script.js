@@ -1230,6 +1230,9 @@
         }
 
         function exportFullCalendar() {
+            // Save current day before exporting
+            saveCurrentDay();
+            
             const exportData = {
                 scheduleData: scheduleData,
                 categories: categories,
