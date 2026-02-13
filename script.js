@@ -1400,7 +1400,9 @@
                 let currentEvent = null;
                 
                 sortedTimes.forEach(time => {
-                    const categoryId = dayData[time];
+                    // Handle both old string format and new object format
+                    const timeData = dayData[time];
+                    const categoryId = typeof timeData === 'string' ? timeData : timeData.category;
                     const categoryObj = categories.find(c => c.id === categoryId);
                     
                     if (!categoryObj) return;
