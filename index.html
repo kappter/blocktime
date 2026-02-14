@@ -407,5 +407,39 @@
         </div>
     </div>
 
+    <!-- Edit Category Dialog -->
+    <div id="editCategoryDialog" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h3>✏️ Edit Category</h3>
+            <div class="form-group">
+                <label>Category Name:</label>
+                <input type="text" id="editCategoryName" placeholder="Enter category name">
+            </div>
+            <div class="form-group">
+                <label>Color:</label>
+                <input type="color" id="editCategoryColor">
+            </div>
+            <div class="form-group">
+                <label>Default Feeling:</label>
+                <div class="emotion-selectors">
+                    <select id="editCategoryHappiness">
+                        <option value="0">😞 Unhappy</option>
+                        <option value="1">😐 Meh</option>
+                        <option value="2">😊 Happy</option>
+                    </select>
+                    <select id="editCategoryWillingness">
+                        <option value="0">🚫 Forced</option>
+                        <option value="1">😑 Meh</option>
+                        <option value="2">✅ Willing</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button onclick="saveEditedCategory()" class="btn-primary">Save Changes</button>
+                <button onclick="closeEditDialog()" class="btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

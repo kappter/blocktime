@@ -497,6 +497,17 @@
                 nameSpan.textContent = category.name;
                 categoryElement.appendChild(nameSpan);
                 
+                // Add edit button for all categories
+                const editBtn = document.createElement('button');
+                editBtn.className = 'edit-btn';
+                editBtn.textContent = '✏️';
+                editBtn.title = 'Edit category';
+                editBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    editCategory(category.id);
+                };
+                categoryElement.appendChild(editBtn);
+                
                 // Add delete button for custom categories (not default ones)
                 if (!['sleep', 'work', 'exercise', 'meals', 'commute', 'leisure', 'study', 'family'].includes(category.id)) {
                     const deleteBtn = document.createElement('button');
@@ -562,6 +573,75 @@
             renderCategories();
             nameInput.value = '';
             colorInput.value = '#c4a484';
+        }
+
+        let editingCategoryId = null;
+
+        function editCategory(categoryId) {
+            editingCategoryId = categoryId;
+            const category = categories.find(c => c.id === categoryId);
+            if (!category) return;
+            
+            // Populate edit dialog
+            document.getElementById('editCategoryName').value = category.name;
+            document.getElementById('editCategoryColor').value = category.color;
+            document.getElementById('editCategoryHappiness').value = category.happiness !== undefined ? category.happiness : 1;
+            document.getElementById('editCategoryWillingness').value = category.willingness !== undefined ? category.willingness : 1;
+            
+            // Show dialog
+            document.getElementById('editCategoryDialog').style.display = 'flex';
+        }
+
+        function saveEditedCategory() {
+            if (!editingCategoryId) return;
+            
+            const category = categories.find(c => c.id === editingCategoryId);
+            if (!category) return;
+            
+            // Get new values
+            const newName = document.getElementById('editCategoryName').value.trim();
+            const newColor = document.getElementById('editCategoryColor').value;
+            const newHappiness = parseInt(document.getElementById('editCategoryHappiness').value);
+            const newWillingness = parseInt(document.getElementById('editCategoryWillingness').value);
+            
+            if (!newName) {
+                alert('Please enter a category name');
+                return;
+            }
+            
+            // Update category
+            category.name = newName;
+            category.color = newColor;
+            category.happiness = newHappiness;
+            category.willingness = newWillingness;
+            
+            // Update CSS
+            const existingStyle = document.querySelector(`style[data-category="${category.id}"]`);
+            if (existingStyle) {
+                existingStyle.textContent = `
+                    .category.${category.id} { background: ${category.color} !important; color: white; }
+                    .time-slot.${category.id} { background: ${category.color} !important; }
+                `;
+            }
+            
+            // Update all time slots with this category to use new defaults
+            document.querySelectorAll(`.time-slot.${category.id}`).forEach(slot => {
+                slot.style.background = category.color;
+                // Update slot content to show new name
+                const contentDiv = slot.querySelector('.slot-content');
+                if (contentDiv) {
+                    contentDiv.textContent = category.name;
+                }
+            });
+            
+            renderCategories();
+            updateSummary();
+            closeEditDialog();
+        }
+
+        function closeEditDialog() {
+            document.getElementById('editCategoryDialog').style.display = 'none';
+            editingCategoryId = null;
         }
 
         function deleteCategory(categoryId) {
