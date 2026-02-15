@@ -1274,8 +1274,15 @@
                         scheduleData[dateKey] = importData.schedule;
                         
                         if (importData.categories) {
-                            categories = importData.categories;
+                            // Merge imported categories with existing ones (avoid duplicates)
+                            importData.categories.forEach(importedCat => {
+                                const exists = categories.find(c => c.id === importedCat.id);
+                                if (!exists) {
+                                    categories.push(importedCat);
+                                }
+                            });
                             renderCategories();
+                            saveCategories();
                         }
                         
                         if (importData.resolution) {
@@ -1292,8 +1299,15 @@
                         scheduleData = importData.scheduleData;
                         
                         if (importData.categories) {
-                            categories = importData.categories;
+                            // Merge imported categories with existing ones (avoid duplicates)
+                            importData.categories.forEach(importedCat => {
+                                const exists = categories.find(c => c.id === importedCat.id);
+                                if (!exists) {
+                                    categories.push(importedCat);
+                                }
+                            });
                             renderCategories();
+                            saveCategories();
                         }
                         
                         loadCurrentDay();
