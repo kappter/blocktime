@@ -1,0 +1,21 @@
+SCREENSHOT PLACEHOLDER
+
+To complete your GitHub repository, please add a screenshot of the BlockTime application.
+
+Recommended screenshot:
+- Take a screenshot showing the main interface with:
+  * Time blocks filled with various activities
+  * The week view with colored indicators
+  * The daily summary showing time distribution
+  * Light or dark mode (your preference)
+
+Save the screenshot as: screenshot.png
+
+The README.md file references this image at the top:
+![BlockTime Screenshot](screenshot.png)
+
+You can take a screenshot by:
+1. Opening BlockTime in your browser
+2. Filling in some sample time blocks
+3. Using your OS screenshot tool (Cmd+Shift+4 on Mac, Win+Shift+S on Windows)
+4. Saving it as screenshot.png in the repository root

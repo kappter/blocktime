@@ -216,6 +216,7 @@
                 <div class="card">
                     <h3>💾 Data Management</h3>
                     <div class="btn-group">
+                        <button class="btn primary" onclick="showSmartFill()">🎯 Smart Fill</button>
                         <button class="btn" onclick="exportDay()">📤 Export Day</button>
                         <button class="btn success" onclick="importDay()">📥 Import Day</button>
                         <button class="btn warning" onclick="exportFullCalendar()">📊 Export Full Calendar</button>
@@ -262,6 +263,7 @@
                 <div class="card">
                     <h3>💾 Data Management</h3>
                     <div class="btn-group">
+                        <button class="btn primary" onclick="showSmartFill()">🎯 Smart Fill</button>
                         <button class="btn" onclick="exportDay()">📤 Export Day</button>
                         <button class="btn success" onclick="importDay()">📥 Import Day</button>
                         <button class="btn warning" onclick="exportFullCalendar()">📊 Export Full Calendar</button>
@@ -339,6 +341,7 @@
                 <div class="card">
                     <h3>💾 Data Management</h3>
                     <div class="btn-group">
+                        <button class="btn primary" onclick="showSmartFill()">🎯 Smart Fill</button>
                         <button class="btn" onclick="exportDay()">📤 Export Day</button>
                         <button class="btn success" onclick="importDay()">📥 Import Day</button>
                         <button class="btn warning" onclick="exportFullCalendar()">📊 Export Full Calendar</button>
@@ -437,6 +440,81 @@
             <div class="modal-buttons">
                 <button onclick="saveEditedCategory()" class="btn-primary">Save Changes</button>
                 <button onclick="closeEditDialog()" class="btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Smart Fill Modal -->
+    <div id="smartFillModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🎯 Smart Fill</h2>
+                <button class="close-btn" onclick="closeModal('smartFillModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Category:</label>
+                    <select id="smartFillCategory" class="form-control" onchange="updateSmartFillPreview()">
+                        <option value="">Select a category...</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Days to Fill:</label>
+                    <div class="day-checkboxes">
+                        <label><input type="checkbox" id="fillMon" onchange="updateSmartFillPreview()"> Mon</label>
+                        <label><input type="checkbox" id="fillTue" onchange="updateSmartFillPreview()"> Tue</label>
+                        <label><input type="checkbox" id="fillWed" onchange="updateSmartFillPreview()"> Wed</label>
+                        <label><input type="checkbox" id="fillThu" onchange="updateSmartFillPreview()"> Thu</label>
+                        <label><input type="checkbox" id="fillFri" onchange="updateSmartFillPreview()"> Fri</label>
+                        <label><input type="checkbox" id="fillSat" onchange="updateSmartFillPreview()"> Sat</label>
+                        <label><input type="checkbox" id="fillSun" onchange="updateSmartFillPreview()"> Sun</label>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <button class="btn-small" onclick="selectWeekdays()">Weekdays</button>
+                        <button class="btn-small" onclick="selectWeekend()">Weekend</button>
+                        <button class="btn-small" onclick="selectAllDays()">All Days</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Time Range:</label>
+                    <div class="time-range">
+                        <select id="smartFillStartTime" class="form-control" onchange="updateSmartFillPreview()">
+                            <!-- Will be populated by JavaScript -->
+                        </select>
+                        <span style="margin: 0 10px;">to</span>
+                        <select id="smartFillEndTime" class="form-control" onchange="updateSmartFillPreview()">
+                            <!-- Will be populated by JavaScript -->
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Emotional State (optional):</label>
+                    <div class="emotion-selectors">
+                        <select id="smartFillHappiness" class="form-control">
+                            <option value="">Use category default</option>
+                            <option value="0">😞 Unhappy</option>
+                            <option value="1">😐 Meh</option>
+                            <option value="2">😊 Happy</option>
+                        </select>
+                        <select id="smartFillWillingness" class="form-control">
+                            <option value="">Use category default</option>
+                            <option value="0">🚫 Forced</option>
+                            <option value="1">😑 Meh</option>
+                            <option value="2">✅ Willing</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="smartFillPreview" class="smart-fill-preview">
+                    <strong>Preview:</strong> <span id="smartFillPreviewText">Select options to see preview</span>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button onclick="applySmartFill()" class="btn-primary" id="smartFillApplyBtn" disabled>Apply Smart Fill</button>
+                <button onclick="closeModal('smartFillModal')" class="btn-secondary">Cancel</button>
             </div>
         </div>
     </div>

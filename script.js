@@ -194,14 +194,49 @@
             }
         };
 
+        // Load data from localStorage on app start
+        function loadFromLocalStorage() {
+            try {
+                // Load schedule data
+                const savedScheduleData = localStorage.getItem('scheduleData');
+                if (savedScheduleData) {
+                    scheduleData = JSON.parse(savedScheduleData);
+                    console.log('Loaded schedule data from localStorage:', Object.keys(scheduleData).length, 'days');
+                }
+                
+                // Load categories
+                const savedCategories = localStorage.getItem('categories');
+                if (savedCategories) {
+                    const loadedCategories = JSON.parse(savedCategories);
+                    // Merge loaded categories with defaults (avoid duplicates)
+                    loadedCategories.forEach(savedCat => {
+                        const exists = categories.find(c => c.id === savedCat.id);
+                        if (!exists) {
+                            categories.push(savedCat);
+                        } else {
+                            // Update existing category with saved values
+                            Object.assign(exists, savedCat);
+                        }
+                    });
+                    console.log('Loaded categories from localStorage:', categories.length, 'categories');
+                }
+            } catch (error) {
+                console.error('Error loading from localStorage:', error);
+            }
+        }
+
         // Initialize the application
         function init() {
+            // Load saved data from localStorage
+            loadFromLocalStorage();
+            
             updateDateDisplay();
             generateTimeGrid();
             renderCategories();
             generateCalendar();
             updateWeekView();
             updateTotals();
+            loadCurrentDay(); // Load the current day's schedule
             
             // Set up date picker
             const datePicker = document.getElementById('datePicker');
@@ -1856,5 +1891,228 @@
             document.getElementById(modalId).classList.remove('show');
         }
 
+        // Smart Fill Functions
+        function showSmartFill() {
+            const modal = document.getElementById('smartFillModal');
+            
+            // Populate category dropdown
+            const categorySelect = document.getElementById('smartFillCategory');
+            categorySelect.innerHTML = '<option value="">Select a category...</option>';
+            categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.id;
+                option.textContent = cat.name;
+                option.dataset.happiness = cat.happiness;
+                option.dataset.willingness = cat.willingness;
+                categorySelect.appendChild(option);
+            });
+            
+            // Populate time dropdowns based on current resolution
+            populateTimeDropdowns();
+            
+            // Reset form
+            categorySelect.value = '';
+            document.querySelectorAll('.day-checkboxes input[type="checkbox"]').forEach(cb => cb.checked = false);
+            document.getElementById('smartFillHappiness').value = '';
+            document.getElementById('smartFillWillingness').value = '';
+            document.getElementById('smartFillApplyBtn').disabled = true;
+            document.getElementById('smartFillPreviewText').textContent = 'Select options to see preview';
+            
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+        
+        function populateTimeDropdowns() {
+            const startSelect = document.getElementById('smartFillStartTime');
+            const endSelect = document.getElementById('smartFillEndTime');
+            
+            startSelect.innerHTML = '';
+            endSelect.innerHTML = '';
+            
+            // Generate time options based on resolution
+            for (let hour = 0; hour < 24; hour++) {
+                for (let minute = 0; minute < 60; minute += resolution) {
+                    const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+                    const displayStr = formatTime(hour, minute);
+                    
+                    const startOption = document.createElement('option');
+                    startOption.value = timeStr;
+                    startOption.textContent = displayStr;
+                    startSelect.appendChild(startOption);
+                    
+                    const endOption = document.createElement('option');
+                    endOption.value = timeStr;
+                    endOption.textContent = displayStr;
+                    endSelect.appendChild(endOption);
+                }
+            }
+            
+            // Set default values
+            startSelect.value = '00:00';
+            endSelect.value = '23:00';
+        }
+        
+        function formatTime(hour, minute) {
+            const period = hour >= 12 ? 'PM' : 'AM';
+            const displayHour = hour % 12 || 12;
+            return `${displayHour}:${String(minute).padStart(2, '0')} ${period}`;
+        }
+        
+        function selectWeekdays() {
+            ['fillMon', 'fillTue', 'fillWed', 'fillThu', 'fillFri'].forEach(id => {
+                document.getElementById(id).checked = true;
+            });
+            ['fillSat', 'fillSun'].forEach(id => {
+                document.getElementById(id).checked = false;
+            });
+            updateSmartFillPreview();
+        }
+        
+        function selectWeekend() {
+            ['fillSat', 'fillSun'].forEach(id => {
+                document.getElementById(id).checked = true;
+            });
+            ['fillMon', 'fillTue', 'fillWed', 'fillThu', 'fillFri'].forEach(id => {
+                document.getElementById(id).checked = false;
+            });
+            updateSmartFillPreview();
+        }
+        
+        function selectAllDays() {
+            document.querySelectorAll('.day-checkboxes input[type="checkbox"]').forEach(cb => {
+                cb.checked = true;
+            });
+            updateSmartFillPreview();
+        }
+        
+        function updateSmartFillPreview() {
+            const category = document.getElementById('smartFillCategory').value;
+            const startTime = document.getElementById('smartFillStartTime').value;
+            const endTime = document.getElementById('smartFillEndTime').value;
+            
+            const selectedDays = [];
+            const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            dayNames.forEach((day, index) => {
+                if (document.getElementById(`fill${day}`).checked) {
+                    selectedDays.push(day);
+                }
+            });
+            
+            const previewText = document.getElementById('smartFillPreviewText');
+            const applyBtn = document.getElementById('smartFillApplyBtn');
+            
+            if (!category || selectedDays.length === 0 || !startTime || !endTime) {
+                previewText.textContent = 'Select category, days, and time range';
+                applyBtn.disabled = true;
+                return;
+            }
+            
+            // Calculate number of time slots
+            const [startHour, startMin] = startTime.split(':').map(Number);
+            const [endHour, endMin] = endTime.split(':').map(Number);
+            const startMinutes = startHour * 60 + startMin;
+            const endMinutes = endHour * 60 + endMin;
+            
+            if (endMinutes <= startMinutes) {
+                previewText.textContent = 'End time must be after start time';
+                applyBtn.disabled = true;
+                return;
+            }
+            
+            const totalMinutes = endMinutes - startMinutes;
+            const slotsPerDay = Math.ceil(totalMinutes / resolution);
+            const totalSlots = slotsPerDay * selectedDays.length;
+            
+            const categoryName = categories.find(c => c.id === category)?.name || category;
+            const dayText = selectedDays.length === 7 ? 'every day' : selectedDays.join(', ');
+            
+            previewText.innerHTML = `Will fill <strong>${totalSlots} time slots</strong> with <strong>${categoryName}</strong><br>` +
+                                   `Days: ${dayText}<br>` +
+                                   `Time: ${formatTime(startHour, startMin)} - ${formatTime(endHour, endMin)}`;
+            
+            applyBtn.disabled = false;
+        }
+        
+        function applySmartFill() {
+            const category = document.getElementById('smartFillCategory').value;
+            const startTime = document.getElementById('smartFillStartTime').value;
+            const endTime = document.getElementById('smartFillEndTime').value;
+            const customHappiness = document.getElementById('smartFillHappiness').value;
+            const customWillingness = document.getElementById('smartFillWillingness').value;
+            
+            // Get selected days
+            const selectedDays = [];
+            const dayIds = ['fillMon', 'fillTue', 'fillWed', 'fillThu', 'fillFri', 'fillSat', 'fillSun'];
+            const dayNumbers = [1, 2, 3, 4, 5, 6, 0]; // JavaScript day numbers (0=Sunday)
+            
+            dayIds.forEach((id, index) => {
+                if (document.getElementById(id).checked) {
+                    selectedDays.push(dayNumbers[index]);
+                }
+            });
+            
+            // Get category defaults
+            const categoryObj = categories.find(c => c.id === category);
+            const happiness = customHappiness !== '' ? parseInt(customHappiness) : categoryObj.happiness;
+            const willingness = customWillingness !== '' ? parseInt(customWillingness) : categoryObj.willingness;
+            
+            // Parse time range
+            const [startHour, startMin] = startTime.split(':').map(Number);
+            const [endHour, endMin] = endTime.split(':').map(Number);
+            
+            // Get current week's date range
+            const today = new Date(currentDate);
+            const currentDay = today.getDay();
+            const weekStart = new Date(today);
+            weekStart.setDate(today.getDate() - currentDay);
+            
+            let filledCount = 0;
+            
+            // Fill for each selected day in the current week
+            selectedDays.forEach(dayNum => {
+                const targetDate = new Date(weekStart);
+                targetDate.setDate(weekStart.getDate() + dayNum);
+                const dateStr = formatDateKey(targetDate);
+                
+                // Initialize date if needed
+                if (!scheduleData[dateStr]) {
+                    scheduleData[dateStr] = {};
+                }
+                
+                // Fill time slots
+                let currentMinutes = startHour * 60 + startMin;
+                const endMinutes = endHour * 60 + endMin;
+                
+                while (currentMinutes < endMinutes) {
+                    const hour = Math.floor(currentMinutes / 60);
+                    const minute = currentMinutes % 60;
+                    const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+                    
+                    scheduleData[dateStr][timeStr] = {
+                        category: category,
+                        happiness: happiness,
+                        willingness: willingness
+                    };
+                    
+                    filledCount++;
+                    currentMinutes += resolution;
+                }
+            });
+            
+            // Save to localStorage
+            localStorage.setItem('scheduleData', JSON.stringify(scheduleData));
+            
+            // Reload current day if it was affected
+            loadCurrentDay();
+            updateTotals();
+            updateWeekView();
+            generateCalendar();
+            
+            // Close modal and show success message
+            closeModal('smartFillModal');
+            alert(`✅ Successfully filled ${filledCount} time slots!`);
+        }
+
         // Initialize the application when the page loads
+        document.addEventListener('DOMContentLoaded', init);
         document.addEventListener('DOMContentLoaded', init);

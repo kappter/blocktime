@@ -1,241 +1,233 @@
-# 🎯 BlockTime Hybrid Emotional Spectrum - Complete Guide
+# BlockTime - Daily Time Blocker
 
-## 🚀 What's New
+A comprehensive web-based time management application that combines visual time blocking with emotional spectrum tracking. Plan your day, track how you feel about each activity, and gain insights into your emotional relationship with time.
 
-**Category-level defaults + Instance-level overrides = Maximum efficiency!**
+![BlockTime Screenshot](screenshot.png)
 
-Build a month's schedule in seconds, then see exactly how much time you spend miserable!
+## Features
 
----
+### Core Time Management
 
-## ✨ How It Works
+**Visual Time Blocking**: Organize your day into color-coded time blocks with customizable resolution (60, 30, or 15-minute intervals). Each block can be assigned to activity categories like Sleep, Work, Exercise, Meals, and more.
 
-### 1. Set Category Defaults (One Time Setup)
+**Smart Fill**: Quickly fill recurring patterns across multiple days. Set up your entire work week (9AM-5PM Monday-Friday) or sleep schedule (11PM-7AM daily) with just a few clicks instead of manually filling dozens of time slots.
 
-When creating or editing a category, set its default emotional state:
+**Flexible Time Resolution**: Switch between 60-minute blocks for high-level planning, 30-minute blocks for detailed scheduling, or 15-minute blocks for precision time management.
 
-**Example Categories:**
-- **Sleep** → 😊🚫 (Happy but Obligated)
-- **Work** → 😐🚫 (Meh & Forced)  
-- **Commute** → 😞🚫 (Unhappy & Forced)
-- **Leisure** → 😊✅ (Happy & Willing)
-- **Exercise** → 😐😑 (Meh & Meh)
+### Emotional Spectrum Tracking
 
-### 2. Build Your Schedule (Lightning Fast)
+**Two-Dimensional Tracking**: Every time block captures both your happiness level (Unhappy 😞 / Meh 😐 / Happy 😊) and willingness level (Forced 🚫 / Meh 😑 / Willing ✅), giving you a complete picture of your emotional relationship with each activity.
 
-- Click a category (e.g., "Work")
-- Click time blocks to assign
-- **Emotional defaults auto-apply instantly!**
-- No need to rate every single hour
+**Category Defaults**: Set default emotional states for each category. Your "Work" category might default to "Meh & Meh" while "Leisure" defaults to "Happy & Willing", saving time during planning.
 
-### 3. Override Exceptions (When Needed)
+**Per-Block Overrides**: Override category defaults for specific time blocks when needed, allowing you to capture variations like an exciting work project or a tedious leisure task.
 
-- Hover over any specific block
-- Click the 3×3 grid to override
-- Example: Most "Work" is 😐🚫, but Friday afternoon becomes 😊😑
+### Lifestyle Templates
 
----
+**Pre-built Schedules**: Choose from professionally designed templates including Professional Athlete, Professional Musician, College Student, and High School Student. Each template provides a realistic daily schedule with appropriate emotional states.
 
-## 📊 The Emotional Matrix
+**Quick Start**: Load a template to see how BlockTime works, then customize it to match your actual lifestyle and preferences.
 
-|  | **🚫 Forced** | **😑 Meh** | **✅ Willing** |
-|---|---|---|---|
-| **😞 Unhappy** | Miserable & Forced | Unhappy but Tolerating | Unhappy but Choosing |
-| **😐 Meh** | Forced but Neutral | Indifferent (Default) | Neutral but Willing |
-| **😊 Happy** | Happy but Obligated | Happy & Okay with it | Ideal State! 🎯 |
+### Data Management
 
----
+**Import/Export**: Export individual days or your entire calendar to JSON format. Import schedules to restore backups or transfer between devices.
 
-## 🎯 Real-World Example
+**Calendar Integration**: Export to ICS format for seamless integration with Google Calendar, Outlook, and other calendar applications. Your time blocks become calendar events with emotional state information in the description.
 
-### College Student Schedule
+**Local Storage Persistence**: All data is automatically saved to your browser's localStorage, ensuring your schedules survive page refreshes and browser restarts.
 
-**Step 1: Set Category Defaults (30 seconds)**
-- Classes → 😐🚫 (Meh/Forced)
-- Study → 😐😑 (Meh/Meh)
-- Sleep → 😊🚫 (Happy/Obligated)
-- Social → 😊✅ (Happy/Willing)
-- Meals → 😊😑 (Happy/Meh)
+**Reset Options**: Clear individual days or reset all data when you need a fresh start.
 
-**Step 2: Build Schedule (2 minutes)**
-- Assign all blocks with category defaults
-- 168 hours/week = done in seconds!
+### Visualization & Reporting
 
-**Step 3: Override Exceptions (30 seconds)**
-- Monday 8am class → 😞🚫 (Ugh, early morning)
-- Friday 2pm class → 😊😑 (Fun professor!)
-- Thursday study group → 😊✅ (Friends + productive)
+**Week View**: See your entire week at a glance with color-coded activity indicators for each day.
 
-**Result: Instant Insights!**
-- 😞🚫 Miserable & Forced: 15% (25 hours/week)
-- 😐🚫 Meh & Forced: 30% (50 hours/week)
-- 😊✅ Happy & Willing: 20% (34 hours/week)
+**Month Calendar**: Navigate through months with visual indicators showing which days have scheduled activities.
 
-**Wake-up call:** *"45% of my week is forced and unhappy/meh. Time to make changes!"*
+**Daily Summary**: View time totals by activity and emotional spectrum distribution for each day, helping you understand how you spend your time and how you feel about it.
 
----
+**Detailed Reports**: Access comprehensive analytics showing patterns in your time usage and emotional states over extended periods.
 
-## 💡 Why This Is Powerful
+### User Experience
 
-### Traditional Approach (Tedious)
-- Create schedule: 5 minutes
-- Rate every single hour: 20 minutes
-- **Total: 25 minutes**
-- Most people give up halfway
+**Light/Dark Mode**: Toggle between light and dark themes to match your environment and reduce eye strain.
 
-### Hybrid Approach (Fast)
-- Set category defaults: 30 seconds
-- Create schedule: 2 minutes (defaults auto-apply!)
-- Override exceptions: 30 seconds
-- **Total: 3 minutes**
-- Actually gets used!
+**Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices with touch-friendly controls.
 
----
+**Intuitive Interface**: Click time slots to assign activities, hover for quick edits, and use keyboard shortcuts for efficient planning.
 
-## 🎓 Use Cases
+## Getting Started
 
-### For Students
-**Goal:** Identify burnout patterns
+### Installation
 
-**Categories to track:**
-- Classes (usually 😐🚫)
-- Homework (usually 😞🚫)
-- Study groups (usually 😐✅)
-- Sleep (usually 😊🚫)
-- Social (usually 😊✅)
+BlockTime is a static web application that runs entirely in your browser with no server required.
 
-**Insight:** *"60% of my week is forced activities. No wonder I'm burned out!"*
+**Option 1: Direct Use**
+1. Clone this repository: `git clone https://github.com/yourusername/blocktime.git`
+2. Open `index.html` in your web browser
+3. Start planning your day!
 
-### For Professionals
-**Goal:** Work-life balance analysis
+**Option 2: Local Server**
+1. Clone the repository
+2. Run a local web server: `python3 -m http.server 8080`
+3. Navigate to `http://localhost:8080` in your browser
 
-**Categories:**
-- Meetings (usually 😐🚫)
-- Deep work (usually 😊😑)
-- Email (usually 😞🚫)
-- Family time (usually 😊✅)
-- Exercise (usually 😐😑)
+**Option 3: GitHub Pages**
+1. Fork this repository
+2. Enable GitHub Pages in repository settings
+3. Access your instance at `https://yourusername.github.io/blocktime`
 
-**Insight:** *"Only 15% of my week is Happy & Willing. Need more autonomy!"*
+### Quick Start Guide
 
-### For Parents
-**Goal:** Find joy in the chaos
+**Step 1: Set Up Categories**
 
-**Categories:**
-- Childcare (usually 😊🚫)
-- Chores (usually 😐🚫)
-- Work (usually 😐😑)
-- Partner time (usually 😊✅)
-- Personal time (usually 😊✅)
+The application comes with default categories (Sleep, Work, Exercise, Meals, etc.), but you can customize them. Click the edit button (✏️) next to any category to change its color or default emotional state, or add new categories using the form at the top.
 
-**Insight:** *"I love my kids (😊🚫) but need more 😊✅ time for myself!"*
+**Step 2: Choose Your Time Resolution**
 
----
+Select your preferred time block size from the Time Settings section. Start with 60-minute blocks for simplicity, or use 15-minute blocks for detailed planning.
 
-## 🔧 Technical Details
+**Step 3: Fill Your Schedule**
 
-### Category Data Structure
-```javascript
+Click any time slot to assign it to a category. The emotional state selector appears automatically, allowing you to set how you feel about that activity. Use the Smart Fill feature for recurring patterns like work hours or sleep schedules.
+
+**Step 4: Review and Adjust**
+
+Check the daily summary to see your time distribution and emotional spectrum. Make adjustments as needed to balance your activities and emotional well-being.
+
+## Usage Examples
+
+### Example 1: Setting Up a Work Week
+
+Use the Smart Fill feature to establish your work schedule. Click "🎯 Smart Fill", select "Work" as the category, check "Weekdays", set the time range to 9:00 AM - 5:00 PM, and click Apply. This fills 40 time slots (8 hours × 5 days) instantly.
+
+### Example 2: Planning Sleep Schedule
+
+Create a consistent sleep routine by using Smart Fill with the "Sleep" category, selecting "All Days", and setting the time range from 11:00 PM to 7:00 AM. The system handles the midnight crossing automatically.
+
+### Example 3: Tracking Emotional Patterns
+
+After using BlockTime for a week, review the Detailed Reports to identify patterns. You might discover that certain activities consistently make you unhappy or that you feel forced to do things at specific times of day, helping you make informed lifestyle changes.
+
+### Example 4: Exporting to Google Calendar
+
+Click "📋 Export ICS File" to download your schedule in calendar format. Import this file into Google Calendar to sync your time blocks with your phone and receive notifications throughout the day.
+
+## Technical Details
+
+### Technology Stack
+
+- **HTML5**: Semantic markup with accessibility features
+- **CSS3**: Modern styling with CSS Grid and Flexbox, custom properties for theming
+- **Vanilla JavaScript**: No frameworks required, pure ES6+ for maximum compatibility
+- **LocalStorage API**: Client-side data persistence
+
+### Browser Compatibility
+
+- Chrome/Edge 90+
+- Firefox 88+
+- Safari 14+
+- Opera 76+
+
+### File Structure
+
+```
+blocktime/
+├── index.html              # Main application HTML
+├── styles.css              # All styling and themes
+├── script.js               # Application logic
+├── README.md               # This file
+├── LICENSE                 # MIT License
+├── SMART_FILL_FEATURE.md   # Smart Fill documentation
+└── BUG_FIX_REPORT.md       # Development notes
+```
+
+### Data Format
+
+Schedule data is stored in localStorage as JSON with the following structure:
+
+```json
 {
-    name: "Work",
-    color: "#6b8b9a",
-    id: "work",
-    happiness: 1,      // 0=Unhappy, 1=Meh, 2=Happy
-    willingness: 0     // 0=Forced, 1=Meh, 2=Willing
+  "2026-02-16": {
+    "9": {
+      "category": "Work",
+      "happiness": 1,
+      "willingness": 1
+    },
+    "10": {
+      "category": "Work",
+      "happiness": 1,
+      "willingness": 1
+    }
+  }
 }
 ```
 
-### Auto-Apply Logic
-When assigning a category to a time block:
-1. Block inherits `category.happiness`
-2. Block inherits `category.willingness`
-3. Emoji badge updates automatically
-4. Summary recalculates distribution
+Keys are date strings (YYYY-MM-DD) containing objects where time slot indices map to activity data.
 
-### Instance Override
-When hovering over a block:
-1. 3×3 grid overlay appears
-2. Click any cell to override
-3. Block's data updates independently
-4. Category default remains unchanged
+## Contributing
 
----
+Contributions are welcome! Whether you're fixing bugs, adding features, or improving documentation, your help makes BlockTime better for everyone.
 
-## 📈 Reports & Insights
+### How to Contribute
 
-### Summary Section Shows:
-- **Emotional Spectrum Distribution**
-  - 😞🚫 Unhappy & Forced: 15.0%
-  - 😐🚫 Meh & Forced: 30.0%
-  - 😊✅ Happy & Willing: 20.0%
-  - etc.
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Make your changes and test thoroughly
+4. Commit with clear messages: `git commit -m 'Add amazing feature'`
+5. Push to your branch: `git push origin feature/amazing-feature`
+6. Open a Pull Request
 
-### Advanced Reports Include:
-- Time-of-day patterns (Are mornings worse?)
-- Day-of-week trends (Is Monday really that bad?)
-- Category analysis (Which activities drain you?)
-- Month-over-month changes (Am I improving?)
+### Development Guidelines
 
----
+- Maintain the vanilla JavaScript approach (no frameworks)
+- Test on multiple browsers before submitting
+- Ensure localStorage persistence works correctly
+- Follow the existing code style and naming conventions
+- Update documentation for new features
 
-## 🎯 Best Practices
+### Reporting Issues
 
-### 1. Be Honest with Defaults
-- Don't set everything to 😊✅
-- Acknowledge forced obligations (😐🚫)
-- Recognize genuine misery (😞🚫)
+Found a bug or have a feature request? Open an issue on GitHub with:
+- Clear description of the problem or suggestion
+- Steps to reproduce (for bugs)
+- Expected vs actual behavior
+- Browser and version information
 
-### 2. Review Monthly
-- Check emotional distribution
-- Identify patterns
-- Make intentional changes
+## Roadmap
 
-### 3. Use Overrides Sparingly
-- Defaults should cover 80% of instances
-- Override only true exceptions
-- If you're overriding often, update the category default
+Future enhancements under consideration:
 
-### 4. Share Insights
-- Show your summary to friends/family
-- Discuss patterns with therapist/coach
-- Use data to justify life changes
+- **Multi-week Smart Fill**: Fill recurring patterns across multiple weeks or months
+- **Template Saving**: Save your custom schedules as reusable templates
+- **Undo/Redo**: Revert recent changes with keyboard shortcuts
+- **Conflict Detection**: Warn before overwriting existing time blocks
+- **Advanced Analytics**: Deeper insights into time usage and emotional patterns
+- **Cloud Sync**: Optional account system for cross-device synchronization
+- **Mobile App**: Native iOS and Android applications
+- **Collaboration**: Share schedules with family or team members
 
----
+## License
 
-## 🚀 Deployment Instructions
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-### Upload to GitHub Pages:
-1. Download `BlockTime-Hybrid-Emotional-Spectrum.zip`
-2. Extract the 3 files (index.html, script.js, styles.css)
-3. Go to https://github.com/kappter/blocktime
-4. Click "Add file" → "Upload files"
-5. Drag all 3 files
-6. Commit: "Add hybrid emotional spectrum tracking"
-7. Wait 1-2 minutes for deployment
-8. Visit: https://kappter.github.io/blocktime/
+## Acknowledgments
+
+- Emoji artwork provided by browser vendors
+- Inspired by time blocking methodologies from productivity experts
+- Built with feedback from users seeking better work-life balance
+
+## Support
+
+For questions, suggestions, or issues:
+- Open an issue on GitHub
+- Check existing documentation in the repository
+- Review the Smart Fill feature guide for advanced usage
+
+## Privacy
+
+BlockTime runs entirely in your browser with no server communication. All data is stored locally on your device using the browser's localStorage. No personal information is collected, transmitted, or stored on external servers.
 
 ---
 
-## ✅ Feature Checklist
-
-- ✅ Category-level emotional defaults
-- ✅ Auto-apply defaults when assigning blocks
-- ✅ Instance-level override with hover 3×3 grid
-- ✅ Visual emoji badges on each block
-- ✅ Enhanced summary with emotional distribution
-- ✅ Backward compatible with existing schedules
-- ✅ ICS export with +1 day offset fix
-- ✅ Persistent localStorage
-- ✅ Dark mode support
-
----
-
-## 🎉 The Bottom Line
-
-**Before:** Building a schedule was fast, but rating emotions took forever.
-
-**After:** Set category defaults once, build schedules in seconds, get instant insights!
-
-**Result:** You actually use the emotional tracking feature, which means you actually see patterns, which means you actually make changes!
-
-**This is the difference between a feature that's "nice to have" and one that drives real behavior change.** 🚀
+**Start taking control of your time and emotions today with BlockTime!** 🚀
