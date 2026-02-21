@@ -1326,9 +1326,18 @@
                             generateTimeGrid();
                         }
                         
+                        // Navigate to the imported date
+                        if (importData.date) {
+                            currentDate = new Date(importData.date);
+                            document.getElementById('datePicker').value = importData.date;
+                        }
+                        
+                        localStorage.setItem('scheduleData', JSON.stringify(scheduleData));
                         loadCurrentDay();
+                        updateWeekView();
+                        generateCalendar();
                         updateTotals();
-                        alert('Day schedule imported successfully!');
+                        alert('Day schedule imported successfully! Navigated to ' + dateKey);
                     } else if (importData.scheduleData) {
                         // Full calendar import
                         scheduleData = importData.scheduleData;
