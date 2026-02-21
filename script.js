@@ -354,7 +354,10 @@
 
         function loadCurrentDay() {
             const dateKey = formatDateKey(currentDate);
+            console.log('[LOAD] Loading day:', dateKey);
+            console.log('[LOAD] Available scheduleData keys:', Object.keys(scheduleData));
             const dayData = scheduleData[dateKey] || {};
+            console.log('[LOAD] Day data for', dateKey, ':', dayData);
             
             // Clear current time slots
             const timeSlots = document.querySelectorAll('.time-slot');
@@ -1306,7 +1309,10 @@
                     if (importData.schedule) {
                         // Single day import
                         const dateKey = importData.date || formatDateKey(currentDate);
+                        console.log('[IMPORT] Importing schedule for date:', dateKey);
+                        console.log('[IMPORT] Schedule data:', importData.schedule);
                         scheduleData[dateKey] = importData.schedule;
+                        console.log('[IMPORT] scheduleData after import:', scheduleData);
                         
                         if (importData.categories) {
                             // Merge imported categories with existing ones (avoid duplicates)
@@ -1361,6 +1367,7 @@
                         alert('Full calendar imported successfully!');
                     }
                 } catch (error) {
+                    console.error('[IMPORT ERROR]', error);
                     alert('Error importing file: ' + error.message);
                 }
             };
@@ -1897,7 +1904,9 @@
         }
 
         function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('show');
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'none';
+            modal.classList.remove('show');
         }
 
         // Smart Fill Functions
