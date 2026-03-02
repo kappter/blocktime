@@ -278,7 +278,7 @@
 
         function goToDate() {
             const datePicker = document.getElementById('datePicker');
-            const newDate = new Date(datePicker.value);
+            const newDate = parseDateKey(datePicker.value);
             if (!isNaN(newDate.getTime())) {
                 saveCurrentDay();
                 currentDate = newDate;
@@ -318,11 +318,25 @@
         }
 
         function formatDateForInput(date) {
-            return date.toISOString().split('T')[0];
+            // Use local date components to avoid UTC timezone shift
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
         }
 
         function formatDateKey(date) {
-            return date.toISOString().split('T')[0];
+            // Use local date components to avoid UTC timezone shift
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function parseDateKey(dateStr) {
+            // Parse YYYY-MM-DD as LOCAL date (not UTC) to avoid timezone shift
+            const [year, month, day] = dateStr.split('-').map(Number);
+            return new Date(year, month - 1, day);
         }
 
         // Save and load day data
@@ -1196,7 +1210,7 @@
             const monthTotals = {};
             
             Object.keys(scheduleData).forEach(dateKey => {
-                const date = new Date(dateKey);
+                const date = parseDateKey(dateKey);
                 if (date.getFullYear() === year && date.getMonth() === month) {
                     const dayData = scheduleData[dateKey];
                     Object.values(dayData).forEach(categoryId => {
@@ -1334,7 +1348,7 @@
                         
                         // Navigate to the imported date
                         if (importData.date) {
-                            currentDate = new Date(importData.date);
+                            currentDate = parseDateKey(importData.date);
                             document.getElementById('datePicker').value = importData.date;
                         }
                         
@@ -1527,7 +1541,7 @@
             // Process each day
             Object.keys(scheduleData).forEach(dateKey => {
                 const dayData = scheduleData[dateKey];
-                const date = new Date(dateKey);
+                const date = parseDateKey(dateKey);
                 
                 // Sort times chronologically
                 const sortedTimes = Object.keys(dayData).sort((a, b) => {
